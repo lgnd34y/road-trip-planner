@@ -143,6 +143,35 @@
     .modal-switch a { color: #52b788; cursor: pointer; text-decoration: underline; }
     .modal-close { float: right; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #a0aec0; margin-top: -4px; }
 
+    /* ── EDIT PANEL ── */
+    .edit-btn { flex: 1; background: white; color: #4a5568; border: 2px solid #cbd5e0; border-radius: 10px; padding: 12px 20px; font-weight: 600; font-size: 0.93rem; cursor: pointer; transition: all 0.2s; }
+    .edit-btn:hover { border-color: #718096; background: #f7fafc; }
+    .edit-btn.active { border-color: #52b788; color: #1b4332; background: #e6f4ed; }
+    .edit-panel { background: #f8fafb; border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-top: 18px; display: none; }
+    .edit-panel.open { display: block; }
+    .edit-section-label { font-size: 0.78rem; font-weight: 700; color: #4a5568; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; margin-top: 16px; }
+    .edit-section-label:first-child { margin-top: 0; }
+    .edit-route-name-input { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 9px 13px; font-size: 0.97rem; font-family: inherit; color: #1a202c; }
+    .edit-route-name-input:focus { outline: none; border-color: #52b788; }
+    .edit-stops-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+    .edit-stop { display: flex; align-items: center; gap: 8px; background: white; border: 1.5px solid #e2e8f0; border-radius: 9px; padding: 10px 12px; }
+    .edit-stop-controls { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+    .edit-move-btn { width: 26px; height: 22px; background: #edf2f7; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; color: #4a5568; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+    .edit-move-btn:hover { background: #e2e8f0; }
+    .edit-stop-fields { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .edit-name-input, .edit-addr-input { border: 1.5px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; font-family: inherit; color: #1a202c; width: 100%; }
+    .edit-name-input:focus, .edit-addr-input:focus { outline: none; border-color: #52b788; }
+    .edit-addr-input { font-size: 0.83rem; color: #4a5568; }
+    .edit-remove-btn { width: 28px; height: 28px; background: #fff5f5; border: 1px solid #fed7d7; border-radius: 6px; color: #e53e3e; cursor: pointer; font-size: 0.9rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+    .edit-remove-btn:hover { background: #fed7d7; }
+    .edit-add-btn { width: 100%; background: #f0fff4; border: 1.5px dashed #9ae6b4; border-radius: 8px; padding: 9px; color: #276749; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-bottom: 16px; transition: background 0.15s; }
+    .edit-add-btn:hover { background: #e6f4ed; }
+    .edit-panel-actions { display: flex; gap: 10px; }
+    .edit-apply-btn { flex: 2; background: linear-gradient(135deg, #1b4332, #52b788); color: white; border: none; border-radius: 8px; padding: 11px; font-weight: 600; font-size: 0.93rem; cursor: pointer; transition: opacity 0.2s; }
+    .edit-apply-btn:hover { opacity: 0.88; }
+    .edit-cancel-btn { flex: 1; background: #edf2f7; color: #4a5568; border: none; border-radius: 8px; padding: 11px; font-weight: 600; font-size: 0.93rem; cursor: pointer; transition: background 0.15s; }
+    .edit-cancel-btn:hover { background: #e2e8f0; }
+
     @media (max-width: 600px) {
       .form-grid { grid-template-columns: 1fr; }
       .hero h1 { font-size: 1.8rem; }
@@ -279,6 +308,72 @@
       }
     });
 
+    // ── Helpers ──
+    function escHtml(s) {
+      return (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function buildMapsUrl(addresses) {
+      return 'https://www.google.com/maps/dir/' + addresses.map(a => encodeURIComponent(a)).join('/');
+    }
+
+    function buildStopItemHtml(stop, j, total) {
+      const isEnd = j === 0 || j === total - 1;
+      let hotelHtml = '';
+      if (stop.hotel && stop.hotel.name && !isEnd) {
+        hotelHtml = `
+          <div class="extras-section">
+            <div class="extras-label">🏨 Where to Stay</div>
+            <div class="hotel-card">
+              <div class="hotel-name">${escHtml(stop.hotel.name)}</div>
+              ${stop.hotel.address ? `<div class="hotel-addr">${escHtml(stop.hotel.address)}</div>` : ''}
+              ${stop.hotel.notes  ? `<div class="hotel-notes">${escHtml(stop.hotel.notes)}</div>`  : ''}
+            </div>
+          </div>`;
+      }
+      let restHtml = '';
+      if (stop.restaurants && stop.restaurants.length) {
+        const cards = stop.restaurants.map(r => `
+          <div class="restaurant-card">
+            <div class="restaurant-name">${escHtml(r.name)}<span class="restaurant-cuisine">${escHtml(r.cuisine || '')}</span></div>
+            ${r.notes ? `<div class="restaurant-notes">${escHtml(r.notes)}</div>` : ''}
+          </div>`).join('');
+        restHtml = `
+          <div class="extras-section">
+            <div class="extras-label">🍽️ Where to Eat</div>
+            <div class="restaurant-list">${cards}</div>
+          </div>`;
+      }
+      return `
+        <div class="stop" onclick="toggleStop(this)">
+          <div class="stop-header">
+            <div class="stop-icon">${isEnd ? '🏁' : '📌'}</div>
+            <div class="stop-info">
+              <div class="stop-name">${escHtml(stop.name)}</div>
+              <div class="stop-address">${escHtml(stop.address)}</div>
+              <div class="stop-label">${j === 0 ? 'Start / End' : isEnd ? 'Return' : 'Stop ' + j}</div>
+            </div>
+            <div class="stop-chevron">▼</div>
+          </div>
+          <div class="stop-desc">${escHtml(stop.description || '')}</div>
+          <div class="stop-extras">${hotelHtml}${restHtml}</div>
+        </div>`;
+    }
+
+    function buildEditStopsHtml(stops) {
+      return stops.map(stop => `
+        <div class="edit-stop">
+          <div class="edit-stop-controls">
+            <button class="edit-move-btn" onclick="moveStop(this,-1)" title="Move up">↑</button>
+            <button class="edit-move-btn" onclick="moveStop(this,1)"  title="Move down">↓</button>
+          </div>
+          <div class="edit-stop-fields">
+            <input class="edit-name-input" value="${escHtml(stop.name)}" placeholder="Place name"/>
+            <input class="edit-addr-input" value="${escHtml(stop.address)}" placeholder="City, State, Country"/>
+          </div>
+          <button class="edit-remove-btn" onclick="removeStop(this)" title="Remove">✕</button>
+        </div>`).join('');
+    }
+
     // ── Render routes ──
     function renderRoutes(routes, sessionId, payload) {
       const resultsDiv = document.getElementById('results');
@@ -287,57 +382,10 @@
       routes.forEach((route, i) => {
         const card = document.createElement('div');
         card.className = 'route-card';
+        card.id = `route-card-${i}`;
 
-        let stopsHtml = '';
-        route.stops.forEach((stop, j) => {
-          const isEnd = j === 0 || j === route.stops.length - 1;
+        const stopsHtml = route.stops.map((s, j) => buildStopItemHtml(s, j, route.stops.length)).join('');
 
-          // Hotel HTML
-          let hotelHtml = '';
-          if (stop.hotel && stop.hotel.name && !isEnd) {
-            hotelHtml = `
-              <div class="extras-section">
-                <div class="extras-label">🏨 Where to Stay</div>
-                <div class="hotel-card">
-                  <div class="hotel-name">${stop.hotel.name}</div>
-                  ${stop.hotel.address ? `<div class="hotel-addr">${stop.hotel.address}</div>` : ''}
-                  ${stop.hotel.notes  ? `<div class="hotel-notes">${stop.hotel.notes}</div>` : ''}
-                </div>
-              </div>`;
-          }
-
-          // Restaurants HTML
-          let restHtml = '';
-          if (stop.restaurants && stop.restaurants.length) {
-            const cards = stop.restaurants.map(r => `
-              <div class="restaurant-card">
-                <div class="restaurant-name">${r.name}<span class="restaurant-cuisine">${r.cuisine || ''}</span></div>
-                ${r.notes ? `<div class="restaurant-notes">${r.notes}</div>` : ''}
-              </div>`).join('');
-            restHtml = `
-              <div class="extras-section">
-                <div class="extras-label">🍽️ Where to Eat</div>
-                <div class="restaurant-list">${cards}</div>
-              </div>`;
-          }
-
-          stopsHtml += `
-            <div class="stop" onclick="toggleStop(this)">
-              <div class="stop-header">
-                <div class="stop-icon">${isEnd ? '🏁' : '📌'}</div>
-                <div class="stop-info">
-                  <div class="stop-name">${stop.name}</div>
-                  <div class="stop-address">${stop.address}</div>
-                  <div class="stop-label">${j === 0 ? 'Start / End' : isEnd ? 'Return' : 'Stop ' + j}</div>
-                </div>
-                <div class="stop-chevron">▼</div>
-              </div>
-              <div class="stop-desc">${stop.description || ''}</div>
-              <div class="stop-extras">${hotelHtml}${restHtml}</div>
-            </div>`;
-        });
-
-        // Itinerary HTML
         let itineraryHtml = '';
         if (route.itinerary && route.itinerary.length) {
           const dayCards = route.itinerary.map(day => `
@@ -345,12 +393,12 @@
               <div class="day-header">
                 <div class="day-num">${day.day}</div>
                 <div class="day-info">
-                  <div class="day-title">${day.title}</div>
-                  ${day.stops && day.stops.length ? `<div class="day-stops-preview">${day.stops.join(' → ')}</div>` : ''}
+                  <div class="day-title">${escHtml(day.title)}</div>
+                  ${day.stops && day.stops.length ? `<div class="day-stops-preview">${day.stops.map(s => escHtml(s)).join(' → ')}</div>` : ''}
                 </div>
                 <div class="day-chev">▼</div>
               </div>
-              <div class="day-plan">${day.plan || ''}</div>
+              <div class="day-plan">${escHtml(day.plan || '')}</div>
             </div>`).join('');
           itineraryHtml = `
             <div class="itinerary-section">
@@ -367,32 +415,44 @@
         card.innerHTML = `
           <div class="route-header" onclick="toggleCard(this.parentElement)">
             <div class="route-header-left">
-              <h3>Route ${i + 1}: ${route.name}</h3>
-              <p>${route.theme}</p>
+              <h3 id="route-title-${i}">Route ${i + 1}: ${escHtml(route.name)}</h3>
+              <p>${escHtml(route.theme)}</p>
               <div class="route-badges">
-                <span class="badge">📏 ${route.distance}</span>
-                <span class="badge">🕐 ${route.drive_time}</span>
-                <span class="badge">📅 ${route.best_time}</span>
+                <span class="badge">📏 ${escHtml(route.distance)}</span>
+                <span class="badge">🕐 ${escHtml(route.drive_time)}</span>
+                <span class="badge">📅 ${escHtml(route.best_time)}</span>
               </div>
             </div>
             <div class="chevron">▼</div>
           </div>
           <div class="route-body">
-            <div class="highlight-box"><strong>⭐ Don't Miss:</strong> ${route.highlight}</div>
+            <div class="highlight-box"><strong>⭐ Don't Miss:</strong> ${escHtml(route.highlight)}</div>
             <div class="stops-title">📍 Stops — click to explore, see hotels & restaurants</div>
-            ${stopsHtml}
+            <div id="stops-container-${i}">${stopsHtml}</div>
             ${itineraryHtml}
             <div class="card-actions">
               <a class="maps-btn" href="/map/${sessionId}/${i}" target="_blank">🗺️ View Route on Map</a>
               <button class="save-btn" id="save-btn-${i}" onclick="handleSave(${i})">💾 Save Route</button>
+              <button class="edit-btn" id="edit-btn-${i}" onclick="toggleEdit(${i})">✏️ Edit Route</button>
             </div>
             <div class="share-box" id="share-box-${i}">
               ✅ Route saved! Share this link:
               <input type="text" id="share-url-${i}" readonly/>
               <button class="copy-btn" onclick="copyLink(${i})">Copy Link</button>
             </div>
-            <a class="maps-link" href="${route.maps_url}" target="_blank">Open directly in Google Maps ↗</a>
+            <a class="maps-link" id="maps-link-${i}" href="${route.maps_url}" target="_blank">Open directly in Google Maps ↗</a>
             ${avoidTip}
+            <div class="edit-panel" id="edit-panel-${i}">
+              <div class="edit-section-label">Route Name</div>
+              <input class="edit-route-name-input" id="edit-route-name-${i}" value="${escHtml(route.name)}"/>
+              <div class="edit-section-label">Stops — reorder, edit, or remove locations</div>
+              <div class="edit-stops-list" id="edit-stops-${i}">${buildEditStopsHtml(route.stops)}</div>
+              <button class="edit-add-btn" onclick="addStop(${i})">+ Add Stop</button>
+              <div class="edit-panel-actions">
+                <button class="edit-apply-btn" onclick="applyEdit(${i})">✓ Apply Changes</button>
+                <button class="edit-cancel-btn" onclick="cancelEdit(${i})">Cancel</button>
+              </div>
+            </div>
           </div>`;
 
         resultsDiv.appendChild(card);
@@ -402,6 +462,93 @@
     function toggleCard(card) { card.classList.toggle('open'); }
     function toggleStop(stop) { stop.classList.toggle('open'); }
     function toggleDay(day)   { day.classList.toggle('open'); }
+
+    // ── Edit route ──
+    function toggleEdit(i) {
+      const panel = document.getElementById(`edit-panel-${i}`);
+      const btn   = document.getElementById(`edit-btn-${i}`);
+      const isOpen = panel.classList.toggle('open');
+      btn.classList.toggle('active', isOpen);
+      if (isOpen) {
+        // Sync edit panel with current (possibly already-edited) route data
+        document.getElementById(`edit-route-name-${i}`).value = currentRoutes[i].name;
+        document.getElementById(`edit-stops-${i}`).innerHTML = buildEditStopsHtml(currentRoutes[i].stops);
+        document.getElementById(`route-card-${i}`).classList.add('open');
+      }
+    }
+
+    function cancelEdit(i) {
+      document.getElementById(`edit-panel-${i}`).classList.remove('open');
+      document.getElementById(`edit-btn-${i}`).classList.remove('active');
+    }
+
+    function moveStop(btn, dir) {
+      const row    = btn.closest('.edit-stop');
+      const parent = row.parentElement;
+      if (dir === -1) { const prev = row.previousElementSibling; if (prev) parent.insertBefore(row, prev); }
+      else            { const next = row.nextElementSibling;     if (next) parent.insertBefore(next, row); }
+    }
+
+    function removeStop(btn) {
+      const list = btn.closest('.edit-stops-list');
+      if (list.querySelectorAll('.edit-stop').length <= 2) { alert('A route needs at least 2 stops.'); return; }
+      btn.closest('.edit-stop').remove();
+    }
+
+    function addStop(i) {
+      const list = document.getElementById(`edit-stops-${i}`);
+      const div  = document.createElement('div');
+      div.className = 'edit-stop';
+      div.innerHTML = `
+        <div class="edit-stop-controls">
+          <button class="edit-move-btn" onclick="moveStop(this,-1)" title="Move up">↑</button>
+          <button class="edit-move-btn" onclick="moveStop(this,1)"  title="Move down">↓</button>
+        </div>
+        <div class="edit-stop-fields">
+          <input class="edit-name-input" value="" placeholder="Place name"/>
+          <input class="edit-addr-input" value="" placeholder="City, State, Country"/>
+        </div>
+        <button class="edit-remove-btn" onclick="removeStop(this)" title="Remove">✕</button>`;
+      // Insert before the last stop so home stays at the end
+      const rows = list.querySelectorAll('.edit-stop');
+      list.insertBefore(div, rows[rows.length - 1] || null);
+    }
+
+    function applyEdit(i) {
+      const nameVal = document.getElementById(`edit-route-name-${i}`).value.trim();
+      const rows    = document.getElementById(`edit-stops-${i}`).querySelectorAll('.edit-stop');
+
+      // Preserve hotel/restaurant data for stops whose name matches
+      const origMap = {};
+      currentRoutes[i].stops.forEach(s => { origMap[s.name.trim().toLowerCase()] = s; });
+
+      const newStops = Array.from(rows).map(row => {
+        const name = row.querySelector('.edit-name-input').value.trim();
+        const addr = row.querySelector('.edit-addr-input').value.trim();
+        if (!name && !addr) return null;
+        const orig = origMap[name.toLowerCase()] || {};
+        return { name: name || addr, address: addr || name,
+                 description: orig.description || '', hotel: orig.hotel || null, restaurants: orig.restaurants || [] };
+      }).filter(Boolean);
+
+      if (newStops.length < 2) { alert('Please include at least 2 stops.'); return; }
+
+      currentRoutes[i].name     = nameVal || currentRoutes[i].name;
+      currentRoutes[i].stops    = newStops;
+      currentRoutes[i].maps_url = buildMapsUrl(newStops.map(s => s.address));
+
+      // Re-render the stops view
+      document.getElementById(`stops-container-${i}`).innerHTML =
+        newStops.map((s, j) => buildStopItemHtml(s, j, newStops.length)).join('');
+
+      // Update the route title and Google Maps link
+      const titleEl = document.getElementById(`route-title-${i}`);
+      if (titleEl) titleEl.textContent = `Route ${i + 1}: ${currentRoutes[i].name}`;
+      const mapsLink = document.getElementById(`maps-link-${i}`);
+      if (mapsLink) mapsLink.href = currentRoutes[i].maps_url;
+
+      cancelEdit(i);
+    }
 
     // ── Save route ──
     async function handleSave(idx) {
