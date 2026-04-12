@@ -186,23 +186,18 @@ Return ONLY a valid JSON array with this exact structure (no markdown, no extra 
     "stops": [
       {
         "name": "Place Name",
-        "address": "Full street address or City, State, Country",
-        "description": "2-3 sentence description of what this place is and why it's worth visiting",
+        "address": "City, State, Country",
+        "description": "1-2 sentences on why this stop is worth visiting",
         "hotel": {
           "name": "Hotel or lodging name",
-          "address": "Address or neighborhood",
-          "notes": "One sentence tip about this accommodation"
+          "address": "Neighborhood or city",
+          "notes": "Brief tip"
         },
         "restaurants": [
           {
             "name": "Restaurant name",
             "cuisine": "Cuisine type",
-            "notes": "One sentence tip about this restaurant"
-          },
-          {
-            "name": "Restaurant name",
-            "cuisine": "Cuisine type",
-            "notes": "One sentence tip about this restaurant"
+            "notes": "Brief tip"
           }
         ]
       }
@@ -212,7 +207,7 @@ Return ONLY a valid JSON array with this exact structure (no markdown, no extra 
         "day": 1,
         "title": "Day 1 — Departure",
         "stops": ["Stop Name A", "Stop Name B"],
-        "plan": "2-3 sentences describing what to do and see this day, where to have meals, and where to sleep"
+        "plan": "1-2 sentences on what to do and where to sleep"
       }
     ]
   }
@@ -220,16 +215,15 @@ Return ONLY a valid JSON array with this exact structure (no markdown, no extra 
 
 Rules:
 - Each route's stops must start AND end at the starting location (circular route)
-- Include 5-8 stops between start and end
-- Provide real, specific addresses or at minimum City, State, Country for every stop
+- Include 5-7 stops between start and end
+- Provide City, State, Country for every stop address
 - If a specific destination is requested, make sure it appears in every route
 - Tailor the route length, stops, and itinerary days to match the requested nights/duration
 - The itinerary must have exactly as many days as the number of nights + 1 (e.g. 3 nights = 4 days, last day returns home)
 - If no nights specified, use the duration or default to a 3-night trip
-- Every stop must include a hotel suggestion and 2 restaurant suggestions
-- The hotel at the starting/ending location can be omitted (traveller is home)
+- Every non-home stop must include a hotel suggestion and 1 restaurant suggestion
 - Incorporate any additional details the user provides
-- Return exactly 3 routes"""
+- Return exactly 3 routes — be concise to stay within token limits"""
 
     user_message = f"Starting location: {location}"
     if destination:
