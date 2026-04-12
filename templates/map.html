@@ -379,6 +379,11 @@
         if (i < stops.length - 1) await sleep(350); // Nominatim rate limit
       }
 
+      // Start and end are the same location — share coords if one geocoded and the other didn't
+      const last = coords.length - 1;
+      if (!coords[0] && coords[last]) coords[0] = coords[last];
+      if (coords[0] && !coords[last]) coords[last] = coords[0];
+
       const valid = coords.filter(Boolean);
       if (valid.length > 0) {
         map.fitBounds(L.latLngBounds(valid), { padding: [50, 50] });
