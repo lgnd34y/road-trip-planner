@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Route Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { display: flex; height: 100vh; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 360px;
+      min-width: 360px;
+      height: 100vh;
+      overflow-y: auto;
+      background: white;
+      box-shadow: 3px 0 16px rgba(0,0,0,0.12);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      background: linear-gradient(135deg, #1b4332, #52b788);
+      color: white;
+      padding: 22px 20px 18px;
+      flex-shrink: 0;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      margin-bottom: 10px;
+    }
+    .back-link:hover { color: white; }
+    .sidebar-header h2 { font-size: 1.15rem; line-height: 1.3; }
+    .sidebar-header p  { font-size: 0.85rem; opacity: 0.85; margin-top: 4px; }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 14px 16px;
+      border-bottom: 1px solid #e2e8f0;
+      flex-shrink: 0;
+    }
+    .badge {
+      background: #e6f4ed;
+      color: #276749;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .highlight {
+      margin: 12px 16px;
+      padding: 12px 14px;
+      background: #fffbea;
+      border-left: 3px solid #f6ad55;
+      border-radius: 6px;
+      font-size: 0.87rem;
+      color: #744210;
+      line-height: 1.5;
+      flex-shrink: 0;
+    }
+    .highlight strong { color: #c05621; }
+
+    .stops-title {
+      padding: 10px 16px 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      flex-shrink: 0;
+    }
+
+    .stops-list { flex: 1; }
+
+    .stop {
+      border-bottom: 1px solid #f0f4f0;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .stop:hover   { background: #f7faf7; }
+    .stop.active  { background: #edf7f1; }
+
+    .stop-row {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 12px 16px;
+    }
+    .stop-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #52b788;
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .stop-num.endpoint { background: #1b4332; font-size: 0.9rem; }
+    .stop-info  { flex: 1; min-width: 0; }
+    .stop-name  { font-weight: 600; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .stop-addr  { font-size: 0.78rem; color: #718096; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .stop-label { font-size: 0.68rem; color: #52b788; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
+    .stop-chev  { font-size: 0.65rem; color: #a0aec0; transition: transform 0.2s; flex-shrink: 0; }
+    .stop.open .stop-chev { transform: rotate(180deg); }
+
+    .stop-desc {
+      display: none;
+      padding: 0 16px 13px 55px;
+      font-size: 0.87rem;
+      color: #4a5568;
+      line-height: 1.65;
+    }
+    .stop.open .stop-desc { display: block; }
+
+    .sidebar-footer {
+      padding: 14px 16px;
+      border-top: 1px solid #e2e8f0;
+      flex-shrink: 0;
+    }
+    .maps-btn {
+      display: block;
+      background: linear-gradient(135deg, #1b4332, #52b788);
+      color: white;
+      text-align: center;
+      padding: 12px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.93rem;
+      transition: opacity 0.2s;
+    }
+    .maps-btn:hover { opacity: 0.88; }
+
+    /* ── MAP ── */
+    #map { flex: 1; height: 100vh; }
+
+    /* ── LOADING ── */
+    #map-loader {
+      position: fixed;
+      top: 0; left: 360px; right: 0; bottom: 0;
+      background: rgba(240,244,240,0.92);
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+    .spinner {
+      width: 44px; height: 44px;
+      border: 4px solid #d1fae5;
+      border-top-color: #52b788;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loader-text { color: #2d6a4f; font-weight: 600; font-size: 0.95rem; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; min-width: 0; height: 50vh; }
+      #map { height: 50vh; }
+      #map-loader { left: 0; top: 50vh; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <a class="back-link" href="javascript:history.back()">← Back to routes</a>
+      <h2 id="route-name"></h2>
+      <p  id="route-theme"></p>
+    </div>
+
+    <div class="badges"   id="badges"></div>
+    <div class="highlight" id="highlight"></div>
+    <div class="stops-title">📍 Stops — click to explore</div>
+    <div class="stops-list" id="stops-list"></div>
+
+    <div class="sidebar-footer">
+      <a id="maps-btn" class="maps-btn" href="#" target="_blank">
+        🗺️ Open Full Route in Google Maps
+      </a>
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div id="map"></div>
+
+  <!-- LOADING OVERLAY -->
+  <div id="map-loader">
+    <div class="spinner"></div>
+    <div id="loader-text">Locating stops on map…</div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const route  = {{ route_json | safe }};
+    const stops  = route.stops;
+    const coords = new Array(stops.length).fill(null);
+    const markers = new Array(stops.length).fill(null);
+
+    // ── Populate sidebar ──
+    document.getElementById('route-name').textContent  = route.name;
+    document.getElementById('route-theme').textContent = route.theme;
+    document.getElementById('highlight').innerHTML =
+      `<strong>⭐ Don't Miss:</strong> ${route.highlight}`;
+    document.getElementById('maps-btn').href = route.maps_url;
+
+    [['📏', route.distance], ['🕐', route.drive_time], ['📅', route.best_time]].forEach(([icon, val]) => {
+      const b = document.createElement('span');
+      b.className = 'badge';
+      b.textContent = `${icon} ${val}`;
+      document.getElementById('badges').appendChild(b);
+    });
+
+    const stopsList = document.getElementById('stops-list');
+    stops.forEach((stop, j) => {
+      const isEndpoint = j === 0 || j === stops.length - 1;
+      const label = j === 0 ? 'Start / End' : isEndpoint ? 'Return' : `Stop ${j}`;
+
+      const div = document.createElement('div');
+      div.className = 'stop';
+      div.dataset.idx = j;
+      div.innerHTML = `
+        <div class="stop-row" onclick="handleStopClick(${j})">
+          <div class="stop-num ${isEndpoint ? 'endpoint' : ''}">${isEndpoint ? '🏁' : j}</div>
+          <div class="stop-info">
+            <div class="stop-name"  title="${stop.name}">${stop.name}</div>
+            <div class="stop-addr"  title="${stop.address}">${stop.address}</div>
+            <div class="stop-label">${label}</div>
+          </div>
+          <div class="stop-chev">▼</div>
+        </div>
+        <div class="stop-desc">${stop.description || ''}</div>`;
+      stopsList.appendChild(div);
+    });
+
+    // ── Init Leaflet map ──
+    const map = L.map('map', { zoomControl: true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
+    }).addTo(map);
+
+    // ── Marker icon factory ──
+    function makeIcon(label, isEndpoint) {
+      const size = isEndpoint ? 34 : 30;
+      const bg   = isEndpoint ? '#1b4332' : '#52b788';
+      const html = `<div style="
+        width:${size}px;height:${size}px;
+        background:${bg};border:2.5px solid white;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;
+        color:white;font-weight:700;font-size:${isEndpoint ? 14 : 13}px;
+        box-shadow:0 2px 8px rgba(0,0,0,0.35);
+      ">${isEndpoint ? '🏁' : label}</div>`;
+      return L.divIcon({ className: '', html, iconSize: [size, size], iconAnchor: [size/2, size/2] });
+    }
+
+    // ── Geocode with Nominatim ──
+    async function geocode(address) {
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`;
+      const res  = await fetch(url, { headers: { 'User-Agent': 'RoadTripPlanner/1.0' } });
+      const data = await res.json();
+      if (data.length > 0) return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+      return null;
+    }
+
+    // ── Draw driving route via OSRM ──
+    async function drawRoute(points) {
+      if (points.length < 2) return;
+      try {
+        const waypoints = points.map(([lat, lon]) => `${lon},${lat}`).join(';');
+        const res  = await fetch(`https://router.project-osrm.org/route/v1/driving/${waypoints}?overview=full&geometries=geojson`);
+        const data = await res.json();
+        if (data.code === 'Ok') {
+          const line = data.routes[0].geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+          L.polyline(line, { color: '#52b788', weight: 5, opacity: 0.85 }).addTo(map);
+          return;
+        }
+      } catch (_) {}
+      // Fallback: dashed straight lines between stops
+      L.polyline(points, { color: '#52b788', weight: 3, opacity: 0.6, dashArray: '8 6' }).addTo(map);
+    }
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    // ── Main: geocode all stops then draw ──
+    async function init() {
+      for (let i = 0; i < stops.length; i++) {
+        document.getElementById('loader-text').textContent =
+          `Locating stop ${i + 1} of ${stops.length}…`;
+        try {
+          const latlng = await geocode(stops[i].address);
+          if (latlng) {
+            coords[i] = latlng;
+            const isEndpoint = i === 0 || i === stops.length - 1;
+            const marker = L.marker(latlng, { icon: makeIcon(i, isEndpoint) })
+              .addTo(map)
+              .bindPopup(`<strong>${stops[i].name}</strong><br><span style="font-size:0.85rem;color:#555">${stops[i].address}</span>`);
+            markers[i] = marker;
+          }
+        } catch (e) { console.warn('Geocode failed:', stops[i].address, e); }
+        if (i < stops.length - 1) await sleep(350); // Nominatim rate limit
+      }
+
+      const valid = coords.filter(Boolean);
+      if (valid.length > 0) {
+        map.fitBounds(L.latLngBounds(valid), { padding: [50, 50] });
+      }
+
+      await drawRoute(valid);
+      document.getElementById('map-loader').style.display = 'none';
+    }
+
+    // ── Stop click: expand desc + pan map ──
+    function handleStopClick(idx) {
+      const el = document.querySelector(`.stop[data-idx="${idx}"]`);
+      const wasOpen = el.classList.contains('open');
+
+      // Collapse all
+      document.querySelectorAll('.stop').forEach(s => s.classList.remove('open', 'active'));
+
+      if (!wasOpen) {
+        el.classList.add('open', 'active');
+        if (coords[idx]) {
+          map.setView(coords[idx], 13, { animate: true });
+          if (markers[idx]) markers[idx].openPopup();
+        }
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

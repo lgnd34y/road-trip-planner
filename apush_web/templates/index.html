@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APUSH MCQ Practice</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --border: #2a2d3a;
+    --text: #e4e4e7;
+    --muted: #9ca3af;
+    --accent: #6366f1;
+    --accent-hover: #818cf8;
+    --green: #22c55e;
+    --green-bg: #052e16;
+    --red: #ef4444;
+    --red-bg: #350a0a;
+    --yellow: #eab308;
+    --blue: #3b82f6;
+    --stimulus-bg: #1e2130;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    padding: 40px 0 30px;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #6366f1, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .header p { color: var(--muted); font-size: 14px; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  /* ── Period Selection ── */
+  .period-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+  }
+  .period-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 10px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .period-btn:hover { border-color: var(--accent); background: #1e1f2e; }
+  .period-btn.selected {
+    border-color: var(--accent);
+    background: rgba(99, 102, 241, 0.15);
+  }
+  .period-btn .num { font-size: 22px; font-weight: 700; color: var(--accent); }
+  .period-btn .range { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .period-btn .name { font-size: 12px; margin-top: 4px; }
+
+  /* ── Config ── */
+  .config-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .config-row:last-child { border-bottom: none; }
+  .config-row label { font-size: 14px; }
+  .config-row .sub { font-size: 12px; color: var(--muted); }
+
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stepper button {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stepper button:hover { background: #2a2d3a; }
+  .stepper .value {
+    width: 36px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: 10px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    gap: 8px;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    width: 100%;
+    margin-top: 16px;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-secondary:hover { background: #1e1f2e; }
+  .btn-all {
+    background: rgba(99,102,241,0.1);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .btn-all:hover { background: rgba(99,102,241,0.2); }
+
+  /* ── Quiz ── */
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+  .question-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  .tag-period { background: rgba(99,102,241,0.15); color: var(--accent); }
+  .tag-skill { background: rgba(59,130,246,0.15); color: var(--blue); }
+  .tag-claude { background: rgba(234,179,8,0.15); color: var(--yellow); }
+  .tag-counter { color: var(--muted); font-size: 13px; }
+
+  .stimulus-box {
+    background: var(--stimulus-bg);
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #c4c4cc;
+    font-style: italic;
+  }
+  .stimulus-box .attribution {
+    font-style: normal;
+    color: var(--muted);
+    margin-top: 8px;
+    font-size: 13px;
+  }
+
+  .question-stem {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 16px 0;
+    line-height: 1.5;
+  }
+
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .choice-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    line-height: 1.5;
+  }
+  .choice-btn:hover:not(.disabled) {
+    border-color: var(--accent);
+    background: #1e1f2e;
+  }
+  .choice-btn .letter {
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 20px;
+  }
+  .choice-btn.correct {
+    border-color: var(--green);
+    background: var(--green-bg);
+  }
+  .choice-btn.correct .letter { color: var(--green); }
+  .choice-btn.incorrect {
+    border-color: var(--red);
+    background: var(--red-bg);
+  }
+  .choice-btn.incorrect .letter { color: var(--red); }
+  .choice-btn.disabled { cursor: default; opacity: 0.6; }
+  .choice-btn.disabled:hover { border-color: var(--border); background: var(--card); }
+
+  .feedback {
+    padding: 16px;
+    border-radius: 10px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .feedback.correct-fb { background: var(--green-bg); border: 1px solid rgba(34,197,94,0.3); }
+  .feedback.incorrect-fb { background: var(--red-bg); border: 1px solid rgba(239,68,68,0.3); }
+  .feedback .fb-title { font-weight: 700; margin-bottom: 8px; font-size: 15px; }
+  .feedback .fb-title.correct-text { color: var(--green); }
+  .feedback .fb-title.incorrect-text { color: var(--red); }
+
+  .set-nav {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .set-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all 0.2s;
+  }
+  .set-dot.active { background: var(--accent); }
+  .set-dot.answered-correct { background: var(--green); }
+  .set-dot.answered-incorrect { background: var(--red); }
+
+  /* ── Results ── */
+  .score-display {
+    text-align: center;
+    padding: 30px 0;
+  }
+  .score-number {
+    font-size: 56px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6366f1, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .score-label { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .score-grade { font-size: 18px; margin-top: 12px; font-weight: 600; }
+  .grade-good { color: var(--green); }
+  .grade-ok { color: var(--yellow); }
+  .grade-bad { color: var(--red); }
+
+  .skill-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0;
+    font-size: 13px;
+  }
+  .skill-name { min-width: 180px; color: var(--muted); }
+  .bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s;
+  }
+  .skill-pct { min-width: 40px; text-align: right; font-weight: 600; }
+
+  /* ── Loading ── */
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+  }
+  .spinner {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .hidden { display: none !important; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .period-grid { grid-template-columns: repeat(2, 1fr); }
+    .container { padding: 16px; }
+    .header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="header">
+    <h1>AP US History MCQ Practice</h1>
+    <p>Stimulus-based questions matching the real AP exam format</p>
+  </div>
+
+  <!-- ═══ SCREEN 1: PERIOD SELECTION ═══ -->
+  <div id="screen-setup">
+    <div class="card">
+      <h3 style="margin-bottom: 14px;">Select Period(s)</h3>
+      <button class="btn-all" onclick="toggleAll()">Select All Periods</button>
+      <div class="period-grid" id="period-grid"></div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom: 14px;">Quiz Settings</h3>
+
+      <div class="config-row">
+        <div>
+          <label>Pre-written question sets</label>
+          <div class="sub">From curated question bank</div>
+        </div>
+        <div class="stepper">
+          <button onclick="adjust('prewritten', -1)">−</button>
+          <span class="value" id="val-prewritten">2</span>
+          <button onclick="adjust('prewritten', 1)">+</button>
+        </div>
+      </div>
+
+      <div class="config-row">
+        <div>
+          <label>Claude-generated sets</label>
+          <div class="sub">New stimulus + 3 Qs from your notes &bull; <span class="tag tag-claude" style="display:inline">&#9733; Claude Generated</span></div>
+          <div id="claude-note" class="hidden" style="font-size:11px;color:var(--red);margin-top:4px;">No API key set — set ANTHROPIC_API_KEY to enable</div>
+        </div>
+        <div class="stepper">
+          <button onclick="adjust('claude', -1)">−</button>
+          <span class="value" id="val-claude">0</span>
+          <button onclick="adjust('claude', 1)">+</button>
+        </div>
+      </div>
+
+      <div class="config-row">
+        <div>
+          <label>Exam stimulus remix sets</label>
+          <div class="sub">Takes stimuli from your practice exams, generates new Qs &bull; <span class="tag tag-claude" style="display:inline">&#9733; Claude Generated</span></div>
+          <div id="exam-note" class="hidden" style="font-size:11px;color:var(--red);margin-top:4px;">No API key set — set ANTHROPIC_API_KEY to enable</div>
+          <div id="exam-count" style="font-size:11px;color:var(--muted);margin-top:4px;"></div>
+        </div>
+        <div class="stepper">
+          <button onclick="adjust('exam', -1)">−</button>
+          <span class="value" id="val-exam">0</span>
+          <button onclick="adjust('exam', 1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="start-btn" onclick="startQuiz()">Start Quiz</button>
+  </div>
+
+  <!-- ═══ SCREEN 2: LOADING ═══ -->
+  <div id="screen-loading" class="hidden">
+    <div class="card loading">
+      <div class="spinner"></div>
+      <p id="loading-text">Preparing questions...</p>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px;" id="loading-sub"></p>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 3: QUIZ ═══ -->
+  <div id="screen-quiz" class="hidden">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
+    <div class="card" id="quiz-card">
+      <div class="question-meta" id="question-meta"></div>
+      <div class="set-nav" id="set-nav"></div>
+      <div class="stimulus-box" id="stimulus-box"></div>
+      <div class="question-stem" id="question-stem"></div>
+      <div class="choices" id="choices"></div>
+      <div id="feedback-box" class="hidden"></div>
+      <button class="btn btn-primary hidden" id="next-btn" onclick="nextQuestion()">Next Question</button>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 4: RESULTS ═══ -->
+  <div id="screen-results" class="hidden">
+    <div class="card">
+      <div class="score-display">
+        <div class="score-number" id="score-number">0/0</div>
+        <div class="score-label">Questions Correct</div>
+        <div class="score-grade" id="score-grade"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:14px;">Skill Breakdown</h3>
+      <div id="skill-bars"></div>
+    </div>
+
+    <div id="review-section"></div>
+
+    <button class="btn btn-primary" onclick="resetQuiz()" style="margin-top:16px;">New Quiz</button>
+  </div>
+
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+const periods = {{ periods | tojson }};
+let selectedPeriods = new Set();
+let config = { prewritten: 2, claude: 0, exam: 0 };
+let hasApiKey = false;
+let questionSets = [];   // [{period, stimulus, questions: [{stem, choices, answer, ...}], claude_generated}]
+let flatQuestions = [];   // flattened for quiz navigation
+let currentIdx = 0;
+let score = 0;
+let results = [];         // {question, userAnswer, correct}
+
+// ─── Setup Screen ────────────────────────────────────────────────────────────
+function buildPeriodGrid() {
+  const grid = document.getElementById('period-grid');
+  grid.innerHTML = '';
+  for (const [num, info] of Object.entries(periods)) {
+    const btn = document.createElement('div');
+    btn.className = 'period-btn';
+    btn.dataset.period = num;
+    btn.innerHTML = `<div class="num">${num}</div><div class="range">${info.range}</div><div class="name">${info.name}</div>`;
+    btn.onclick = () => togglePeriod(parseInt(num));
+    grid.appendChild(btn);
+  }
+}
+
+function togglePeriod(num) {
+  if (selectedPeriods.has(num)) selectedPeriods.delete(num);
+  else selectedPeriods.add(num);
+  updatePeriodUI();
+}
+
+function toggleAll() {
+  if (selectedPeriods.size === 9) selectedPeriods.clear();
+  else for (let i = 1; i <= 9; i++) selectedPeriods.add(i);
+  updatePeriodUI();
+}
+
+function updatePeriodUI() {
+  document.querySelectorAll('.period-btn').forEach(btn => {
+    const p = parseInt(btn.dataset.period);
+    btn.classList.toggle('selected', selectedPeriods.has(p));
+  });
+  document.getElementById('start-btn').disabled = selectedPeriods.size === 0;
+}
+
+function adjust(key, delta) {
+  const maxVals = { prewritten: 9, claude: 5, exam: 5 };
+  config[key] = Math.max(0, Math.min(maxVals[key] || 5, config[key] + delta));
+  document.getElementById(`val-${key}`).textContent = config[key];
+}
+
+// ─── Quiz Start ──────────────────────────────────────────────────────────────
+async function startQuiz() {
+  if (selectedPeriods.size === 0) return;
+  if (config.prewritten === 0 && config.claude === 0 && config.exam === 0) {
+    alert('Select at least 1 question set.');
+    return;
+  }
+
+  showScreen('loading');
+  questionSets = [];
+  flatQuestions = [];
+  currentIdx = 0;
+  score = 0;
+  results = [];
+
+  try {
+    // Fetch prewritten
+    if (config.prewritten > 0) {
+      document.getElementById('loading-text').textContent = 'Loading pre-written questions...';
+      const res = await fetch('/api/prewritten', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ periods: [...selectedPeriods], count: config.prewritten })
+      });
+      const data = await res.json();
+      questionSets.push(...data);
+    }
+
+    // Generate Claude sets (new stimulus)
+    if (config.claude > 0) {
+      const periodsArr = [...selectedPeriods];
+      for (let i = 0; i < config.claude; i++) {
+        const period = periodsArr[i % periodsArr.length];
+        document.getElementById('loading-text').textContent = `Generating Claude questions (${i+1}/${config.claude})...`;
+        document.getElementById('loading-sub').textContent = `Period ${period}: ${periods[period].name}`;
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ period })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          questionSets.push(data);
+        }
+      }
+    }
+
+    // Generate from exam stimuli (reuse stimulus, new questions)
+    if (config.exam > 0) {
+      const periodsArr = [...selectedPeriods];
+      for (let i = 0; i < config.exam; i++) {
+        const period = periodsArr[i % periodsArr.length];
+        document.getElementById('loading-text').textContent = `Remixing exam stimulus (${i+1}/${config.exam})...`;
+        document.getElementById('loading-sub').textContent = `Period ${period}: ${periods[period].name}`;
+        const res = await fetch('/api/generate_from_exam', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ period })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          questionSets.push(data);
+        }
+      }
+    }
+
+    // Shuffle sets
+    questionSets.sort(() => Math.random() - 0.5);
+
+    // Flatten: each question keeps reference to its stimulus and set info
+    for (const set of questionSets) {
+      for (let qi = 0; qi < set.questions.length; qi++) {
+        flatQuestions.push({
+          ...set.questions[qi],
+          period: set.period,
+          stimulus: set.stimulus,
+          claude_generated: set.claude_generated || false,
+          setSize: set.questions.length,
+          setIndex: qi,
+          setId: questionSets.indexOf(set),
+        });
+      }
+    }
+
+    if (flatQuestions.length === 0) {
+      alert('No questions available. Try different periods.');
+      showScreen('setup');
+      return;
+    }
+
+    showScreen('quiz');
+    renderQuestion();
+  } catch (err) {
+    alert('Error: ' + err.message);
+    showScreen('setup');
+  }
+}
+
+// ─── Quiz Rendering ──────────────────────────────────────────────────────────
+function renderQuestion() {
+  const q = flatQuestions[currentIdx];
+  const total = flatQuestions.length;
+
+  // Progress
+  document.getElementById('progress-fill').style.width = `${((currentIdx) / total) * 100}%`;
+
+  // Meta tags
+  const meta = document.getElementById('question-meta');
+  meta.innerHTML = `
+    <span class="tag-counter">Question ${currentIdx + 1} of ${total}</span>
+    <span class="tag tag-period">Period ${q.period}</span>
+    ${q.skill ? `<span class="tag tag-skill">${q.skill}</span>` : ''}
+    ${q.reasoning ? `<span class="tag tag-skill">${q.reasoning}</span>` : ''}
+    ${q.claude_generated ? '<span class="tag tag-claude">&#9733; Claude Generated Question</span>' : ''}
+  `;
+
+  // Set navigation dots
+  const nav = document.getElementById('set-nav');
+  if (q.setSize > 1) {
+    nav.innerHTML = '';
+    for (let i = 0; i < q.setSize; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'set-dot';
+      if (i === q.setIndex) dot.classList.add('active');
+      // Check if answered
+      const flatIdx = currentIdx - q.setIndex + i;
+      if (flatIdx < results.length) {
+        dot.classList.add(results[flatIdx].correct ? 'answered-correct' : 'answered-incorrect');
+      }
+      nav.appendChild(dot);
+    }
+    nav.classList.remove('hidden');
+  } else {
+    nav.classList.add('hidden');
+  }
+
+  // Stimulus
+  document.getElementById('stimulus-box').innerHTML = q.stimulus.replace(/\n/g, '<br>');
+
+  // Stem
+  document.getElementById('question-stem').textContent = q.stem;
+
+  // Choices
+  const choicesDiv = document.getElementById('choices');
+  choicesDiv.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  q.choices.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="letter">${letters[i]}</span><span>${choice}</span>`;
+    btn.onclick = () => selectAnswer(letters[i]);
+    choicesDiv.appendChild(btn);
+  });
+
+  // Hide feedback and next
+  document.getElementById('feedback-box').classList.add('hidden');
+  document.getElementById('next-btn').classList.add('hidden');
+}
+
+function selectAnswer(letter) {
+  const q = flatQuestions[currentIdx];
+  const correct = letter === q.answer;
+  if (correct) score++;
+
+  results.push({ question: q, userAnswer: letter, correct });
+
+  // Update choice buttons
+  const btns = document.querySelectorAll('.choice-btn');
+  const letters = ['A', 'B', 'C', 'D'];
+  btns.forEach((btn, i) => {
+    btn.classList.add('disabled');
+    btn.onclick = null;
+    if (letters[i] === q.answer) btn.classList.add('correct');
+    else if (letters[i] === letter && !correct) btn.classList.add('incorrect');
+  });
+
+  // Update set dots
+  const nav = document.getElementById('set-nav');
+  const dots = nav.querySelectorAll('.set-dot');
+  if (dots[q.setIndex]) {
+    dots[q.setIndex].classList.remove('active');
+    dots[q.setIndex].classList.add(correct ? 'answered-correct' : 'answered-incorrect');
+  }
+
+  // Show feedback
+  const fb = document.getElementById('feedback-box');
+  fb.className = correct ? 'feedback correct-fb' : 'feedback incorrect-fb';
+  fb.innerHTML = `
+    <div class="fb-title ${correct ? 'correct-text' : 'incorrect-text'}">
+      ${correct ? '&#10003; Correct!' : `&#10007; Incorrect — Answer: ${q.answer}`}
+    </div>
+    <div>${q.explanation}</div>
+  `;
+  fb.classList.remove('hidden');
+
+  // Show next button
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.textContent = currentIdx + 1 >= flatQuestions.length ? 'View Results' : 'Next Question';
+  nextBtn.classList.remove('hidden');
+}
+
+function nextQuestion() {
+  currentIdx++;
+  if (currentIdx >= flatQuestions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// ─── Results ─────────────────────────────────────────────────────────────────
+function showResults() {
+  showScreen('results');
+
+  const total = flatQuestions.length;
+  const pct = Math.round((score / total) * 100);
+
+  document.getElementById('score-number').textContent = `${score}/${total}`;
+
+  const gradeEl = document.getElementById('score-grade');
+  if (pct >= 75) { gradeEl.textContent = `${pct}% — Likely 4-5, strong performance!`; gradeEl.className = 'score-grade grade-good'; }
+  else if (pct >= 55) { gradeEl.textContent = `${pct}% — Likely 3-4, keep studying!`; gradeEl.className = 'score-grade grade-ok'; }
+  else { gradeEl.textContent = `${pct}% — More review needed`; gradeEl.className = 'score-grade grade-bad'; }
+
+  // Skill breakdown
+  const skillStats = {};
+  results.forEach(r => {
+    const sk = r.question.skill || 'General';
+    if (!skillStats[sk]) skillStats[sk] = { correct: 0, total: 0 };
+    skillStats[sk].total++;
+    if (r.correct) skillStats[sk].correct++;
+  });
+
+  const barsDiv = document.getElementById('skill-bars');
+  barsDiv.innerHTML = '';
+  for (const [skill, stats] of Object.entries(skillStats)) {
+    const p = Math.round((stats.correct / stats.total) * 100);
+    const color = p >= 70 ? 'var(--green)' : p >= 50 ? 'var(--yellow)' : 'var(--red)';
+    barsDiv.innerHTML += `
+      <div class="skill-bar">
+        <span class="skill-name">${skill}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${p}%;background:${color}"></div></div>
+        <span class="skill-pct" style="color:${color}">${stats.correct}/${stats.total}</span>
+      </div>`;
+  }
+
+  // Review missed questions
+  const missed = results.filter(r => !r.correct);
+  const reviewSection = document.getElementById('review-section');
+  if (missed.length > 0) {
+    let html = '<div class="card" style="margin-top:16px;"><h3 style="margin-bottom:14px;">Missed Questions</h3>';
+    missed.forEach(r => {
+      const q = r.question;
+      const letters = ['A', 'B', 'C', 'D'];
+      html += `
+        <div style="border-top:1px solid var(--border);padding:16px 0;">
+          <div class="question-meta">
+            <span class="tag tag-period">Period ${q.period}</span>
+            ${q.skill ? `<span class="tag tag-skill">${q.skill}</span>` : ''}
+            ${q.claude_generated ? '<span class="tag tag-claude">&#9733; Claude Generated</span>' : ''}
+          </div>
+          <div class="stimulus-box" style="font-size:13px;margin:8px 0;">${q.stimulus.replace(/\n/g, '<br>')}</div>
+          <p style="font-weight:600;margin:8px 0;">${q.stem}</p>
+          <div style="margin:8px 0;">
+            ${q.choices.map((c, i) => {
+              let style = '';
+              if (letters[i] === q.answer) style = 'color:var(--green);font-weight:600;';
+              else if (letters[i] === r.userAnswer) style = 'color:var(--red);text-decoration:line-through;';
+              return `<div style="${style};font-size:13px;margin:4px 0;">${letters[i]}) ${c}${letters[i] === q.answer ? ' ✓' : ''}${letters[i] === r.userAnswer ? ' (your answer)' : ''}</div>`;
+            }).join('')}
+          </div>
+          <div style="font-size:13px;color:var(--muted);margin-top:8px;">${q.explanation}</div>
+        </div>`;
+    });
+    html += '</div>';
+    reviewSection.innerHTML = html;
+  } else {
+    reviewSection.innerHTML = '<div class="card" style="margin-top:16px;text-align:center;padding:20px;color:var(--green);font-weight:600;">Perfect score! No missed questions.</div>';
+  }
+}
+
+// ─── Navigation ──────────────────────────────────────────────────────────────
+function showScreen(name) {
+  ['setup', 'loading', 'quiz', 'results'].forEach(s => {
+    document.getElementById(`screen-${s}`).classList.toggle('hidden', s !== name);
+  });
+}
+
+function resetQuiz() {
+  showScreen('setup');
+}
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+buildPeriodGrid();
+document.getElementById('start-btn').disabled = true;
+
+// Check if API key is available
+fetch('/api/has_api_key').then(r => r.json()).then(data => {
+  hasApiKey = data.has_key;
+  if (hasApiKey) {
+    config.claude = 1;
+    document.getElementById('val-claude').textContent = '1';
+    config.exam = 1;
+    document.getElementById('val-exam').textContent = '1';
+  } else {
+    config.claude = 0;
+    config.exam = 0;
+    document.getElementById('val-claude').textContent = '0';
+    document.getElementById('val-exam').textContent = '0';
+    document.getElementById('claude-note').classList.remove('hidden');
+    document.getElementById('exam-note').classList.remove('hidden');
+  }
+}).catch(() => {});
+
+// Update exam stimuli count when periods change
+function updateExamCount() {
+  fetch('/api/exam_stimuli_count', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ periods: [...selectedPeriods] })
+  }).then(r => r.json()).then(data => {
+    document.getElementById('exam-count').textContent = `${data.count} exam stimuli available for selected periods`;
+  }).catch(() => {});
+}
+// Hook into period toggle
+const origToggle = togglePeriod;
+togglePeriod = function(num) { origToggle(num); updateExamCount(); };
+const origToggleAll = toggleAll;
+toggleAll = function() { origToggleAll(); updateExamCount(); };
+</script>
+</body>
+</html>

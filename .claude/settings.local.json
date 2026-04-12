@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(claude-api)",
+      "Skill(claude-api:*)",
+      "Bash(pip show:*)",
+      "Bash(pip install:*)",
+      "Bash(find /c/Users/laksh -name APUSH*)",
+      "Bash(find /c/Users/laksh -name AP*)",
+      "Bash(find /c/Users/laksh -name *Unit* -o -name *Noteguide* -o -name *TimeLine*)",
+      "Bash(find /c/Users/laksh -name *.pdf)",
+      "Bash(find /c/Users/laksh/Downloads -name *.pdf)",
+      "Bash(python3 -m pip install pdfplumber flask)",
+      "Bash(python3 -c \"import pdfplumber; print\\(''ok''\\)\")",
+      "Bash(python3 -c \"import flask; print\\(''ok''\\)\")",
+      "Bash(python3:*)",
+      "WebFetch(domain:highschooltestprep.com)",
+      "WebSearch"
+    ]
+  }
+}

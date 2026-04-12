@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snake Game</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a2e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-family: 'Courier New', monospace;
+    color: #eee;
+  }
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    color: #4ecca3;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+  #scoreboard {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 16px;
+    font-size: 1rem;
+    color: #aaa;
+  }
+  #scoreboard span { color: #4ecca3; font-weight: bold; }
+  canvas {
+    border: 2px solid #4ecca3;
+    border-radius: 4px;
+    box-shadow: 0 0 20px #4ecca355;
+    display: block;
+  }
+  #message {
+    margin-top: 16px;
+    font-size: 1rem;
+    color: #aaa;
+    letter-spacing: 2px;
+    min-height: 1.5em;
+  }
+  #message strong { color: #f7b731; }
+</style>
+</head>
+<body>
+<h1>Snake</h1>
+<div id="scoreboard">
+  SCORE: <span id="score">0</span> &nbsp;&nbsp; BEST: <span id="best">0</span>
+</div>
+<canvas id="canvas" width="400" height="400"></canvas>
+<div id="message">Press <strong>ENTER</strong> or <strong>SPACE</strong> to start</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const bestEl = document.getElementById('best');
+const msgEl = document.getElementById('message');
+
+const GRID = 20;
+const COLS = canvas.width / GRID;
+const ROWS = canvas.height / GRID;
+
+let snake, dir, nextDir, food, score, best, gameLoop, state;
+
+function init() {
+  snake = [
+    { x: 10, y: 10 },
+    { x: 9,  y: 10 },
+    { x: 8,  y: 10 },
+  ];
+  dir = { x: 1, y: 0 };
+  nextDir = { x: 1, y: 0 };
+  score = 0;
+  best = best || parseInt(localStorage.getItem('snakeBest') || '0');
+  scoreEl.textContent = 0;
+  bestEl.textContent = best;
+  placeFood();
+  state = 'playing';
+  msgEl.textContent = '';
+  clearInterval(gameLoop);
+  gameLoop = setInterval(tick, 120);
+}
+
+function placeFood() {
+  let pos;
+  do {
+    pos = { x: Math.floor(Math.random() * COLS), y: Math.floor(Math.random() * ROWS) };
+  } while (snake.some(s => s.x === pos.x && s.y === pos.y));
+  food = pos;
+}
+
+function tick() {
+  dir = nextDir;
+  const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+
+  // Wall collision
+  if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) return endGame();
+  // Self collision
+  if (snake.some(s => s.x === head.x && s.y === head.y)) return endGame();
+
+  snake.unshift(head);
+
+  if (head.x === food.x && head.y === food.y) {
+    score++;
+    scoreEl.textContent = score;
+    if (score > best) {
+      best = score;
+      bestEl.textContent = best;
+      localStorage.setItem('snakeBest', best);
+    }
+    placeFood();
+  } else {
+    snake.pop();
+  }
+
+  draw();
+}
+
+function endGame() {
+  clearInterval(gameLoop);
+  state = 'dead';
+  draw();
+  msgEl.innerHTML = `Game over! Score: <strong>${score}</strong> — Press <strong>ENTER</strong> to restart`;
+}
+
+function draw() {
+  // Background
+  ctx.fillStyle = '#16213e';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Grid dots
+  ctx.fillStyle = '#ffffff08';
+  for (let x = 0; x < COLS; x++) {
+    for (let y = 0; y < ROWS; y++) {
+      ctx.fillRect(x * GRID + GRID / 2 - 1, y * GRID + GRID / 2 - 1, 2, 2);
+    }
+  }
+
+  // Food
+  const fx = food.x * GRID + GRID / 2;
+  const fy = food.y * GRID + GRID / 2;
+  ctx.fillStyle = '#f7b731';
+  ctx.beginPath();
+  ctx.arc(fx, fy, GRID / 2 - 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#fff3';
+  ctx.beginPath();
+  ctx.arc(fx - 2, fy - 2, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Snake
+  snake.forEach((seg, i) => {
+    const t = i / snake.length;
+    const g = Math.floor(180 + (1 - t) * 75);
+    ctx.fillStyle = i === 0 ? '#4ecca3' : `rgb(30, ${g}, 120)`;
+    const pad = i === 0 ? 1 : 2;
+    const r = i === 0 ? 5 : 3;
+    roundRect(ctx, seg.x * GRID + pad, seg.y * GRID + pad, GRID - pad * 2, GRID - pad * 2, r);
+    ctx.fill();
+
+    // Eyes on head
+    if (i === 0) {
+      ctx.fillStyle = '#1a1a2e';
+      const ex = dir.y !== 0 ? (dir.y === -1 ? [4, 12] : [4, 12]) : (dir.x === 1 ? [12, 12] : [4, 4]);
+      const ey = dir.x !== 0 ? [4, 12] : (dir.y === 1 ? [12, 12] : [4, 4]);
+      ctx.beginPath(); ctx.arc(seg.x * GRID + ex[0], seg.y * GRID + ey[0], 2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(seg.x * GRID + ex[1], seg.y * GRID + ey[1], 2, 0, Math.PI * 2); ctx.fill();
+    }
+  });
+
+  // Death flash overlay
+  if (state === 'dead') {
+    ctx.fillStyle = '#ff000015';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    if (state !== 'playing') init();
+    return;
+  }
+  if (state !== 'playing') return;
+  const moves = {
+    ArrowUp:    { x: 0,  y: -1 },
+    ArrowDown:  { x: 0,  y:  1 },
+    ArrowLeft:  { x: -1, y:  0 },
+    ArrowRight: { x: 1,  y:  0 },
+    w: { x: 0,  y: -1 },
+    s: { x: 0,  y:  1 },
+    a: { x: -1, y:  0 },
+    d: { x: 1,  y:  0 },
+  };
+  const m = moves[e.key];
+  if (m && !(m.x === -dir.x && m.y === -dir.y)) {
+    nextDir = m;
+    e.preventDefault();
+  }
+});
+
+// Initial draw
+best = parseInt(localStorage.getItem('snakeBest') || '0');
+bestEl.textContent = best;
+state = 'idle';
+ctx.fillStyle = '#16213e';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+ctx.fillStyle = '#4ecca3';
+ctx.font = 'bold 28px Courier New';
+ctx.textAlign = 'center';
+ctx.fillText('SNAKE', canvas.width / 2, canvas.height / 2 - 10);
+ctx.font = '14px Courier New';
+ctx.fillStyle = '#aaa';
+ctx.fillText('Press ENTER or SPACE to start', canvas.width / 2, canvas.height / 2 + 24);
+</script>
+</body>
+</html>
