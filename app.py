@@ -2,6 +2,7 @@ import anthropic
 import json
 import os
 import uuid
+from datetime import datetime
 from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
@@ -21,6 +22,7 @@ def build_maps_url(addresses):
 
 @app.route("/")
 def index():
+    print(f"[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC] 👀 Someone visited the site — IP: {request.remote_addr}", flush=True)
     return render_template("index.html")
 
 
@@ -40,6 +42,8 @@ def recommend():
         return jsonify({"error": "Please add your Anthropic API key to app.py"}), 400
     if not location:
         return jsonify({"error": "Location is required"}), 400
+
+    print(f"[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC] 🚗 Trip requested — From: {location} | Destination: {destination or 'any'} | Duration: {duration or 'any'} | IP: {request.remote_addr}", flush=True)
 
     client = anthropic.Anthropic(api_key=api_key)
 
