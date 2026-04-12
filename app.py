@@ -160,6 +160,7 @@ def recommend():
     location    = data.get("location", "").strip()
     destination = data.get("destination", "").strip()
     duration    = data.get("duration", "").strip()
+    nights      = data.get("nights", "").strip()
     extra_info  = data.get("extra_info", "").strip()
 
     if not api_key:
@@ -167,7 +168,7 @@ def recommend():
     if not location:
         return jsonify({"error": "Location is required"}), 400
 
-    print(f"[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC] 🚗 From: {location} | Dest: {destination or 'any'} | Duration: {duration or 'any'} | IP: {request.remote_addr}", flush=True)
+    print(f"[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC] 🚗 From: {location} | Dest: {destination or 'any'} | Duration: {duration or 'any'} | Nights: {nights or 'any'} | IP: {request.remote_addr}", flush=True)
 
     client = anthropic.Anthropic(api_key=api_key)
 
@@ -186,7 +187,32 @@ Return ONLY a valid JSON array with this exact structure (no markdown, no extra 
       {
         "name": "Place Name",
         "address": "Full street address or City, State, Country",
-        "description": "2-3 sentence description of what this place is and why it's worth visiting"
+        "description": "2-3 sentence description of what this place is and why it's worth visiting",
+        "hotel": {
+          "name": "Hotel or lodging name",
+          "address": "Address or neighborhood",
+          "notes": "One sentence tip about this accommodation"
+        },
+        "restaurants": [
+          {
+            "name": "Restaurant name",
+            "cuisine": "Cuisine type",
+            "notes": "One sentence tip about this restaurant"
+          },
+          {
+            "name": "Restaurant name",
+            "cuisine": "Cuisine type",
+            "notes": "One sentence tip about this restaurant"
+          }
+        ]
+      }
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "Day 1 — Departure",
+        "stops": ["Stop Name A", "Stop Name B"],
+        "plan": "2-3 sentences describing what to do and see this day, where to have meals, and where to sleep"
       }
     ]
   }
@@ -197,14 +223,20 @@ Rules:
 - Include 5-8 stops between start and end
 - Provide real, specific addresses or at minimum City, State, Country for every stop
 - If a specific destination is requested, make sure it appears in every route
-- Tailor the route length and number of stops to match the requested time on the road
+- Tailor the route length, stops, and itinerary days to match the requested nights/duration
+- The itinerary must have exactly as many days as the number of nights + 1 (e.g. 3 nights = 4 days, last day returns home)
+- If no nights specified, use the duration or default to a 3-night trip
+- Every stop must include a hotel suggestion and 2 restaurant suggestions
+- The hotel at the starting/ending location can be omitted (traveller is home)
 - Incorporate any additional details the user provides
 - Return exactly 3 routes"""
 
     user_message = f"Starting location: {location}"
     if destination:
         user_message += f"\nMust include: {destination}"
-    if duration:
+    if nights:
+        user_message += f"\nNumber of nights: {nights}"
+    elif duration:
         user_message += f"\nTime on road: {duration}"
     if extra_info:
         user_message += f"\nDetails: {extra_info}"
@@ -212,7 +244,7 @@ Rules:
     try:
         response = client.messages.create(
             model="claude-opus-4-6",
-            max_tokens=4096,
+            max_tokens=8000,
             system=system_prompt,
             messages=[{"role": "user", "content": user_message}]
         )

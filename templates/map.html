@@ -121,12 +121,42 @@
 
     .stop-desc {
       display: none;
-      padding: 0 16px 13px 55px;
+      padding: 0 16px 6px 55px;
       font-size: 0.87rem;
       color: #4a5568;
       line-height: 1.65;
     }
     .stop.open .stop-desc { display: block; }
+
+    .stop-extras {
+      display: none;
+      padding: 0 16px 13px 55px;
+    }
+    .stop.open .stop-extras { display: block; }
+    .extras-label {
+      font-size: 0.7rem; font-weight: 700; color: #718096;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin: 8px 0 5px;
+    }
+    .hotel-card {
+      background: #f0fff4; border: 1px solid #c6f6d5;
+      border-radius: 7px; padding: 8px 11px; font-size: 0.83rem;
+    }
+    .hotel-name  { font-weight: 600; color: #276749; }
+    .hotel-addr  { color: #4a5568; font-size: 0.8rem; margin-top: 1px; }
+    .hotel-notes { color: #718096; font-size: 0.8rem; margin-top: 3px; font-style: italic; }
+    .restaurant-list { display: flex; flex-direction: column; gap: 5px; }
+    .restaurant-card {
+      background: #fff8f0; border: 1px solid #fbd38d;
+      border-radius: 7px; padding: 8px 11px; font-size: 0.83rem;
+    }
+    .restaurant-name    { font-weight: 600; color: #744210; }
+    .restaurant-cuisine {
+      display: inline-block; background: #fefcbf; color: #975a16;
+      font-size: 0.7rem; font-weight: 700; padding: 1px 6px;
+      border-radius: 10px; margin-left: 5px;
+    }
+    .restaurant-notes { color: #718096; font-size: 0.8rem; margin-top: 3px; font-style: italic; }
 
     .sidebar-footer {
       padding: 14px 16px;
@@ -241,6 +271,31 @@
       const div = document.createElement('div');
       div.className = 'stop';
       div.dataset.idx = j;
+      // Hotel HTML
+      let hotelHtml = '';
+      if (stop.hotel && stop.hotel.name && !isEndpoint) {
+        hotelHtml = `
+          <div class="extras-label">🏨 Where to Stay</div>
+          <div class="hotel-card">
+            <div class="hotel-name">${stop.hotel.name}</div>
+            ${stop.hotel.address ? `<div class="hotel-addr">${stop.hotel.address}</div>` : ''}
+            ${stop.hotel.notes   ? `<div class="hotel-notes">${stop.hotel.notes}</div>`  : ''}
+          </div>`;
+      }
+
+      // Restaurants HTML
+      let restHtml = '';
+      if (stop.restaurants && stop.restaurants.length) {
+        const cards = stop.restaurants.map(r => `
+          <div class="restaurant-card">
+            <div class="restaurant-name">${r.name}<span class="restaurant-cuisine">${r.cuisine || ''}</span></div>
+            ${r.notes ? `<div class="restaurant-notes">${r.notes}</div>` : ''}
+          </div>`).join('');
+        restHtml = `
+          <div class="extras-label">🍽️ Where to Eat</div>
+          <div class="restaurant-list">${cards}</div>`;
+      }
+
       div.innerHTML = `
         <div class="stop-row" onclick="handleStopClick(${j})">
           <div class="stop-num ${isEndpoint ? 'endpoint' : ''}">${isEndpoint ? '🏁' : j}</div>
@@ -251,7 +306,8 @@
           </div>
           <div class="stop-chev">▼</div>
         </div>
-        <div class="stop-desc">${stop.description || ''}</div>`;
+        <div class="stop-desc">${stop.description || ''}</div>
+        <div class="stop-extras">${hotelHtml}${restHtml}</div>`;
       stopsList.appendChild(div);
     });
 
