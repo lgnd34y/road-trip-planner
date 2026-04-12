@@ -1,3 +1,5 @@
 flask
 anthropic
 waitress
+flask-sqlalchemy
+flask-login
