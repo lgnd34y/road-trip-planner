@@ -15,7 +15,24 @@
       "Bash(python3 -c \"import flask; print\\(''ok''\\)\")",
       "Bash(python3:*)",
       "WebFetch(domain:highschooltestprep.com)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(python -c \"import dotenv; print\\(''ok''\\)\")",
+      "Bash(python -m pip install python-dotenv -q)",
+      "Bash(python -c \"from dotenv import load_dotenv; import os; load_dotenv\\(''.env''\\); print\\(repr\\(os.environ.get\\(''ANTHROPIC_API_KEY'', ''NOT FOUND''\\)\\)\\)\")",
+      "Bash(python -c \":*)",
+      "Bash(python -c \"from dotenv import load_dotenv; import os; load_dotenv\\(''.env'', override=True\\); print\\(repr\\(os.environ.get\\(''ANTHROPIC_API_KEY'', ''NOT FOUND''\\)[:20]\\)\\)\")",
+      "Bash(taskkill /F /IM python.exe)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :5050)",
+      "Bash(taskkill /PID 29912 /PID 17848 /PID 38104 /PID 38680 /PID 21740 /F)",
+      "Bash(cmd /c \"taskkill /PID 29912 /PID 17848 /PID 38104 /PID 38680 /PID 21740 /F\")",
+      "Bash(cmd /c \"taskkill /PID 29912 /F & taskkill /PID 17848 /F & taskkill /PID 38104 /F & taskkill /PID 38680 /F & taskkill /PID 21740 /F\")",
+      "Bash(python -c \"import app; print\\('OK'\\)\")",
+      "Bash(cmd /c \"for /f tokens^=5 %a in \\('netstat -ano ^| findstr :5050'\\) do taskkill /PID %a /F\")",
+      "Bash(findstr LISTENING)",
+      "Bash(python app.py)",
+      "Bash(curl -s http://localhost:5050/api/has_api_key)",
+      "Bash(pip freeze:*)"
     ]
   }
 }

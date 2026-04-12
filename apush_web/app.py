@@ -11,6 +11,9 @@ import sys
 import json
 import random
 from flask import Flask, render_template, jsonify, request
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"), override=True)
 
 app = Flask(__name__)
 
@@ -34,6 +37,13 @@ EXAM_STIMULI = []
 if os.path.exists(EXAM_STIMULI_PATH):
     with open(EXAM_STIMULI_PATH, "r", encoding="utf-8") as f:
         EXAM_STIMULI = json.load(f)
+
+# ─── Load HSTP (highschooltestprep.com) stimuli ────────────────────────────────
+HSTP_STIMULI_PATH = os.path.join(os.path.dirname(__file__), "hstp_stimuli.json")
+HSTP_STIMULI = []
+if os.path.exists(HSTP_STIMULI_PATH):
+    with open(HSTP_STIMULI_PATH, "r", encoding="utf-8") as f:
+        HSTP_STIMULI = json.load(f)
 
 # ─── Period metadata ───────────────────────────────────────────────────────────
 PERIODS = {
@@ -899,12 +909,230 @@ def api_generate_from_exam():
     return jsonify({"error": "Failed to generate questions from exam stimulus"}), 500
 
 
+@app.route("/api/hstp_stimuli_count", methods=["POST"])
+def api_hstp_stimuli_count():
+    """Return count of available HSTP stimuli for selected periods."""
+    data = request.json
+    selected = data.get("periods", [])
+    count = sum(1 for s in HSTP_STIMULI if s["period"] in selected)
+    return jsonify({"count": count})
+
+
+@app.route("/api/generate_from_hstp", methods=["POST"])
+def api_generate_from_hstp():
+    """Generate new questions from a highschooltestprep.com stimulus."""
+    if not HAS_API_KEY:
+        return jsonify({"error": "No ANTHROPIC_API_KEY set."}), 400
+
+    data = request.json
+    period = data.get("period", 1)
+
+    candidates = [s for s in HSTP_STIMULI if s["period"] == period]
+    if not candidates:
+        return jsonify({"error": f"No HSTP stimuli available for period {period}"}), 404
+
+    chosen = random.choice(candidates)
+    result = generate_from_exam_stimulus(chosen)
+    if result:
+        result["exam_source"] = "hstp"
+        return jsonify(result)
+    return jsonify({"error": "Failed to generate questions from HSTP stimulus"}), 500
+
+
+def generate_saq(period_num: int) -> dict | None:
+    """Generate a Short Answer Question for a given period."""
+    if not HAS_API_KEY or not client:
+        return None
+
+    period_info = PERIODS[period_num]
+
+    notes_context = ""
+    for key, text in UNIT_NOTES.items():
+        if str(period_num) in key:
+            notes_context += text[:2000]
+
+    prompt = f"""You are an AP United States History exam question writer.
+
+Generate a Short Answer Question (SAQ) for Period {period_num} ({period_info['range']}: {period_info['name']}).
+
+AP SAQ format:
+- A stimulus: primary source excerpt OR historian's argument (2-4 sentences)
+- 3 parts (a, b, c), each worth exactly 1 point
+- Part A: "Briefly describe" or "Briefly explain" ONE thing directly from/supported by the stimulus
+- Part B: "Briefly explain" ONE historical development, cause, or effect from the period
+- Part C: "Briefly explain" ONE comparison, contrast, or continuity/change over time
+
+{'CONTEXT FROM STUDENT NOTES:' + notes_context[:1500] if notes_context else ''}
+
+EXACT FORMAT (no extra text before or after):
+
+STIMULUS:
+[2-4 sentence primary source excerpt or historian argument]
+
+SOURCE: [Author, Title, Date]
+
+PART_A:
+[Part A question — say "Briefly describe" or "Briefly explain" ONE specific thing from the stimulus]
+
+PART_B:
+[Part B question — say "Briefly explain" ONE cause/effect/development]
+
+PART_C:
+[Part C question — say "Briefly explain" ONE comparison, contrast, or continuity/change]"""
+
+    try:
+        with client.messages.stream(
+            model="claude-opus-4-6",
+            max_tokens=1500,
+            thinking={"type": "adaptive"},
+            messages=[{"role": "user", "content": prompt}],
+        ) as stream:
+            raw = stream.get_final_message()
+
+        text = next(b.text for b in raw.content if b.type == "text")
+        return _parse_saq(text, period_num)
+    except Exception as e:
+        print(f"SAQ generation error: {e}", file=sys.stderr)
+        return None
+
+
+def _parse_saq(text: str, period_num: int) -> dict | None:
+    """Parse Claude's SAQ output into structured data."""
+    import re
+    stimulus_m = re.search(r'STIMULUS:\s*\n(.*?)(?=\nSOURCE:|\nPART_A:)', text, re.DOTALL)
+    source_m   = re.search(r'SOURCE:\s*(.*?)(?=\nPART_A:)', text, re.DOTALL)
+    part_a_m   = re.search(r'PART_A:\s*\n(.*?)(?=\nPART_B:)', text, re.DOTALL)
+    part_b_m   = re.search(r'PART_B:\s*\n(.*?)(?=\nPART_C:)', text, re.DOTALL)
+    part_c_m   = re.search(r'PART_C:\s*\n(.*?)$', text, re.DOTALL)
+    if not all([stimulus_m, part_a_m, part_b_m, part_c_m]):
+        return None
+    return {
+        "period": period_num,
+        "stimulus": stimulus_m.group(1).strip(),
+        "source": source_m.group(1).strip() if source_m else "",
+        "parts": [
+            {"label": "A", "question": part_a_m.group(1).strip()},
+            {"label": "B", "question": part_b_m.group(1).strip()},
+            {"label": "C", "question": part_c_m.group(1).strip()},
+        ]
+    }
+
+
+def grade_saq(saq_data: dict, responses: dict) -> dict | None:
+    """Grade SAQ responses using Claude."""
+    if not HAS_API_KEY or not client:
+        return None
+
+    parts = saq_data["parts"]
+
+    prompt = f"""You are an AP US History SAQ grader. Grade each part 0 or 1.
+
+A response earns 1 point if it directly addresses the question with accurate historical evidence or reasoning.
+A response earns 0 points if it is blank, off-topic, historically inaccurate, or only restates the question.
+
+STIMULUS:
+{saq_data['stimulus']}
+{('SOURCE: ' + saq_data['source']) if saq_data.get('source') else ''}
+
+PART A: {parts[0]['question']}
+PART B: {parts[1]['question']}
+PART C: {parts[2]['question']}
+
+STUDENT RESPONSES:
+Part A: {responses.get('a', '[No response]') or '[No response]'}
+Part B: {responses.get('b', '[No response]') or '[No response]'}
+Part C: {responses.get('c', '[No response]') or '[No response]'}
+
+EXACT FORMAT:
+
+PART_A_SCORE: [0 or 1]
+PART_A_FEEDBACK: [2-3 sentences: explain the score and what a full-credit response needs]
+
+PART_B_SCORE: [0 or 1]
+PART_B_FEEDBACK: [2-3 sentences]
+
+PART_C_SCORE: [0 or 1]
+PART_C_FEEDBACK: [2-3 sentences]
+
+TOTAL: [0, 1, 2, or 3]
+OVERALL: [1-2 sentences of holistic feedback]"""
+
+    try:
+        with client.messages.stream(
+            model="claude-opus-4-6",
+            max_tokens=1200,
+            thinking={"type": "adaptive"},
+            messages=[{"role": "user", "content": prompt}],
+        ) as stream:
+            raw = stream.get_final_message()
+
+        text = next(b.text for b in raw.content if b.type == "text")
+        return _parse_saq_grade(text)
+    except Exception as e:
+        print(f"SAQ grading error: {e}", file=sys.stderr)
+        return None
+
+
+def _parse_saq_grade(text: str) -> dict | None:
+    import re
+
+    def get_score(label):
+        m = re.search(rf'PART_{label}_SCORE:\s*([01])', text)
+        return int(m.group(1)) if m else 0
+
+    def get_feedback(label):
+        m = re.search(rf'PART_{label}_FEEDBACK:\s*(.*?)(?=\nPART_[BC]_SCORE:|\nTOTAL:|\Z)', text, re.DOTALL)
+        return m.group(1).strip() if m else ""
+
+    total_m   = re.search(r'TOTAL:\s*([0-3])', text)
+    overall_m = re.search(r'OVERALL:\s*(.*?)$', text, re.DOTALL)
+
+    return {
+        "parts": {
+            "a": {"score": get_score('A'), "feedback": get_feedback('A')},
+            "b": {"score": get_score('B'), "feedback": get_feedback('B')},
+            "c": {"score": get_score('C'), "feedback": get_feedback('C')},
+        },
+        "total": int(total_m.group(1)) if total_m else (get_score('A') + get_score('B') + get_score('C')),
+        "overall": overall_m.group(1).strip() if overall_m else "",
+    }
+
+
+@app.route("/api/generate_saq", methods=["POST"])
+def api_generate_saq():
+    if not HAS_API_KEY:
+        return jsonify({"error": "No ANTHROPIC_API_KEY set."}), 400
+    data = request.json
+    period = data.get("period", 1)
+    result = generate_saq(period)
+    if result:
+        return jsonify(result)
+    return jsonify({"error": "Failed to generate SAQ"}), 500
+
+
+@app.route("/api/grade_saq", methods=["POST"])
+def api_grade_saq():
+    if not HAS_API_KEY:
+        return jsonify({"error": "No ANTHROPIC_API_KEY set."}), 400
+    data = request.json
+    saq_data  = data.get("saq")
+    responses = data.get("responses", {})
+    if not saq_data:
+        return jsonify({"error": "No SAQ data provided"}), 400
+    result = grade_saq(saq_data, responses)
+    if result:
+        return jsonify(result)
+    return jsonify({"error": "Failed to grade SAQ"}), 500
+
+
 if __name__ == "__main__":
     exam_count = len([s for s in EXAM_STIMULI if len(s["stimulus"]) > 80])
+    hstp_count = len(HSTP_STIMULI)
     print(f"\n  APUSH MCQ Practice Tool")
-    print(f"  {len(PREWRITTEN_SETS)} pre-written sets + {exam_count} exam stimuli loaded")
+    print(f"  {len(PREWRITTEN_SETS)} pre-written sets + {exam_count} exam stimuli + {hstp_count} HSTP stimuli loaded")
     if not HAS_API_KEY:
         print("  NOTE: No ANTHROPIC_API_KEY set — Claude generation disabled.")
         print("  Pre-written questions will still work. Set the env var to enable Claude.\n")
     print("  Open http://localhost:5050 in your browser\n")
-    app.run(debug=False, port=5050)
+    port = int(os.environ.get("PORT", 5050))
+    app.run(debug=False, host="0.0.0.0", port=port)

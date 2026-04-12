@@ -1,0 +1,373 @@
+[
+  {
+    "source": "hstp",
+    "q_range": "1-3",
+    "period": 1,
+    "stimulus": "\"Into and among these gentle sheep, endowed by their Maker and Creator with all the qualities aforesaid, did creep the Spaniards, who no sooner had knowledge of these people than they became like fierce wolves and tigers and lions who have gone many days without food or nourishment. And no other thing have they done for forty years until this day, and still today see fit to do, but dismember, slay, perturb, afflict, torment, and destroy the Indians by all manner of cruelty new and divers and most singular manners such as never before seen or read of heard of some few of which shall be recounted below, and they do this to such a degree that on the Island of Hispaniola, of the above three millions souls that we once saw, today there be no more than two hundred of those native people remaining.\"\n—Bartolomé de las Casas, 1542",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "9",
+    "period": 1,
+    "stimulus": "\"Touching the religion, not only of this island, but also of all the other nations of the new world, they worshipped, and still worship, various deities, many painted, others sculptured, some formed of clay, others of wood, or gold, or silver; and in some places I have seen them of the shapes of birds, of tigers, of stags, and other sorts of animals, but I have mostly seen them made with a tail and feet, like our Satan. And although our priests and monks have endeavored, and still endeavor, to destroy these idols, yet the ministers of their faith keep a great many of them hidden in caves and underground, sacrificing to them occultly.\"\n—Girolamo Benzoni, History of the New World, 1565",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "13-16",
+    "period": 1,
+    "stimulus": "\"...We [the Church] grant to you [Kings of Spain and Portugal] by these present documents, with our Apostolic Authority, full and free permission to invade, search out, capture, and subjugate the Saracens and pagans and any other unbelievers and enemies of Christ wherever they may be, as well as their kingdoms, duchies, counties, principalities, and other property [...] and to reduce their persons into perpetual servitude.\"\n—The Doctrine of Discovery, 1493",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "17-20",
+    "period": 1,
+    "stimulus": "\"On the thirty-third day after leaving Cadiz, I came into the Indian Sea, where I discovered many islands inhabited by numerous people. I took possession of all of them for our most fortunate King by making public proclamation and unfurling his standard, no one making any resistance.\"\n—Christopher Columbus' Diary, 1492",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "1-3",
+    "period": 2,
+    "stimulus": "\"...for wee must Consider that wee shall be as a Citty upon a Hill, the eies of all people are uppon us; soe that if wee shall deale falsely with our god in this worke wee have undertaken and soe cause him to withdrawe his present help from us, wee shall be made a story and a byword through the world, wee shall open the mouthes of enemies to speake evill of the wayes of god and all professours for Gods sake; wee shall shame the faces of many of gods worthy servants, and cause theire prayers to be turned into Cursses upon us till wee be consumed out of the good land whether wee are going...\"\n—John Winthrop, 1630",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "4-5",
+    "period": 2,
+    "stimulus": "\"The mildnesse of the ayre, the fertilitie of the soyle, and situation of the rivers are so propitious to the nature and vse of man, as no place is more convenient for pleasure, profit, and mans sustenance, vnder that latitude or climat. Here will liue any beasts, as horses, goats, sheepe, asses, hens, &c. as appeared by them that were carried thether. The waters, Isles, and shoales, are full of safe harbours for ships of warre or marchandize, for boats of all sorts, for transportation or fishing, &c. The Bay and rivers haue much marchantable fish, and places fit for Salt coats, building of ships, making of Iron, &c.\"\n—John Smith, 1624",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "12-14",
+    "period": 2,
+    "stimulus": "\"That the increase of the wealth, splendour, and power of Great Britain and Ireland depends upon exporting more in value of our native produce and manufactures than we import of commodities from other nations and brining thereby money into the kingdom by means of freight by shipping...that gold and silver is the measure of trade and that silver is a commodity and may be exported, especially in foreign coin as well as any other commodity.\"\n—Malachy Postlewayt, 1757",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "15-17",
+    "period": 2,
+    "stimulus": "\"And then it was, in the latter part of December, that the Spirit of God began extraordinarily to set in and wonderfully to work among us; and there were, very suddenly, one after another, five or six persons who were to all appearance savingly converted, and some of them wrought upon in a very remarkable manner...God made it, I suppose, the greatest occasion of awakening to others...Those who were wont to be the vainest and loosest, and those who had been disposed to think and speak lightly of vital and experimental religion, were now generally subject to great awakenings.\"\n—Jonathan Edwards, Account of the Revival of Religion in Northampton, 1743",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "1-3",
+    "period": 3,
+    "stimulus": "\"Before those whom you call your brothers come on your lands, did you not live by bow and arrow? You had no need of gun nor powder, nor the rest of their things, and nevertheless you caught animals to live and clothe yourselves with their skins, but when I saw that you inclined to the evil, I called back the animals into the depths of the woods, so that you had need of your brothers to have your wants supplied and I shall send back to you the animals to live on.\"\n—Pontiac, an Ottawa war chief, 1763",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "7-8",
+    "period": 3,
+    "stimulus": "\"As to the history of the revolution, my ideas may be peculiar, perhaps singular. What do we mean by the revolution? The war? That was no part of the revolution; it was only an effect and consequence of it. The revolution was in the minds of the people, and this was effected from 1760 to 1775, in the course of fifteen years, before a drop of blood was shed at Lexington.\"\n—John Adams",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "11-13",
+    "period": 3,
+    "stimulus": "\"We hold these truths to be self-evident, that all men are created equal, that they are endowed by their Creator with certain unalienable Rights, that among these are Life, Liberty and the pursuit of Happiness. — That to secure these rights, Governments are instituted among Men, deriving their just powers from the consent of the governed, — That whenever any Form of Government becomes destructive of these ends, it is the Right of the People to alter or to abolish it, and to institute new Government, laying its foundation on such principles and organizing its powers in such form, as to them shall seem most likely to effect their Safety and Happiness.\"\n—The Declaration of Independence",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "14-16",
+    "period": 3,
+    "stimulus": "\"There is nothing more common than to confound the terms of the American Revolution with those of the late American war. The American war is over: but this is far from being the case with the American Revolution. On the contrary, nothing but the first act of the great drama is closed. It remains yet to establish and perfect our new forms of government; and to prepare the principles, morals, and manners of our citizens, for these forms of government, after they are established and brought to perfection.\"\n—Benjamin Rush, signatory to the Declaration of Independence",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "1-3",
+    "period": 4,
+    "stimulus": "\"But if the reports which we now hear are true, that with England all hope of honorable accommodation is at an end, and that with France our negotiations are in a fowardness encouraging expectations of a favorable result, where is the motive for longer delay? The final step ought to be taken; and that step is WAR. By what course of measures we have reached the present crisis, is not now a question for freemen and patriots to discuss. It exists; and it is by open and manly war only that we can get through it with honor and advantage to the country. Our wrongs have been great; our cause is just; and if we are decided and firm, success is inevitable.\"\n—Henry Clay, 1812",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "4-6",
+    "period": 4,
+    "stimulus": "\"A wide and apparently an impervious boundary of forests severed the possessions of the hostile provinces of France and England. The hardy colonist, and the trained European who fought at his side, frequently expended months in struggling against the rapids of the streams, or in effecting the rugged passes of the mountains, in quest of an opportunity to exhibit their courage in a more martial conflict. But, emulating the patience and self-denial of the practised native warriors, they learned to overcome every difficulty...\"\n—James Fennimore Cooper, The Last of the Mohicans, 1826",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "7-8",
+    "period": 4,
+    "stimulus": "\"In November, of the same year, the Sally and Mary, a boat of sixty or seventy tons, ...had passed into the Canal, by the locks at Waterloo and the Seneca River...The vessel was not only received as the precursor of a commerce, which will be unlimited in its extent and importance, but as an interesting evidence of the ingenuity and enterprise of our countrymen. Her timbers grew near where she was built...her cargo was the produce of the fields from whence she sprung...her sails and rigging even, were emphatically domestic manufactures, for they were grown, and made, at the homes of her owners.\"\n—Cadwallader Colden, 1825",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "9-11",
+    "period": 4,
+    "stimulus": "\"In 1831 Lowell was little more than a factory village. Several corporations were started, and the cotton-mills belonging to them were building. Help was in great demand; and stories were told all over the country of the new factory town, and the high wages that were offered to all classes of work-people, stories that reached the ears of mechanics' and farmers' sons, and gave new life to lonely and dependent women in distant towns and farmhouses.\"\n—Harriet Robinson, Loom and Spindle, 1898",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "13-14",
+    "period": 4,
+    "stimulus": "\"The abolitionism which I advocate is as absolute as the law of God, and as unyielding as his throne. It admits of no compromise. Every slave is a stolen man; every slaveholder is a man stealer. By no precedent, no example, no law, no compact, no purchase, no bequest, no inheritance, no combination of circumstances, is slaveholding right or justifiable.\"\n—William Lloyd Garrison, 1854",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "15-16",
+    "period": 4,
+    "stimulus": "\"Resolved, therefore, That, being invested by the Creator with the same capabilities, and the same consciousness of responsibility for their exercise, it is demonstrably the right and duty of woman, equally with man, to promote every righteous cause, by every righteous means...and this being a self-evident truth, growing out of the divinely implanted principles of human nature, any custom or authority adverse to it, whether modern or wearing the hoary sanction of antiquity, is to be regarded as self-evident falsehood, and at war with the interests of mankind.\"\n—Declaration of Sentiments and Resolutions, Seneca Falls Women's Rights Convention, 1848",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "17-18",
+    "period": 4,
+    "stimulus": "\"But when the laws undertake to add to these natural and just advantages artificial distinctions, to grant titles, gratuities, and exclusive privileges, to make the rich richer and the potent more powerful, the humble members of society the farmers, mechanics, and laborers who have neither the time nor the means of securing like favors to themselves, have a right to complain of the injustice of their Government.\"\n—Andrew Jackson, 1832",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "19",
+    "period": 4,
+    "stimulus": "\"By the stipulations of this instrument, we are despoiled of our private possessions, the indefeasible property of individuals. We are stripped of every attribute of freedom and eligibility for legal self-defence. Our property may be plundered before our eyes; violence may be committed on our persons; even our lives may be taken away, and there is none to regard our complaints. We are denationalized; we are disfranchised. We are deprived of membership in the human family! We have neither land nor home, nor resting place that can be called our own.\"\n—A letter to Congress protesting Indian removal, John Ross, a Cherokee Indian chief, 1836",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "21-22",
+    "period": 4,
+    "stimulus": "\"So if a law be in opposition to the constitution; if both the law and the constitution apply to a particular case, so that the court must either decide that case conformably to the law, disregarding the constitution; or conformably to the constitution, disregarding the law; the court must determine which of these conflicting rules governs the case. This is of the very essence of judicial duty.\"\n—Marbury v. Madison, 1803",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "1-2",
+    "period": 5,
+    "stimulus": "\"We must onward to the fulfilment of our mission — to the entire development of the principle of our organization — freedom of conscience, freedom of person, freedom of trade and business pursuits, universality of freedom and equality. This is our high destiny, and in nature's eternal, inevitable decree of cause and effect we must accomplish it. All this will be our future history, to establish on earth the moral dignity and salvation of man — the immutable truth and beneficence of God. ...Who, then, can doubt that our country is destined to be the great nation of futurity?\"\n—John L. O'Sullivan, Manifest Destiny, 1839",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "8-10",
+    "period": 5,
+    "stimulus": "\"And by virtue of the power, and for the purpose aforesaid, I do order and declare that all persons held as slaves within said designated States, and parts of States, are, and henceforward shall be free; and that the Executive government of the United States, including the military and naval authorities thereof, will recognize and maintain the freedom of said persons. And I hereby enjoin upon the people so declared to be free to abstain from all violence, unless in necessary self-defence; and I recommend to them that, in all cases when allowed, they labor faithfully for reasonable wages.\"\n—Abraham Lincoln, The Emancipation Proclamation, 1863",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "11-14",
+    "period": 5,
+    "stimulus": "\"All persons born or naturalized in the United States, and subject to the jurisdiction thereof, are citizens of the United States and of the State wherein they reside. No State shall make or enforce any law which shall abridge the privileges or immunities of citizens of the United States; nor shall any State deprive any person of life, liberty, or property, without due process of law; nor deny to any person within its jurisdiction the equal protection of the laws.\"\n—14th Amendment to the U.S. Constitution",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "18-20",
+    "period": 5,
+    "stimulus": "\"What was the object of the compromise measures of 1850 — their prime object, we mean? Was it not to settle for all time the connection of the General Government with the subject of slavery? Was it not to take the whole question out of the hands of Congress, and give it into the charge of the people interested in it? Was it not to determine the rule upon which territories should hereafter be organized?\"\n—Detroit Free Press, The Object of the Compromise of 1850, 1854",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "21-23",
+    "period": 5,
+    "stimulus": "\"In regard to the authority of the Constitution, African Americans have been considered as a subordinate and inferior class of beings, who had no rights which the white man was bound to respect. Furthermore, the Missouri Compromise is deemed unconstitutional, as Congress has no authority to prohibit the extension of slavery into the territories.\"\n—Dred Scott v. Sandford, 1857",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "24-26",
+    "period": 5,
+    "stimulus": "\"Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal. Now we are engaged in a great civil war, testing whether that nation, or any nation so conceived and so dedicated, can long endure.\"\n—Abraham Lincoln, The Gettysburg Address, 1863",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "1-2",
+    "period": 6,
+    "stimulus": "\"On one side, an ill-advised queen, seeking by intrigue and by unwise, if not disreputable, alliances to save her nationality, but supported by the passionate instincts of nearly the whole Hawaiian people; and on the other side a foreign population, who had in many cases assumed the duties of citizenship without realizing the extent of its responsibilities, and who proclaimed that the commercial interests of the foreign-born must outweigh the national interests of the Hawaiian-born citizen.\"\n—Theophilus Harris Davies, The Hawaiian Situation, 1893",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "3-4",
+    "period": 6,
+    "stimulus": "\"The urban workmen are denied the right to organize for self-protection, imported pauperized labor beats down their wages, a hireling standing army, unrecognized by our laws, is established to shoot them down, and they are rapidly degenerating into European conditions. The fruits of the toil of millions are badly stolen to build up colossal fortunes for a few, unprecedented in the history of mankind; and the possessors of these, in turn, despise the Republic and endanger liberty. From the same prolific womb of governmental injustice we breed the two great classes — tramps and millionaires.\"\n—Populist Party's platform, 1892",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "5-6",
+    "period": 6,
+    "stimulus": "\"It is not difficult to see that although America is pledged to the democratic ideal, the view of democracy has been partial, and that its best achievement thus far has been pushed along the line of the franchise. Democracy has made little attempt to assert itself in social affairs... We hasten to give the franchise to the immigrant from a sense of justice, from a tradition that he ought to have it, while we dub him with epithets deriding his past life or present occupation, and feel no duty to invite him to our houses.\"\n—Jane Addams, The Subjective Necessity for Social Settlement, 1892",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "7-8",
+    "period": 6,
+    "stimulus": "\"Sec. 1. Be it ordained by the police jury of the parish of St. Landry, That no negro shall be allowed to pass within the limits of said parish without special permit in writing from his employer. Whoever shall violate this provision shall pay a fine of two dollars and fifty cents, or in default thereof shall be forced to work four days on the public road, or suffer corporeal punishment as provided hereinafter... Sec. 4... Every negro is required to be in the regular service of some white person, or former owner, who shall be held responsible for the conduct of said negro.\"\n—Louisiana Black Codes, 1865",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "9-10",
+    "period": 6,
+    "stimulus": "\"...we got at Carlisle on Thursday and when we got here I did not like the place but since I have being here two or three days I have got used to the place and I like it very well but when we got I felt very home sick and be sure and send my bow and some spike arrows. And we go to church every Sunday. And I have a blue suit to where (sic) and there was one Shyenne (sic) boy shot himself with a pistol... the boys have a nice green lawn in which play Kicking a football.\"\n—A letter from Harry Shirley, a member of the Caddo Indian tribe, who attended the Carlisle Indian Industrial School in 1882",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "13-16",
+    "period": 6,
+    "stimulus": "\"Every contract, combination in the form of trust or otherwise, or conspiracy, in restraint of trade or commerce among the several States, or with foreign nations, is declared to be illegal. Every person who shall monopolize, or attempt to monopolize, or combine or conspire with any other person or persons, to monopolize any part of the trade or commerce among the several States, or with foreign nations, shall be deemed guilty of a felony.\"\n—The Sherman Antitrust Act, 1890",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "17-20",
+    "period": 6,
+    "stimulus": "\"This, then, is held to be the duty of the man of Wealth: First, to set an example of modest, unostentatious living, shunning display or extravagance; and, second, to provide moderately for the legitimate wants of those dependent upon him; and, after doing so, to consider all surplus revenues which come to him simply as trust funds, which he is called upon to administer, and strictly bound as a matter of duty to administer in the manner which, in his judgment, is best calculated to produce the most beneficial results for the community—the man of wealth thus becoming the mere trustee and agent for his poorer brethren, bringing to their service his superior wisdom, experience, and ability to administer, doing for them better than they would or could do for themselves.\"\n—Andrew Carnegie, \"The Gospel of Wealth,\" 1889",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "21-24",
+    "period": 6,
+    "stimulus": "\"To those of the white race who look to the incoming of those of foreign birth and strange tongue and habits for the prosperity of the South, were I permitted I would repeat what I say to my own race, 'Cast down your bucket where you are.' Cast it down among the eight millions of Negroes whose habits you know, whose fidelity and love you have tested in days when to have proved treacherous meant the ruin of your firesides. Cast down your bucket in agriculture, mechanics, in commerce, in domestic service, and in the professions.\"\n—Booker T. Washington, \"Atlanta Exposition Address,\" 1895",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "25-28",
+    "period": 6,
+    "stimulus": "\"The existence of an area of free land, its continuous recession, and the advance of American settlement westward explain American development. The American frontier is sharply distinguished from the European frontier—a fortified boundary line running through dense populations. The most significant thing about the American frontier is that it lies at the hither edge of free land.\"\n—Frederick Jackson Turner, \"The Significance of the Frontier in American History,\" 1893",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "3-4",
+    "period": 7,
+    "stimulus": "\"There were cattle which had been fed on 'whiskey-malt,' the refuse of the breweries, and had become what the men called 'steerly' — which means covered with boils. It was a nasty job killing these, for when you plunged your knife into them they would burst and splash foul-smelling stuff into your face; and when a man's sleeves were smeared with blood, and his hands steeped in it, how was he ever to wipe his face, or to clear his eyes so that he could see? It was stuff such as this that made the 'embalmed beef' that had killed several times as many United States soldiers as all the bullets of the Spaniards.\"\n—Upton Sinclair, The Jungle, 1906",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "5-7",
+    "period": 7,
+    "stimulus": "\"But the right is more precious than peace, and we shall fight for the things which we have always carried nearest our hearts — for democracy, for the right of those who submit to authority to have a voice in their own governments, for the rights and liberties of small nations, for a universal dominion of right by such a concert of free peoples as shall bring peace and safety to all nations and make the world itself at last free.\"\n—Woodrow Wilson, War Message to Congress, 1917",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "8-10",
+    "period": 7,
+    "stimulus": "\"Two months ago we were facing serious problems. The country was dying by inches. It was dying because trade and commerce had declined to dangerously low levels; prices for basic commodities were such as to destroy the value of the assets of national institutions such as banks, savings banks, insurance companies, and others. These institutions, because of their great needs, were foreclosing mortgages, calling loans, refusing credit. Thus there was actually in process of destruction the property of millions of people who had borrowed money on that property.\"\n—Franklin D. Roosevelt, \"Fireside Chat\", 1933",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "15-18",
+    "period": 7,
+    "stimulus": "\"We intend to begin on the first of February unrestricted submarine warfare. We shall endeavor in spite of this to keep the United States of America neutral. In the event of this not succeeding, we make Mexico a proposal of alliance on the following basis: make war together, make peace together, generous financial support and an understanding on our part that Mexico is to reconquer the lost territory in Texas, New Mexico, and Arizona.\"\n—Arthur Zimmermann, \"The Zimmermann Telegram,\" 1917",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "19-22",
+    "period": 7,
+    "stimulus": "\"From World War I through the 1970s, some six million black southerners left the land of their forefathers and fanned out across the country for an uncertain existence in nearly every other corner of America. The Great Migration would become a turning point in history. It would transform urban America and recast the social and political order of every city it touched. It would force the South to search its soul and finally to lay aside a feudal caste system. It grew out of the unmet promises made after the Civil War and, through the sheer weight of it, helped push the country toward the civil rights revolutions of the 1960s.\"\n—Isabel Wilkerson, \"The Great Migration and the Search for a New Life,\" 1994",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "25-26",
+    "period": 7,
+    "stimulus": "\"Walk away quietly in any direction and taste the freedom of the mountaineer. Camp out among the grasses and gentians of glacial meadows, in craggy garden nooks full of nature's darlings. Climb the mountains and get their good tidings, Nature's peace will flow into you as sunshine flows into trees. The winds will blow their own freshness into you and the storms their energy, while cares will drop off like autumn leaves.\"\n—John Muir, 1898",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "1-3",
+    "period": 8,
+    "stimulus": "\"The Kremlin regards the United States as the only major threat to the conflict between idea of slavery under the grim oligarchy of the Kremlin, which has come to a crisis with the polarization of power described in Section I, and the exclusive possession of atomic weapons by the two protagonists. The idea of freedom, moreover, is peculiarly and intolerably subversive of the idea of slavery. But the converse is not true. The implacable purpose of the slave state to eliminate the challenge of freedom has placed the two great powers at opposite poles.\"\n—NSC 68, 1950",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "4-5",
+    "period": 8,
+    "stimulus": "\"Section 2. The United States regards as vital to its national interest and to world peace the maintenance of international peace and security in southeast Asia. Consonant with the Constitution of the United States and the Charter of the United Nations and in accordance with its obligations under the Southeast Asia Collective Defense Treaty, the United States is, therefore, prepared, as the President determines, to take all necessary steps, including the use of armed force, to assist any member or protocol state of the Southeast Asia Collective Defense Treaty requesting assistance in defense of its freedom.\"\n—The Gulf of Tonkin Resolution, 1964",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "7-8",
+    "period": 8,
+    "stimulus": "\"We come then to the question presented: Does segregation of children in public schools solely on the basis of race, even though the physical facilities and other 'tangible' factors may be equal, deprive the children of the minority group of equal educational opportunities? We believe that it does.\"\n—Brown v. Board of Education, 1954",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "13-14",
+    "period": 8,
+    "stimulus": "\"The air we breathe, our water, our soil and wildlife, are being blighted by the poisons and chemicals which are the by-products of technology and industry... The same society which receives the rewards of technology, must, as a cooperating whole, take responsibility for control. To deal with these new problems will require a new conservation. We must not only protect the countryside and save it from destruction, we must restore what has been destroyed and salvage the beauty and charm of our cities.\"\n—Lyndon B. Johnson, \"Special Message to the Congress on Conservation and Restoration of Natural Beauty,\" 1965",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "17-18",
+    "period": 8,
+    "stimulus": "\"Little boxes on the hillside, Little boxes all the same. There's a green one and a pink one / And a blue one and a yellow one, / And they're all made out of ticky tacky / And they all look just the same. / And the people in the houses / All went to the university, / Where they were put in boxes / And they came out all the same.\"\n—Malvina Reynolds, \"Little Boxes,\" 1962",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "20-23",
+    "period": 8,
+    "stimulus": "\"In the councils of government, we must guard against the acquisition of unwarranted influence, whether sought or unsought, by the military-industrial complex. The potential for the disastrous rise of misplaced power exists and will persist. We must never let the weight of this combination endanger our liberties or democratic processes. We should take nothing for granted. Only an alert and knowledgeable citizenry can compel the proper meshing of the huge industrial and military machinery of defense with our peaceful methods and goals, so that security and liberty may prosper together.\"\n—Dwight D. Eisenhower, \"Farewell Address,\" 1961",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "1-2",
+    "period": 9,
+    "stimulus": "\"It's morning again in America. Today more men and women will go to work than ever before in our country's history. With interest rates at about half the record highs of 1980, nearly two thousand families today will buy new homes, more than at any time in the past four years. This afternoon 6,500 young men and women will be married, and with inflation at less than half of what it was just four years ago, they can look forward with confidence to the future.\"\n—Campaign Commercial for Ronald Reagan, 1984",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "8-11",
+    "period": 9,
+    "stimulus": "\"We stand today at a unique and extraordinary moment. The crisis in the Persian Gulf, as grave as it is, also offers a rare opportunity to move toward an historic period of cooperation. Out of these troubled times, our fifth objective — a new world order — can emerge: a new era — freer from the threat of terror, stronger in the pursuit of justice, and more secure in the quest for peace. An era in which the nations of the world, East and West, North and South, can prosper and live in harmony.\"\n—George H.W. Bush, \"Toward a New World Order,\" 1990",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "12-15",
+    "period": 9,
+    "stimulus": "\"I chose to run for the presidency at this moment in history because I believe deeply that we cannot solve the challenges of our time unless we solve them together – unless we perfect our union by understanding that we may have different stories, but we hold common hopes; that we may not look the same and we may not have come from the same place, but we all want to move in the same direction – towards a better future for our children and our grandchildren.\"\n—Barack Obama, \"A More Perfect Union,\" 2008",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "16-19",
+    "period": 9,
+    "stimulus": "\"We need a new government for a new century—humble enough not to try to solve all our problems for us, but strong enough to give us the tools to solve our problems for ourselves; a government that is smaller, lives within its means, and does more with less. Yet where it can stand up for our values and interests around the world, and where it can give Americans the power to make a real difference in their everyday lives, government should do more, not less.\"\n—Bill Clinton, \"Bridge to the 21st Century,\" 1996",
+    "type": "excerpt"
+  },
+  {
+    "source": "hstp",
+    "q_range": "20-23",
+    "period": 9,
+    "stimulus": "\"Today, our fellow citizens, our way of life, our very freedom came under attack in a series of deliberate and deadly terrorist acts... These acts of mass murder were intended to frighten our nation into chaos and retreat. But they have failed; our country is strong. A great people has been moved to defend a great nation. Terrorist attacks can shake the foundations of our biggest buildings, but they cannot touch the foundation of America.\"\n—George W. Bush, \"Address to the Nation on September 11, 2001\"",
+    "type": "excerpt"
+  }
+]

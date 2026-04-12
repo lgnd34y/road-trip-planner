@@ -360,6 +360,84 @@
 
   .hidden { display: none !important; }
 
+  /* ── Page Navigation ── */
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 24px;
+  }
+  .nav-tab {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-tab:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+  .nav-tab.active { background: var(--accent); color: white; }
+
+  /* ── SAQ ── */
+  .saq-part {
+    border-top: 1px solid var(--border);
+    padding: 16px 0;
+  }
+  .saq-part-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .saq-part-label {
+    background: rgba(99,102,241,0.15);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 13px;
+    padding: 3px 10px;
+    border-radius: 6px;
+  }
+  .saq-question {
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+  .saq-textarea {
+    width: 100%;
+    min-height: 100px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    padding: 12px;
+    resize: vertical;
+    line-height: 1.5;
+    transition: border-color 0.2s;
+  }
+  .saq-textarea:focus { outline: none; border-color: var(--accent); }
+  .saq-grade-box {
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .saq-grade-1 { background: var(--green-bg); border: 1px solid rgba(34,197,94,0.3); }
+  .saq-grade-0 { background: var(--red-bg); border: 1px solid rgba(239,68,68,0.3); }
+  .saq-score-display { text-align: center; padding: 24px 0; }
+  .saq-score-num { font-size: 72px; font-weight: 800; line-height: 1; }
+  .saq-score-denom { font-size: 32px; color: var(--muted); }
+  .saq-score-label { color: var(--muted); font-size: 14px; margin-top: 8px; }
+
   /* ── Responsive ── */
   @media (max-width: 600px) {
     .period-grid { grid-template-columns: repeat(2, 1fr); }
@@ -374,9 +452,15 @@
 
   <!-- ═══ HEADER ═══ -->
   <div class="header">
-    <h1>AP US History MCQ Practice</h1>
-    <p>Stimulus-based questions matching the real AP exam format</p>
+    <h1>AP US History Practice</h1>
   </div>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-page="mcq" onclick="switchPage('mcq')">&#128214; MCQ Practice</button>
+    <button class="nav-tab" data-page="saq" onclick="switchPage('saq')">&#9997;&#65039; SAQ Practice</button>
+  </div>
+
+  <div id="page-mcq">
 
   <!-- ═══ SCREEN 1: PERIOD SELECTION ═══ -->
   <div id="screen-setup">
@@ -425,6 +509,20 @@
           <button onclick="adjust('exam', -1)">−</button>
           <span class="value" id="val-exam">0</span>
           <button onclick="adjust('exam', 1)">+</button>
+        </div>
+      </div>
+
+      <div class="config-row">
+        <div>
+          <label>Web practice test remix sets</label>
+          <div class="sub">Takes stimuli from highschooltestprep.com, generates new Qs &bull; <span class="tag tag-claude" style="display:inline">&#9733; Claude Generated</span></div>
+          <div id="hstp-note" class="hidden" style="font-size:11px;color:var(--red);margin-top:4px;">No API key set — set ANTHROPIC_API_KEY to enable</div>
+          <div id="hstp-count" style="font-size:11px;color:var(--muted);margin-top:4px;"></div>
+        </div>
+        <div class="stepper">
+          <button onclick="adjust('hstp', -1)">−</button>
+          <span class="value" id="val-hstp">0</span>
+          <button onclick="adjust('hstp', 1)">+</button>
         </div>
       </div>
     </div>
@@ -476,13 +574,87 @@
     <button class="btn btn-primary" onclick="resetQuiz()" style="margin-top:16px;">New Quiz</button>
   </div>
 
+  </div><!-- end page-mcq -->
+
+  <!-- ═══ SAQ PAGE ═══ -->
+  <div id="page-saq" class="hidden">
+
+    <!-- SAQ Screen 1: Setup -->
+    <div id="saq-screen-setup">
+      <div class="card">
+        <h3 style="margin-bottom: 14px;">Select Period(s)</h3>
+        <button class="btn-all" onclick="saqToggleAll()">Select All Periods</button>
+        <div class="period-grid" id="saq-period-grid"></div>
+      </div>
+      <button class="btn btn-primary" id="saq-generate-btn" onclick="generateSAQ()" disabled>Generate SAQ</button>
+    </div>
+
+    <!-- SAQ Screen 2: Generating -->
+    <div id="saq-screen-loading" class="hidden">
+      <div class="card loading">
+        <div class="spinner"></div>
+        <p>Generating Short Answer Question...</p>
+        <p style="font-size:12px;color:var(--muted);margin-top:8px;">Claude is crafting a stimulus and 3-part question</p>
+      </div>
+    </div>
+
+    <!-- SAQ Screen 3: Answer -->
+    <div id="saq-screen-answer" class="hidden">
+      <div class="card">
+        <div id="saq-meta"></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Short Answer Question &mdash; 3 parts, 1 point each (0&ndash;3 total)</div>
+        <div class="stimulus-box" id="saq-stimulus"></div>
+
+        <div class="saq-part">
+          <div class="saq-part-header"><span class="saq-part-label">Part A</span></div>
+          <p class="saq-question" id="saq-q-a"></p>
+          <textarea class="saq-textarea" id="saq-ans-a" placeholder="Write your response here (2–4 sentences)..."></textarea>
+        </div>
+        <div class="saq-part">
+          <div class="saq-part-header"><span class="saq-part-label">Part B</span></div>
+          <p class="saq-question" id="saq-q-b"></p>
+          <textarea class="saq-textarea" id="saq-ans-b" placeholder="Write your response here (2–4 sentences)..."></textarea>
+        </div>
+        <div class="saq-part">
+          <div class="saq-part-header"><span class="saq-part-label">Part C</span></div>
+          <p class="saq-question" id="saq-q-c"></p>
+          <textarea class="saq-textarea" id="saq-ans-c" placeholder="Write your response here (2–4 sentences)..."></textarea>
+        </div>
+
+        <button class="btn btn-primary" onclick="submitSAQ()" style="margin-top:8px;">Submit &amp; Grade</button>
+      </div>
+    </div>
+
+    <!-- SAQ Screen 4: Grading -->
+    <div id="saq-screen-grading" class="hidden">
+      <div class="card loading">
+        <div class="spinner"></div>
+        <p>Grading your responses...</p>
+        <p style="font-size:12px;color:var(--muted);margin-top:8px;">Claude is evaluating against the AP rubric</p>
+      </div>
+    </div>
+
+    <!-- SAQ Screen 5: Results -->
+    <div id="saq-screen-results" class="hidden">
+      <div class="card">
+        <div id="saq-total-score"></div>
+        <div id="saq-results-parts"></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="btn btn-secondary" onclick="tryAgainSAQ()" style="flex:1;">Try Again</button>
+        <button class="btn btn-primary" onclick="newSAQ()" style="flex:1;margin-top:0;">New SAQ</button>
+      </div>
+    </div>
+
+  </div><!-- end page-saq -->
+
 </div>
 
 <script>
 // ─── State ───────────────────────────────────────────────────────────────────
 const periods = {{ periods | tojson }};
 let selectedPeriods = new Set();
-let config = { prewritten: 2, claude: 0, exam: 0 };
+let config = { prewritten: 2, claude: 0, exam: 0, hstp: 0 };
 let hasApiKey = false;
 let questionSets = [];   // [{period, stimulus, questions: [{stem, choices, answer, ...}], claude_generated}]
 let flatQuestions = [];   // flattened for quiz navigation
@@ -525,7 +697,7 @@ function updatePeriodUI() {
 }
 
 function adjust(key, delta) {
-  const maxVals = { prewritten: 9, claude: 5, exam: 5 };
+  const maxVals = { prewritten: 9, claude: 5, exam: 5, hstp: 5 };
   config[key] = Math.max(0, Math.min(maxVals[key] || 5, config[key] + delta));
   document.getElementById(`val-${key}`).textContent = config[key];
 }
@@ -533,7 +705,7 @@ function adjust(key, delta) {
 // ─── Quiz Start ──────────────────────────────────────────────────────────────
 async function startQuiz() {
   if (selectedPeriods.size === 0) return;
-  if (config.prewritten === 0 && config.claude === 0 && config.exam === 0) {
+  if (config.prewritten === 0 && config.claude === 0 && config.exam === 0 && config.hstp === 0) {
     alert('Select at least 1 question set.');
     return;
   }
@@ -585,6 +757,25 @@ async function startQuiz() {
         document.getElementById('loading-text').textContent = `Remixing exam stimulus (${i+1}/${config.exam})...`;
         document.getElementById('loading-sub').textContent = `Period ${period}: ${periods[period].name}`;
         const res = await fetch('/api/generate_from_exam', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ period })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          questionSets.push(data);
+        }
+      }
+    }
+
+    // Generate from HSTP stimuli (web practice test remix)
+    if (config.hstp > 0) {
+      const periodsArr = [...selectedPeriods];
+      for (let i = 0; i < config.hstp; i++) {
+        const period = periodsArr[i % periodsArr.length];
+        document.getElementById('loading-text').textContent = `Remixing web practice test stimulus (${i+1}/${config.hstp})...`;
+        document.getElementById('loading-sub').textContent = `Period ${period}: ${periods[period].name}`;
+        const res = await fetch('/api/generate_from_hstp', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ period })
@@ -840,12 +1031,14 @@ fetch('/api/has_api_key').then(r => r.json()).then(data => {
     config.exam = 0;
     document.getElementById('val-claude').textContent = '0';
     document.getElementById('val-exam').textContent = '0';
+    document.getElementById('val-hstp').textContent = '0';
     document.getElementById('claude-note').classList.remove('hidden');
     document.getElementById('exam-note').classList.remove('hidden');
+    document.getElementById('hstp-note').classList.remove('hidden');
   }
 }).catch(() => {});
 
-// Update exam stimuli count when periods change
+// Update exam/hstp stimuli counts when periods change
 function updateExamCount() {
   fetch('/api/exam_stimuli_count', {
     method: 'POST',
@@ -854,12 +1047,200 @@ function updateExamCount() {
   }).then(r => r.json()).then(data => {
     document.getElementById('exam-count').textContent = `${data.count} exam stimuli available for selected periods`;
   }).catch(() => {});
+
+  fetch('/api/hstp_stimuli_count', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ periods: [...selectedPeriods] })
+  }).then(r => r.json()).then(data => {
+    document.getElementById('hstp-count').textContent = `${data.count} web stimuli available for selected periods`;
+  }).catch(() => {});
 }
 // Hook into period toggle
 const origToggle = togglePeriod;
 togglePeriod = function(num) { origToggle(num); updateExamCount(); };
 const origToggleAll = toggleAll;
 toggleAll = function() { origToggleAll(); updateExamCount(); };
+
+// ─── Page Switching ───────────────────────────────────────────────────────────
+function switchPage(page) {
+  document.getElementById('page-mcq').classList.toggle('hidden', page !== 'mcq');
+  document.getElementById('page-saq').classList.toggle('hidden', page !== 'saq');
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.page === page));
+}
+
+// ─── SAQ State ────────────────────────────────────────────────────────────────
+let saqSelectedPeriods = new Set();
+let currentSAQ = null;
+let lastSAQResponses = {};
+
+function buildSaqPeriodGrid() {
+  const grid = document.getElementById('saq-period-grid');
+  grid.innerHTML = '';
+  for (const [num, info] of Object.entries(periods)) {
+    const btn = document.createElement('div');
+    btn.className = 'period-btn';
+    btn.dataset.period = num;
+    btn.innerHTML = `<div class="num">${num}</div><div class="range">${info.range}</div><div class="name">${info.name}</div>`;
+    btn.onclick = () => saqTogglePeriod(parseInt(num));
+    grid.appendChild(btn);
+  }
+}
+
+function saqTogglePeriod(num) {
+  if (saqSelectedPeriods.has(num)) saqSelectedPeriods.delete(num);
+  else saqSelectedPeriods.add(num);
+  updateSaqPeriodUI();
+}
+
+function saqToggleAll() {
+  if (saqSelectedPeriods.size === 9) saqSelectedPeriods.clear();
+  else for (let i = 1; i <= 9; i++) saqSelectedPeriods.add(i);
+  updateSaqPeriodUI();
+}
+
+function updateSaqPeriodUI() {
+  document.querySelectorAll('#saq-period-grid .period-btn').forEach(btn => {
+    btn.classList.toggle('selected', saqSelectedPeriods.has(parseInt(btn.dataset.period)));
+  });
+  document.getElementById('saq-generate-btn').disabled = saqSelectedPeriods.size === 0;
+}
+
+function showSaqScreen(name) {
+  ['setup', 'loading', 'answer', 'grading', 'results'].forEach(s => {
+    document.getElementById(`saq-screen-${s}`).classList.toggle('hidden', s !== name);
+  });
+}
+
+// ─── SAQ Generate ─────────────────────────────────────────────────────────────
+async function generateSAQ() {
+  if (saqSelectedPeriods.size === 0) return;
+  const periodsArr = [...saqSelectedPeriods];
+  const period = periodsArr[Math.floor(Math.random() * periodsArr.length)];
+
+  showSaqScreen('loading');
+  try {
+    const res = await fetch('/api/generate_saq', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ period })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      alert('Error: ' + (err.error || 'Failed to generate SAQ'));
+      showSaqScreen('setup');
+      return;
+    }
+    currentSAQ = await res.json();
+    renderSAQ();
+    showSaqScreen('answer');
+  } catch (err) {
+    alert('Error: ' + err.message);
+    showSaqScreen('setup');
+  }
+}
+
+function renderSAQ() {
+  const saq = currentSAQ;
+  document.getElementById('saq-meta').innerHTML = `
+    <div class="question-meta" style="margin-bottom:12px;">
+      <span class="tag tag-period">Period ${saq.period}</span>
+      <span class="tag tag-skill">${periods[saq.period].range}</span>
+      <span class="tag tag-claude">&#9733; Claude Generated</span>
+    </div>`;
+  const stimHtml = saq.stimulus.replace(/\n/g, '<br>') +
+    (saq.source ? `<div class="attribution">${saq.source}</div>` : '');
+  document.getElementById('saq-stimulus').innerHTML = stimHtml;
+  ['a','b','c'].forEach((p, i) => {
+    document.getElementById(`saq-q-${p}`).textContent = saq.parts[i].question;
+    document.getElementById(`saq-ans-${p}`).value = '';
+  });
+}
+
+// ─── SAQ Submit ───────────────────────────────────────────────────────────────
+async function submitSAQ() {
+  const responses = {
+    a: document.getElementById('saq-ans-a').value.trim(),
+    b: document.getElementById('saq-ans-b').value.trim(),
+    c: document.getElementById('saq-ans-c').value.trim(),
+  };
+  lastSAQResponses = responses;
+
+  if (!responses.a && !responses.b && !responses.c) {
+    alert('Please write at least one response before submitting.');
+    return;
+  }
+
+  showSaqScreen('grading');
+  try {
+    const res = await fetch('/api/grade_saq', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ saq: currentSAQ, responses })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      alert('Error: ' + (err.error || 'Failed to grade'));
+      showSaqScreen('answer');
+      return;
+    }
+    const grade = await res.json();
+    renderSaqResults(grade, responses);
+    showSaqScreen('results');
+  } catch (err) {
+    alert('Error: ' + err.message);
+    showSaqScreen('answer');
+  }
+}
+
+// ─── SAQ Results ──────────────────────────────────────────────────────────────
+function renderSaqResults(grade, responses) {
+  const total = grade.total;
+  const color = total >= 2 ? 'var(--green)' : total >= 1 ? 'var(--yellow)' : 'var(--red)';
+  document.getElementById('saq-total-score').innerHTML = `
+    <div class="saq-score-display">
+      <div class="saq-score-num" style="color:${color}">${total}<span class="saq-score-denom">/3</span></div>
+      <div class="saq-score-label">Points Earned</div>
+    </div>`;
+
+  let html = '';
+  ['a','b','c'].forEach((p, i) => {
+    const partGrade = grade.parts[p];
+    const score = partGrade.score;
+    const resp = responses[p] || '';
+    html += `
+      <div class="saq-part" style="margin-bottom:0">
+        <div class="saq-part-header">
+          <span class="saq-part-label">Part ${p.toUpperCase()}</span>
+          <span style="font-size:14px;font-weight:700;color:${score ? 'var(--green)' : 'var(--red)'};">${score}/1</span>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:8px;">${currentSAQ.parts[i].question}</p>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--muted);font-style:italic;margin-bottom:8px;">
+          ${resp ? resp.replace(/\n/g,'<br>') : '<span style="color:var(--red)">No response given</span>'}
+        </div>
+        <div class="saq-grade-box ${score ? 'saq-grade-1' : 'saq-grade-0'}">
+          <strong style="color:${score ? 'var(--green)' : 'var(--red)'};">${score ? '&#10003; 1 point earned' : '&#10007; 0 points'}</strong>
+          <div style="margin-top:4px;">${partGrade.feedback}</div>
+        </div>
+      </div>`;
+  });
+
+  if (grade.overall) {
+    html += `<div style="margin-top:16px;padding:14px 16px;background:rgba(99,102,241,0.1);border-radius:8px;border:1px solid rgba(99,102,241,0.3);font-size:14px;line-height:1.6;">
+      <strong style="color:var(--accent);">Overall Feedback</strong><br>${grade.overall}</div>`;
+  }
+  document.getElementById('saq-results-parts').innerHTML = html;
+}
+
+function newSAQ() { currentSAQ = null; showSaqScreen('setup'); }
+function tryAgainSAQ() {
+  ['a','b','c'].forEach(p => {
+    document.getElementById(`saq-ans-${p}`).value = lastSAQResponses[p] || '';
+  });
+  showSaqScreen('answer');
+}
+
+buildSaqPeriodGrid();
 </script>
 </body>
 </html>
