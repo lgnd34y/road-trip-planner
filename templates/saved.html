@@ -53,6 +53,22 @@
     .btn-edit.active { background: #e6f4ed; color: #276749; }
     .btn-delete { background: #fff5f5; border: 1px solid #fed7d7; color: #c53030; padding: 10px 16px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
     .btn-delete:hover { background: #fed7d7; }
+    .btn-copy   { background: white; color: #4a5568; border: 1.5px solid #cbd5e0; border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-copy:hover { border-color: #718096; background: #f7fafc; }
+    .btn-invite { background: #faf5ff; color: #553c9a; border: 1.5px solid #d6bcfa; border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-invite:hover { background: #e9d8fd; }
+
+    /* Invite box */
+    .invite-box { display: none; margin-top: 12px; background: #faf5ff; border: 1.5px solid #d6bcfa; border-radius: 10px; padding: 14px 16px; }
+    .invite-box.open { display: block; }
+    .invite-label { font-size: 0.8rem; font-weight: 700; color: #553c9a; margin-bottom: 8px; }
+    .invite-url-row { display: flex; align-items: center; gap: 8px; }
+    .invite-url { flex: 1; font-size: 0.8rem; color: #553c9a; word-break: break-all; background: white; border: 1px solid #d6bcfa; border-radius: 6px; padding: 7px 10px; }
+    .invite-copy-btn { background: #805ad5; color: white; border: none; border-radius: 6px; padding: 7px 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .invite-copy-btn:hover { opacity: 0.88; }
+    .invite-revoke-btn { background: #fff5f5; border: 1px solid #fed7d7; color: #c53030; border-radius: 6px; padding: 7px 10px; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .invite-revoke-btn:hover { background: #fed7d7; }
+    .invite-note { font-size: 0.78rem; color: #718096; margin-top: 8px; }
 
     /* Edit panel */
     .edit-panel { display: none; margin-top: 18px; background: #f8fafb; border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; }
@@ -149,8 +165,21 @@
 
             <div class="card-actions">
               <a class="btn-view" href="/share/{{ r.share_id }}">🗺️ View on Map</a>
-              <button class="btn-edit" id="edit-btn-{{ r.id }}" onclick="toggleEdit({{ r.id }})">✏️ Edit</button>
+              <button class="btn-edit"   id="edit-btn-{{ r.id }}"   onclick="toggleEdit({{ r.id }})">✏️ Edit</button>
+              <button class="btn-copy"   id="copy-btn-{{ r.id }}"   onclick="copyRoute({{ r.id }})">📋 Copy</button>
+              <button class="btn-invite" id="invite-btn-{{ r.id }}" onclick="toggleInvite({{ r.id }})">👥 Invite</button>
               <button class="btn-delete" onclick="confirmDelete({{ r.id }}, '{{ r.name | e }}')">🗑️</button>
+            </div>
+
+            <div class="invite-box" id="invite-box-{{ r.id }}">
+              <div class="invite-label">👥 Collaborative Editing Link</div>
+              <div class="invite-url-row">
+                <span class="invite-url" id="invite-url-{{ r.id }}">Click "Generate Link" to create a shareable edit link</span>
+                <button class="invite-copy-btn" id="invite-copy-{{ r.id }}" style="display:none" onclick="copyInviteLink({{ r.id }})">Copy</button>
+                <button class="invite-copy-btn" id="invite-gen-{{ r.id }}" onclick="generateInvite({{ r.id }})">Generate Link</button>
+                <button class="invite-revoke-btn" id="invite-revoke-{{ r.id }}" style="display:none" onclick="revokeInvite({{ r.id }})">Revoke</button>
+              </div>
+              <div class="invite-note">Anyone with this link can view and edit this route. Revoke it anytime to remove their access.</div>
             </div>
 
             <div class="edit-panel" id="edit-panel-{{ r.id }}">
@@ -436,13 +465,137 @@
       }
     }
 
-    // Copy link
+    // Copy share link
     function copyLink(shareId, btn) {
       navigator.clipboard.writeText(window.location.origin + '/share/' + shareId).then(() => {
         btn.textContent = 'Copied!';
         btn.classList.add('copied');
         setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
       });
+    }
+
+    // ── Copy route ──
+    async function copyRoute(id) {
+      const btn = document.getElementById('copy-btn-' + id);
+      btn.disabled = true;
+      btn.textContent = 'Copying…';
+      try {
+        const res  = await fetch('/routes/copy/' + id, { method: 'POST' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        // Inject new card at top of list
+        const list = document.querySelector('.routes-list');
+        const tpl  = document.createElement('div');
+        tpl.innerHTML = `
+          <div class="route-card" id="card-${data.id}" style="opacity:0;transition:opacity 0.4s">
+            <div class="card-header">
+              <div class="card-title" id="card-title-${data.id}">${escHtml(data.name)}</div>
+              <div class="card-date">${data.created_at}</div>
+            </div>
+            <div class="card-body">
+              <div class="card-badges" id="badges-${data.id}"></div>
+              <div class="share-box">
+                <span class="share-label">🔗 Share:</span>
+                <span class="share-url" id="url-${data.id}">${window.location.origin}/share/${data.share_id}</span>
+                <button class="copy-btn" onclick="copyLink('${data.share_id}', this)">Copy</button>
+              </div>
+              <div class="card-actions">
+                <a class="btn-view" href="/share/${data.share_id}">🗺️ View on Map</a>
+                <button class="btn-copy"   id="copy-btn-${data.id}"   onclick="copyRoute(${data.id})">📋 Copy</button>
+                <button class="btn-invite" id="invite-btn-${data.id}" onclick="toggleInvite(${data.id})">👥 Invite</button>
+                <button class="btn-delete" onclick="confirmDelete(${data.id}, '${escHtml(data.name)}')">🗑️</button>
+              </div>
+              <div class="invite-box" id="invite-box-${data.id}">
+                <div class="invite-label">👥 Collaborative Editing Link</div>
+                <div class="invite-url-row">
+                  <span class="invite-url" id="invite-url-${data.id}">Click "Generate Link" to create a shareable edit link</span>
+                  <button class="invite-copy-btn" id="invite-copy-${data.id}" style="display:none" onclick="copyInviteLink(${data.id})">Copy</button>
+                  <button class="invite-copy-btn" id="invite-gen-${data.id}" onclick="generateInvite(${data.id})">Generate Link</button>
+                  <button class="invite-revoke-btn" id="invite-revoke-${data.id}" style="display:none" onclick="revokeInvite(${data.id})">Revoke</button>
+                </div>
+                <div class="invite-note">Anyone with this link can view and edit this route. Revoke it anytime to remove their access.</div>
+              </div>
+            </div>
+          </div>`;
+        const newCard = tpl.firstElementChild;
+        list.prepend(newCard);
+
+        // Copy badge data from original
+        const origBadges = document.getElementById('badges-' + id);
+        const newBadges  = document.getElementById('badges-' + data.id);
+        if (origBadges && newBadges) newBadges.innerHTML = origBadges.innerHTML;
+
+        savedRoutes[data.id] = JSON.parse(JSON.stringify(savedRoutes[id]));
+        savedRoutes[data.id].name = data.name;
+
+        requestAnimationFrame(() => { newCard.style.opacity = '1'; });
+        btn.textContent = '✓ Copied!';
+        setTimeout(() => { btn.textContent = '📋 Copy'; btn.disabled = false; }, 2000);
+      } catch(e) {
+        btn.textContent = '❌ Error';
+        btn.disabled = false;
+      }
+    }
+
+    function escHtml(s) {
+      return (s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ── Invite / collab ──
+    function toggleInvite(id) {
+      const box = document.getElementById('invite-box-' + id);
+      box.classList.toggle('open');
+    }
+
+    async function generateInvite(id) {
+      const genBtn    = document.getElementById('invite-gen-' + id);
+      const urlEl     = document.getElementById('invite-url-' + id);
+      const copyBtn   = document.getElementById('invite-copy-' + id);
+      const revokeBtn = document.getElementById('invite-revoke-' + id);
+      genBtn.textContent = 'Generating…';
+      genBtn.disabled = true;
+      try {
+        const res  = await fetch('/routes/invite/' + id, { method: 'POST' });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        const link = window.location.origin + '/collab/' + data.edit_token;
+        urlEl.textContent = link;
+        urlEl._link = link;
+        copyBtn.style.display = 'inline-block';
+        revokeBtn.style.display = 'inline-block';
+        genBtn.style.display = 'none';
+      } catch(e) {
+        urlEl.textContent = 'Error generating link.';
+        genBtn.textContent = 'Retry';
+        genBtn.disabled = false;
+      }
+    }
+
+    function copyInviteLink(id) {
+      const urlEl = document.getElementById('invite-url-' + id);
+      const link  = urlEl._link || urlEl.textContent;
+      navigator.clipboard.writeText(link).then(() => {
+        const btn = document.getElementById('invite-copy-' + id);
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+
+    async function revokeInvite(id) {
+      if (!confirm('Revoke the collaborative link? Anyone with the old link will lose edit access.')) return;
+      const res  = await fetch('/routes/revoke/' + id, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('invite-url-' + id).textContent = 'Link revoked.';
+        document.getElementById('invite-url-' + id)._link = null;
+        document.getElementById('invite-copy-' + id).style.display = 'none';
+        document.getElementById('invite-revoke-' + id).style.display = 'none';
+        const genBtn = document.getElementById('invite-gen-' + id);
+        genBtn.textContent = 'Generate New Link';
+        genBtn.style.display = 'inline-block';
+        genBtn.disabled = false;
+      }
     }
   </script>
 </body>

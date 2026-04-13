@@ -39,6 +39,7 @@ class SavedRoute(db.Model):
     id         = db.Column(db.Integer, primary_key=True)
     user_id    = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     share_id   = db.Column(db.String(12), unique=True, nullable=False)
+    edit_token = db.Column(db.String(36), unique=True, nullable=True)
     name       = db.Column(db.String(200), nullable=False)
     route_data = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -329,6 +330,66 @@ def map_view(session_id, idx):
     if not routes or idx < 0 or idx >= len(routes):
         return render_template("map.html", route_json="null")
     return render_template("map.html", route_json=json.dumps(routes[idx]))
+
+
+@app.route("/routes/copy/<int:route_id>", methods=["POST"])
+@login_required
+def copy_route(route_id):
+    original = SavedRoute.query.get_or_404(route_id)
+    if original.user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    copy = SavedRoute(
+        user_id=current_user.id,
+        share_id=str(uuid.uuid4())[:10],
+        name="Copy of " + original.name,
+        route_data=original.route_data
+    )
+    db.session.add(copy)
+    db.session.commit()
+    return jsonify({"success": True, "id": copy.id, "name": copy.name, "share_id": copy.share_id,
+                    "created_at": copy.created_at.strftime("%b %d, %Y")})
+
+
+@app.route("/routes/invite/<int:route_id>", methods=["POST"])
+@login_required
+def invite_route(route_id):
+    saved = SavedRoute.query.get_or_404(route_id)
+    if saved.user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    if not saved.edit_token:
+        saved.edit_token = str(uuid.uuid4())
+        db.session.commit()
+    return jsonify({"edit_token": saved.edit_token})
+
+
+@app.route("/routes/revoke/<int:route_id>", methods=["POST"])
+@login_required
+def revoke_invite(route_id):
+    saved = SavedRoute.query.get_or_404(route_id)
+    if saved.user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    saved.edit_token = None
+    db.session.commit()
+    return jsonify({"success": True})
+
+
+@app.route("/collab/<edit_token>")
+def collab_edit(edit_token):
+    saved = SavedRoute.query.filter_by(edit_token=edit_token).first_or_404()
+    return render_template("collab.html", route_name=saved.name,
+                           route_json=saved.route_data, edit_token=edit_token)
+
+
+@app.route("/routes/collab-save/<edit_token>", methods=["POST"])
+def collab_save(edit_token):
+    saved = SavedRoute.query.filter_by(edit_token=edit_token).first_or_404()
+    new_route = request.json.get("route")
+    if not new_route:
+        return jsonify({"error": "No route data"}), 400
+    saved.route_data = json.dumps(new_route)
+    saved.name = new_route.get("name", saved.name)
+    db.session.commit()
+    return jsonify({"success": True})
 
 
 @app.route("/api/costs", methods=["POST"])

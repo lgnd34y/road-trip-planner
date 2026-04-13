@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Route — {{ route_name }}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f4f0; min-height: 100vh; }
+
+    nav { background: linear-gradient(135deg, #553c9a, #805ad5); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+    .nav-brand { color: white; font-weight: 700; font-size: 1.1rem; text-decoration: none; }
+    .collab-badge { background: rgba(255,255,255,0.2); color: white; font-size: 0.8rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+
+    .page-header { background: white; border-bottom: 1px solid #e2e8f0; padding: 24px; text-align: center; }
+    .page-header h1 { font-size: 1.4rem; color: #553c9a; margin-bottom: 4px; }
+    .page-header p  { color: #718096; font-size: 0.9rem; }
+
+    .container { max-width: 700px; margin: 32px auto; padding: 0 20px 60px; }
+
+    .card { background: white; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; margin-bottom: 20px; }
+    .section-label { font-size: 0.78rem; font-weight: 700; color: #4a5568; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; margin-top: 18px; }
+    .section-label:first-child { margin-top: 0; }
+
+    .name-input { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; font-size: 1rem; font-family: inherit; color: #1a202c; }
+    .name-input:focus { outline: none; border-color: #805ad5; }
+
+    .stops-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+    .stop-row { display: flex; align-items: center; gap: 8px; background: #f8fafb; border: 1.5px solid #e2e8f0; border-radius: 9px; padding: 10px 12px; }
+    .stop-controls { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+    .move-btn { width: 26px; height: 22px; background: #edf2f7; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; color: #4a5568; display: flex; align-items: center; justify-content: center; }
+    .move-btn:hover { background: #e2e8f0; }
+    .stop-fields { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .stop-name-input, .stop-addr-input { border: 1.5px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; font-family: inherit; color: #1a202c; width: 100%; }
+    .stop-name-input:focus, .stop-addr-input:focus { outline: none; border-color: #805ad5; }
+    .stop-addr-input { font-size: 0.83rem; color: #4a5568; }
+    .remove-btn { width: 28px; height: 28px; background: #fff5f5; border: 1px solid #fed7d7; border-radius: 6px; color: #e53e3e; cursor: pointer; font-size: 0.9rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .remove-btn:hover { background: #fed7d7; }
+
+    .add-stop-btn { width: 100%; background: #faf5ff; border: 1.5px dashed #d6bcfa; border-radius: 8px; padding: 10px; color: #553c9a; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-bottom: 18px; }
+    .add-stop-btn:hover { background: #e9d8fd; }
+
+    .save-btn { width: 100%; background: linear-gradient(135deg, #553c9a, #805ad5); color: white; border: none; border-radius: 10px; padding: 14px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+    .save-btn:hover { opacity: 0.88; }
+    .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .save-indicator { display: none; margin-top: 12px; background: #e9d8fd; color: #553c9a; font-size: 0.9rem; font-weight: 600; padding: 10px 14px; border-radius: 8px; text-align: center; }
+
+    /* AI Chat */
+    .ai-card { background: white; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; }
+    .ai-header { background: linear-gradient(135deg, #553c9a, #805ad5); color: white; padding: 14px 18px; font-size: 0.95rem; font-weight: 600; }
+    .ai-header p { font-size: 0.82rem; opacity: 0.85; font-weight: 400; margin-top: 2px; }
+    .chat-history { max-height: 260px; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: #faf5ff; }
+    .msg { max-width: 85%; padding: 10px 13px; border-radius: 10px; font-size: 0.88rem; line-height: 1.55; }
+    .msg.ai   { background: white; border: 1px solid #e9d8fd; color: #44337a; align-self: flex-start; border-radius: 10px 10px 10px 2px; }
+    .msg.user { background: #805ad5; color: white; align-self: flex-end; border-radius: 10px 10px 2px 10px; }
+    .apply-wrap { padding: 8px 14px; background: #faf5ff; border-top: 1px solid #e9d8fd; }
+    .apply-btn { background: #553c9a; color: white; border: none; border-radius: 7px; padding: 8px 16px; font-size: 0.87rem; font-weight: 600; cursor: pointer; }
+    .apply-btn:hover { opacity: 0.88; }
+    .input-row { display: flex; border-top: 1.5px solid #d6bcfa; }
+    .chat-input { flex: 1; border: none; padding: 11px 14px; font-size: 0.9rem; font-family: inherit; background: white; color: #1a202c; }
+    .chat-input:focus { outline: none; }
+    .send-btn { background: #805ad5; color: white; border: none; padding: 11px 18px; font-weight: 600; font-size: 0.88rem; cursor: pointer; }
+    .send-btn:hover { opacity: 0.88; }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .view-map-btn { display: block; text-align: center; background: linear-gradient(135deg, #1b4332, #52b788); color: white; text-decoration: none; padding: 13px; border-radius: 10px; font-weight: 600; font-size: 0.95rem; margin-top: 14px; }
+    .view-map-btn:hover { opacity: 0.88; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-brand" href="/">🗺️ Road Trip Planner</a>
+    <span class="collab-badge">👥 Collaborative Edit</span>
+  </nav>
+
+  <div class="page-header">
+    <h1>✏️ Editing: {{ route_name }}</h1>
+    <p>You've been invited to edit this route. Changes save directly to the owner's trip.</p>
+  </div>
+
+  <div class="container">
+
+    <div class="card">
+      <div class="section-label">Route Name</div>
+      <input class="name-input" id="route-name" value=""/>
+
+      <div class="section-label">Stops — reorder, edit, or remove</div>
+      <div class="stops-list" id="stops-list"></div>
+      <button class="add-stop-btn" onclick="addStop()">+ Add Stop</button>
+
+      <button class="save-btn" id="save-btn" onclick="saveChanges()">💾 Save Changes</button>
+      <div class="save-indicator" id="save-indicator">✓ Changes saved!</div>
+
+      <a class="view-map-btn" id="view-map-btn" href="#" onclick="openMap(event)">🗺️ View on Map</a>
+    </div>
+
+    <div class="ai-card">
+      <div class="ai-header">
+        🤖 AI Route Assistant
+        <p>Describe changes in plain English — "add a stop in Lyon", "swap stops 2 and 3"</p>
+      </div>
+      <div class="chat-history" id="chat-history">
+        <div class="msg ai">Hi! I can help edit this route. Tell me what you'd like to change.</div>
+      </div>
+      <div class="apply-wrap" id="apply-wrap" style="display:none"></div>
+      <div class="input-row">
+        <input class="chat-input" id="chat-input" placeholder="Ask me to modify this route…" onkeydown="if(event.key==='Enter') sendChat()"/>
+        <button class="send-btn" id="send-btn" onclick="sendChat()">Send</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const EDIT_TOKEN = {{ edit_token | tojson }};
+    let route = {{ route_json | safe }};
+
+    function escHtml(s) {
+      return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function buildMapsUrl(stops) {
+      return 'https://www.google.com/maps/dir/' + stops.map(s => encodeURIComponent(s.address)).join('/');
+    }
+
+    function renderStops(stops) {
+      const list = document.getElementById('stops-list');
+      list.innerHTML = (stops || []).map(s => `
+        <div class="stop-row">
+          <div class="stop-controls">
+            <button class="move-btn" onclick="moveStop(this,-1)">↑</button>
+            <button class="move-btn" onclick="moveStop(this,1)">↓</button>
+          </div>
+          <div class="stop-fields">
+            <input class="stop-name-input" value="${escHtml(s.name)}" placeholder="Place name"/>
+            <input class="stop-addr-input" value="${escHtml(s.address)}" placeholder="City, State, Country"/>
+          </div>
+          <button class="remove-btn" onclick="removeStop(this)">✕</button>
+        </div>`).join('');
+    }
+
+    function collectStops() {
+      const origMap = {};
+      (route.stops || []).forEach(s => { origMap[s.name.trim().toLowerCase()] = s; });
+      return Array.from(document.querySelectorAll('.stop-row')).map(row => {
+        const name = row.querySelector('.stop-name-input').value.trim();
+        const addr = row.querySelector('.stop-addr-input').value.trim();
+        if (!name && !addr) return null;
+        const orig = origMap[name.toLowerCase()] || {};
+        return { name: name||addr, address: addr||name,
+                 description: orig.description||'', attractions: orig.attractions||[],
+                 hotel: orig.hotel||null, restaurants: orig.restaurants||[] };
+      }).filter(Boolean);
+    }
+
+    function moveStop(btn, dir) {
+      const row = btn.closest('.stop-row');
+      const p   = row.parentElement;
+      if (dir === -1) { const prev = row.previousElementSibling; if (prev) p.insertBefore(row, prev); }
+      else            { const next = row.nextElementSibling;     if (next) p.insertBefore(next, row); }
+    }
+
+    function removeStop(btn) {
+      const list = document.getElementById('stops-list');
+      if (list.querySelectorAll('.stop-row').length <= 2) { alert('Need at least 2 stops.'); return; }
+      btn.closest('.stop-row').remove();
+    }
+
+    function addStop() {
+      const list = document.getElementById('stops-list');
+      const div  = document.createElement('div');
+      div.className = 'stop-row';
+      div.innerHTML = `
+        <div class="stop-controls">
+          <button class="move-btn" onclick="moveStop(this,-1)">↑</button>
+          <button class="move-btn" onclick="moveStop(this,1)">↓</button>
+        </div>
+        <div class="stop-fields">
+          <input class="stop-name-input" value="" placeholder="Place name"/>
+          <input class="stop-addr-input" value="" placeholder="City, State, Country"/>
+        </div>
+        <button class="remove-btn" onclick="removeStop(this)">✕</button>`;
+      const rows = list.querySelectorAll('.stop-row');
+      list.insertBefore(div, rows[rows.length - 1] || null);
+    }
+
+    async function saveChanges() {
+      const btn  = document.getElementById('save-btn');
+      const name = document.getElementById('route-name').value.trim();
+      const stops = collectStops();
+      if (stops.length < 2) { alert('Need at least 2 stops.'); return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+
+      const updated = Object.assign({}, route, {
+        name: name || route.name,
+        stops,
+        maps_url: buildMapsUrl(stops)
+      });
+
+      try {
+        const res  = await fetch('/routes/collab-save/' + EDIT_TOKEN, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ route: updated })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        route = updated;
+        const ind = document.getElementById('save-indicator');
+        ind.style.display = 'block';
+        setTimeout(() => { ind.style.display = 'none'; }, 3000);
+      } catch(e) {
+        alert('Error saving: ' + e.message);
+      }
+      btn.disabled = false;
+      btn.textContent = '💾 Save Changes';
+    }
+
+    function openMap(e) {
+      e.preventDefault();
+      const stops = collectStops();
+      const snap  = Object.assign({}, route, { stops, maps_url: buildMapsUrl(stops) });
+      const hash  = btoa(unescape(encodeURIComponent(JSON.stringify(snap))));
+      window.open('/map/inline/0#' + hash, '_blank');
+    }
+
+    // AI Chat
+    function appendMsg(role, text) {
+      const hist = document.getElementById('chat-history');
+      const div  = document.createElement('div');
+      div.className = 'msg ' + role;
+      div.textContent = text;
+      hist.appendChild(div);
+      hist.scrollTop = hist.scrollHeight;
+      return div;
+    }
+
+    async function sendChat() {
+      const input   = document.getElementById('chat-input');
+      const sendBtn = document.getElementById('send-btn');
+      const msg     = input.value.trim();
+      if (!msg) return;
+      sendBtn.disabled = true;
+      input.value = '';
+      appendMsg('user', msg);
+      const thinkEl = appendMsg('ai', '…');
+
+      // Build current route snapshot from form
+      const stops   = collectStops();
+      const current = Object.assign({}, route, {
+        name: document.getElementById('route-name').value.trim() || route.name,
+        stops
+      });
+
+      try {
+        const res  = await fetch('/chat', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ message: msg, route: current })
+        });
+        const data = await res.json();
+        thinkEl.textContent = data.reply || 'Done!';
+
+        const wrap = document.getElementById('apply-wrap');
+        if (data.updated_route) {
+          wrap._pending = data.updated_route;
+          wrap.style.display = 'block';
+          wrap.innerHTML = `<button class="apply-btn" onclick="applyAI()">✓ Apply AI Changes</button>`;
+        } else {
+          wrap.style.display = 'none';
+        }
+      } catch(e) {
+        thinkEl.textContent = 'Error reaching AI assistant.';
+      }
+      sendBtn.disabled = false;
+    }
+
+    function applyAI() {
+      const wrap    = document.getElementById('apply-wrap');
+      const updated = wrap._pending;
+      if (!updated) return;
+      Object.assign(route, updated);
+      document.getElementById('route-name').value = route.name || '';
+      renderStops(route.stops);
+      wrap.innerHTML = '<div style="color:#553c9a;font-size:0.85rem;padding:4px 0;">✓ Applied — click Save Changes to keep them.</div>';
+      wrap._pending = null;
+      setTimeout(() => { wrap.style.display = 'none'; }, 4000);
+    }
+
+    // Init
+    document.getElementById('route-name').value = route.name || '';
+    renderStops(route.stops);
+  </script>
+</body>
+</html>
