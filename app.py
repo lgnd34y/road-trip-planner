@@ -216,7 +216,8 @@ Return ONLY a valid JSON array (no markdown, no extra text):
         "stops": ["Attraction A", "Attraction B"],
         "plan": "1 sentence day flow"
       }
-    ]
+    ],
+    "flights": []
   }
 ]
 
@@ -225,6 +226,7 @@ Rules:
 - Include 5-7 specific named attractions between start and end
 - No hotels (day trip)
 - Each stop has 2 activities in attractions array
+- flights is always [] for day trips
 - Return exactly 3 routes — be very concise"""
     else:
         system_prompt = """You are an expert road trip planner. Provide 3 distinct road trip routes.
@@ -264,6 +266,14 @@ Return ONLY a valid JSON array (no markdown, no extra text):
         "stops": ["Stop A", "Stop B"],
         "plan": "1 sentence plan"
       }
+    ],
+    "flights": [
+      {
+        "from": "Stop Name A",
+        "to": "Stop Name B",
+        "reason": "e.g. 9h drive vs ~1.5h flight",
+        "search_url": "https://www.google.com/travel/flights?q=Flights+from+CityA+to+CityB"
+      }
     ]
   }
 ]
@@ -277,6 +287,8 @@ Rules:
 - Include at most 7 itinerary entries total; combine days for longer trips
 - If no nights specified, default to 3-night trip
 - Non-home stops only need hotel + attractions
+- flights: add an entry for any leg between consecutive stops that likely exceeds 5 hours driving. Use [] if all legs are short driving distances.
+- For flights search_url use: https://www.google.com/travel/flights?q=Flights+from+[City+A]+to+[City+B] (URL-encode city names with +)
 - Return exactly 3 routes — be very concise"""
 
     # For long trips, add an explicit compression instruction
@@ -476,7 +488,8 @@ def chat_route():
     data    = request.json
     api_key = data.get("api_key", "").strip() or DEFAULT_API_KEY
     message = data.get("message", "").strip()
-    route   = data.get("route")
+    route   = data.get("route")    # single route (edit panel)
+    routes  = data.get("routes")   # all routes (global chat)
 
     if not api_key:
         return jsonify({"reply": "No API key available for the AI assistant."}), 400
@@ -485,7 +498,9 @@ def chat_route():
 
     client = anthropic.Anthropic(api_key=api_key)
 
-    system = """You are a helpful road trip planning assistant. The user is editing a road trip route.
+    if route:
+        # Single-route editing context
+        system = """You are a helpful road trip planning assistant. The user is editing a road trip route.
 
 If the user asks to modify the route (add/remove/reorder stops, change hotels, rename route, etc.) respond ONLY with valid JSON:
 {"reply": "Brief explanation of what you changed", "updated_route": <full updated route JSON with ALL original fields preserved>}
@@ -493,10 +508,27 @@ If the user asks to modify the route (add/remove/reorder stops, change hotels, r
 If the user is just asking a question with no route changes, respond ONLY with:
 {"reply": "Your answer here"}
 
-Preserve all fields (name, theme, distance, drive_time, best_time, highlight, stops, itinerary, maps_url) in updated_route.
+Preserve all fields (name, theme, distance, drive_time, best_time, highlight, stops, itinerary, maps_url, flights) in updated_route.
 Return ONLY valid JSON. No markdown."""
+        user_content = f"Current route:\n{json.dumps(route)}\n\nUser: {message}"
+    elif routes:
+        # Global chat with all generated routes as context
+        system = """You are a friendly road trip planning assistant. The user has generated road trip routes and may have questions about them or general travel questions. Answer helpfully and conversationally. Do NOT return updated_route — just answer questions.
 
-    user_content = f"Current route:\n{json.dumps(route)}\n\nUser: {message}"
+Respond ONLY with valid JSON:
+{"reply": "Your helpful answer here"}
+
+No markdown. Be concise and friendly."""
+        user_content = f"User's current trip options:\n{json.dumps(routes)}\n\nUser question: {message}"
+    else:
+        # No route context — general travel assistant
+        system = """You are a friendly road trip planning assistant. Answer travel questions helpfully and conversationally.
+
+Respond ONLY with valid JSON:
+{"reply": "Your helpful answer here"}
+
+No markdown. Be concise and friendly."""
+        user_content = f"User question: {message}"
 
     try:
         response = client.messages.create(

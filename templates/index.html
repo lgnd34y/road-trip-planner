@@ -219,9 +219,113 @@
     .ai-chat-send:hover { opacity: 0.88; }
     .ai-chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    @media (max-width: 600px) {
+    /* ── FLIGHTS ── */
+    .flight-section { margin-top: 22px; }
+    .flight-section-title { font-size: 0.95rem; font-weight: 700; color: #2d3748; margin-bottom: 10px; }
+    .flight-card { display: flex; align-items: center; gap: 12px; background: #ebf8ff; border: 1.5px solid #bee3f8; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; flex-wrap: wrap; }
+    .flight-route { font-weight: 700; color: #2c5282; font-size: 0.95rem; flex: 1; min-width: 180px; }
+    .flight-reason { font-size: 0.83rem; color: #4a5568; flex: 2; min-width: 160px; font-style: italic; }
+    .flight-search-btn { background: #2b6cb0; color: white; font-size: 0.82rem; font-weight: 600; padding: 6px 13px; border-radius: 7px; text-decoration: none; white-space: nowrap; transition: background 0.15s; flex-shrink: 0; }
+    .flight-search-btn:hover { background: #2c5282; }
+
+    /* ── GLOBAL CHAT WIDGET ── */
+    .gchat-btn {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9000;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, #553c9a, #805ad5);
+      box-shadow: 0 4px 16px rgba(85,60,154,0.45);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+      font-size: 1.4rem; border: none;
+    }
+    .gchat-btn:hover { transform: scale(1.08); box-shadow: 0 6px 22px rgba(85,60,154,0.55); }
+    .gchat-btn.open { background: linear-gradient(135deg, #322659, #553c9a); }
+    .gchat-notif {
+      position: absolute; top: -3px; right: -3px;
+      width: 14px; height: 14px; background: #fc8181; border-radius: 50%;
+      border: 2px solid white; display: none;
+    }
+    .gchat-btn.has-routes .gchat-notif { display: block; }
+
+    .gchat-panel {
+      position: fixed; bottom: 92px; right: 24px; z-index: 8999;
+      width: 340px; max-height: 480px;
+      background: white; border-radius: 16px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+      display: none; flex-direction: column; overflow: hidden;
+      border: 1.5px solid #e9d8fd;
+    }
+    .gchat-panel.open { display: flex; }
+    .gchat-header {
+      background: linear-gradient(135deg, #553c9a, #805ad5);
+      color: white; padding: 14px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .gchat-header-text { font-weight: 700; font-size: 0.95rem; }
+    .gchat-header-sub { font-size: 0.78rem; opacity: 0.82; margin-top: 1px; }
+    .gchat-close {
+      background: rgba(255,255,255,0.18); border: none; color: white;
+      width: 28px; height: 28px; border-radius: 50%; font-size: 1rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .gchat-close:hover { background: rgba(255,255,255,0.3); }
+    .gchat-messages {
+      flex: 1; overflow-y: auto; padding: 14px;
+      display: flex; flex-direction: column; gap: 8px;
+      background: #faf5ff;
+    }
+    .gchat-msg {
+      max-width: 88%; padding: 9px 12px; border-radius: 10px;
+      font-size: 0.87rem; line-height: 1.5;
+    }
+    .gchat-msg.ai   { background: white; border: 1px solid #e9d8fd; color: #44337a; align-self: flex-start; border-radius: 10px 10px 10px 2px; }
+    .gchat-msg.user { background: #805ad5; color: white; align-self: flex-end; border-radius: 10px 10px 2px 10px; }
+    .gchat-input-row { display: flex; border-top: 1.5px solid #d6bcfa; background: white; }
+    .gchat-input {
+      flex: 1; border: none; padding: 11px 14px;
+      font-size: 0.9rem; font-family: inherit; background: white; color: #1a202c;
+    }
+    .gchat-input:focus { outline: none; }
+    .gchat-send {
+      background: #805ad5; color: white; border: none;
+      padding: 11px 16px; font-weight: 600; font-size: 0.88rem; cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .gchat-send:hover { opacity: 0.88; }
+    .gchat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── MOBILE RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 10px 16px; flex-wrap: wrap; gap: 8px; }
+      .nav-right { gap: 8px; flex-wrap: wrap; }
+      .nav-btn { padding: 5px 10px; font-size: 0.8rem; }
+      .nav-user { font-size: 0.82rem; }
+      .hero { padding: 32px 16px 28px; }
+      .hero h1 { font-size: 1.75rem; }
+      .hero p  { font-size: 0.95rem; }
+      .form-wrap { margin: -20px 12px 32px; padding: 20px 16px; }
       .form-grid { grid-template-columns: 1fr; }
-      .hero h1 { font-size: 1.8rem; }
+      #results { padding: 0 12px; margin-bottom: 80px; }
+      .route-header { padding: 16px; }
+      .route-body   { padding: 0 16px 16px; }
+      .card-actions { flex-direction: column; gap: 8px; }
+      .maps-btn, .save-btn, .edit-btn { flex: none; width: 100%; }
+      .cost-inputs  { grid-template-columns: 1fr 1fr; }
+      .stop-header  { padding: 10px 12px; gap: 8px; }
+      .stop-desc, .stop-extras { margin: 0 12px; }
+      .edit-panel   { padding: 14px; }
+      .flight-card  { flex-direction: column; align-items: flex-start; gap: 6px; }
+      .gchat-panel  { right: 12px; left: 12px; width: auto; bottom: 88px; }
+      .gchat-btn    { bottom: 16px; right: 16px; }
+    }
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 1.45rem; }
+      .route-header-left h3 { font-size: 1rem; }
+      .route-badges { gap: 6px; }
+      .badge { font-size: 0.73rem; padding: 3px 8px; }
+      .cost-inputs  { grid-template-columns: 1fr; }
+      .modal { padding: 20px 16px; margin: 12px; }
     }
   </style>
 </head>
@@ -287,6 +391,28 @@
   <div id="loader"><div class="spinner"></div><span>Planning your road trips…</span></div>
   <div id="error-box"></div>
   <div id="results"></div>
+
+  <!-- GLOBAL AI CHAT WIDGET -->
+  <button class="gchat-btn" id="gchat-btn" onclick="toggleGlobalChat()" title="AI Travel Assistant">
+    🤖
+    <span class="gchat-notif" id="gchat-notif"></span>
+  </button>
+  <div class="gchat-panel" id="gchat-panel">
+    <div class="gchat-header">
+      <div>
+        <div class="gchat-header-text">🤖 AI Travel Assistant</div>
+        <div class="gchat-header-sub">Ask anything about your trip or travel plans</div>
+      </div>
+      <button class="gchat-close" onclick="toggleGlobalChat()">×</button>
+    </div>
+    <div class="gchat-messages" id="gchat-messages">
+      <div class="gchat-msg ai">Hi! I'm your travel assistant. Generate a trip first, then ask me anything — comparisons, tips, flight info, what to pack, and more!</div>
+    </div>
+    <div class="gchat-input-row">
+      <input class="gchat-input" id="gchat-input" placeholder="Ask me anything about your trip…" onkeydown="if(event.key==='Enter') sendGlobalChat()"/>
+      <button class="gchat-send" id="gchat-send" onclick="sendGlobalChat()">Send</button>
+    </div>
+  </div>
 
   <!-- LOGIN MODAL -->
   <div class="modal-backdrop" id="login-modal">
@@ -488,6 +614,22 @@
             </div>`;
         }
 
+        // ── Flights HTML ──
+        let flightsHtml = '';
+        if (route.flights && route.flights.length) {
+          const flightCards = route.flights.map(f => `
+            <div class="flight-card">
+              <div class="flight-route">✈️ ${escHtml(f.from)} → ${escHtml(f.to)}</div>
+              <div class="flight-reason">${escHtml(f.reason)}</div>
+              <a class="flight-search-btn" href="${escHtml(f.search_url)}" target="_blank" rel="noopener noreferrer">Search Flights →</a>
+            </div>`).join('');
+          flightsHtml = `
+            <div class="flight-section">
+              <div class="flight-section-title">✈️ Flight Options for Long Legs</div>
+              ${flightCards}
+            </div>`;
+        }
+
         const avoidWords = ['highway','highways','motorway','toll','tolls','freeway'];
         const avoidTip = avoidWords.some(w => (payload.extra_info||'').toLowerCase().includes(w))
           ? `<p style="margin-top:10px;font-size:0.83rem;color:#744210;background:#fffbea;padding:9px 12px;border-radius:7px;">⚠️ To avoid highways/tolls: in Google Maps click ⋮ → Route options after it opens.</p>`
@@ -511,6 +653,7 @@
             <div class="stops-title">📍 Stops — click to explore, see hotels & restaurants</div>
             <div id="stops-container-${i}">${stopsHtml}</div>
             ${itineraryHtml}
+            ${flightsHtml}
             <div class="cost-section" id="cost-${i}">
               <div class="cost-toggle" onclick="toggleCost(${i})">
                 <span>💰 Estimate Trip Cost</span>
@@ -573,6 +716,8 @@
 
         resultsDiv.appendChild(card);
       });
+
+      markGchatReady();
     }
 
     function openMap(e, i) {
@@ -907,6 +1052,69 @@
       wrapEl.innerHTML = '<div style="color:#553c9a;font-size:0.85rem;padding:4px 0;">✓ Changes applied to route!</div>';
       wrapEl._pending = null;
       setTimeout(() => { wrapEl.style.display = 'none'; }, 3000);
+    }
+
+    // ── Global AI Chat Widget ──
+    function toggleGlobalChat() {
+      const panel = document.getElementById('gchat-panel');
+      const btn   = document.getElementById('gchat-btn');
+      const isOpen = panel.classList.toggle('open');
+      btn.classList.toggle('open', isOpen);
+      if (isOpen) {
+        document.getElementById('gchat-input').focus();
+        // Update hint if routes are loaded
+        if (currentRoutes.length) {
+          btn.classList.add('has-routes');
+        }
+      }
+    }
+
+    function appendGlobalMsg(role, text) {
+      const msgs = document.getElementById('gchat-messages');
+      const div  = document.createElement('div');
+      div.className = `gchat-msg ${role}`;
+      div.textContent = text;
+      msgs.appendChild(div);
+      msgs.scrollTop = msgs.scrollHeight;
+      return div;
+    }
+
+    async function sendGlobalChat() {
+      const input   = document.getElementById('gchat-input');
+      const sendBtn = document.getElementById('gchat-send');
+      const msg     = input.value.trim();
+      if (!msg) return;
+
+      sendBtn.disabled = true;
+      input.value = '';
+      appendGlobalMsg('user', msg);
+      const thinkEl = appendGlobalMsg('ai', '…');
+
+      try {
+        const body = {
+          api_key: document.getElementById('api_key').value.trim(),
+          message: msg
+        };
+        if (currentRoutes.length) {
+          body.routes = currentRoutes;
+        }
+
+        const res  = await fetch('/chat', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        thinkEl.textContent = data.reply || 'Done!';
+      } catch(e) {
+        thinkEl.textContent = 'Error reaching AI assistant. Please try again.';
+      }
+      sendBtn.disabled = false;
+    }
+
+    // Mark chat button with indicator dot when routes are available
+    function markGchatReady() {
+      document.getElementById('gchat-btn').classList.add('has-routes');
     }
   </script>
 </body>
