@@ -331,6 +331,54 @@ def map_view(session_id, idx):
     return render_template("map.html", route_json=json.dumps(routes[idx]))
 
 
+@app.route("/api/costs", methods=["POST"])
+def estimate_costs():
+    data    = request.json
+    api_key = data.get("api_key", "").strip() or DEFAULT_API_KEY
+    route   = data.get("route")
+
+    if not api_key:
+        return jsonify({"error": "No API key"}), 400
+    if not route:
+        return jsonify({"error": "No route"}), 400
+
+    stops = [s.get("address", "") for s in route.get("stops", []) if s.get("address")]
+    region = stops[0] if stops else "USA"
+
+    client = anthropic.Anthropic(api_key=api_key)
+    prompt = f"""A road trip is being planned through these locations: {', '.join(stops[:6])}.
+
+Provide realistic CURRENT price estimates for this region. Return ONLY this JSON (no markdown):
+{{
+  "gas_price": <average fuel price in USD per gallon (or USD-equivalent per gallon if metric country)>,
+  "mpg": <typical car fuel efficiency in MPG for a standard sedan>,
+  "hotel_rate": <typical mid-range hotel per night in USD>,
+  "food_rate": <typical daily food budget per person in USD (mix of restaurants and casual)>,
+  "extras_rate": <typical daily activities/extras per person in USD>,
+  "currency_note": "<brief note like 'Prices converted to USD from EUR' or 'US prices'>",
+  "notes": "<1 sentence context e.g. 'Hotel rates reflect peak summer season in this region'>"
+}}
+
+Base these on real current prices for the specific region, not generic defaults."""
+
+    try:
+        response = client.messages.create(
+            model="claude-opus-4-6",
+            max_tokens=400,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        raw = response.content[0].text.strip()
+        if "```" in raw:
+            raw = raw.split("```", 1)[1]
+            if raw.startswith("json"): raw = raw[4:]
+            raw = raw.rsplit("```", 1)[0].strip()
+        s, e = raw.find("{"), raw.rfind("}")
+        if s != -1 and e != -1: raw = raw[s:e+1]
+        return jsonify(json.loads(raw))
+    except Exception as ex:
+        return jsonify({"error": str(ex)}), 500
+
+
 @app.route("/routes/update/<int:route_id>", methods=["POST"])
 @login_required
 def update_route(route_id):
