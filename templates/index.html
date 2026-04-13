@@ -172,6 +172,52 @@
     .edit-cancel-btn { flex: 1; background: #edf2f7; color: #4a5568; border: none; border-radius: 8px; padding: 11px; font-weight: 600; font-size: 0.93rem; cursor: pointer; transition: background 0.15s; }
     .edit-cancel-btn:hover { background: #e2e8f0; }
 
+    /* ── ATTRACTIONS ── */
+    .attractions-list { display: flex; flex-direction: column; gap: 5px; }
+    .attraction-item { display: flex; gap: 6px; align-items: baseline; font-size: 0.86rem; }
+    .attraction-dot { color: #52b788; font-size: 1rem; flex-shrink: 0; }
+    .attraction-name { font-weight: 600; color: #2d3748; }
+    .attraction-note { color: #718096; font-style: italic; }
+
+    /* ── HOTEL BOOKING LINK ── */
+    .hotel-book-btn { display: inline-block; margin-top: 7px; background: #ebf8ff; border: 1px solid #bee3f8; color: #2b6cb0; font-size: 0.8rem; font-weight: 600; padding: 5px 11px; border-radius: 6px; text-decoration: none; transition: background 0.15s; }
+    .hotel-book-btn:hover { background: #bee3f8; }
+
+    /* ── COST ESTIMATOR ── */
+    .cost-section { margin-top: 20px; border: 1.5px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+    .cost-toggle { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; cursor: pointer; font-weight: 600; font-size: 0.93rem; color: #2d3748; background: #f7fafc; user-select: none; transition: background 0.15s; }
+    .cost-toggle:hover { background: #edf2f7; }
+    .cost-chev { font-size: 0.75rem; color: #a0aec0; transition: transform 0.2s; }
+    .cost-section.open .cost-chev { transform: rotate(180deg); }
+    .cost-body { display: none; padding: 16px; border-top: 1px solid #e2e8f0; }
+    .cost-section.open .cost-body { display: block; }
+    .cost-inputs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .cost-input-group { display: flex; flex-direction: column; gap: 4px; }
+    .cost-input-group label { font-size: 0.74rem; font-weight: 600; color: #4a5568; text-transform: uppercase; letter-spacing: 0.04em; }
+    .cost-input-group input { border: 1.5px solid #e2e8f0; border-radius: 6px; padding: 7px 10px; font-size: 0.9rem; font-family: inherit; color: #1a202c; }
+    .cost-input-group input:focus { outline: none; border-color: #52b788; }
+    .cost-breakdown { background: #f0fff4; border: 1px solid #c6f6d5; border-radius: 8px; padding: 14px 16px; font-size: 0.9rem; }
+    .cost-row { display: flex; justify-content: space-between; padding: 4px 0; color: #4a5568; }
+    .cost-total { display: flex; justify-content: space-between; padding: 10px 0 4px; margin-top: 6px; border-top: 1.5px solid #9ae6b4; font-weight: 700; font-size: 1rem; color: #276749; }
+    .cost-per-person { text-align: right; font-size: 0.83rem; color: #52b788; margin-top: 4px; }
+
+    /* ── AI CHAT ── */
+    .ai-chat-section { margin-top: 18px; border: 1.5px solid #d6bcfa; border-radius: 10px; overflow: hidden; }
+    .ai-chat-header { background: linear-gradient(135deg, #553c9a, #805ad5); color: white; padding: 10px 14px; font-size: 0.88rem; font-weight: 600; }
+    .ai-chat-history { max-height: 220px; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; background: #faf5ff; }
+    .ai-msg { max-width: 85%; padding: 9px 12px; border-radius: 10px; font-size: 0.87rem; line-height: 1.5; }
+    .ai-msg.ai   { background: white; border: 1px solid #e9d8fd; color: #44337a; align-self: flex-start; border-radius: 10px 10px 10px 2px; }
+    .ai-msg.user { background: #805ad5; color: white; align-self: flex-end; border-radius: 10px 10px 2px 10px; }
+    .chat-apply-wrap { padding: 8px 12px; background: #faf5ff; border-top: 1px solid #e9d8fd; }
+    .chat-apply-btn { background: #553c9a; color: white; border: none; border-radius: 7px; padding: 8px 16px; font-size: 0.87rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+    .chat-apply-btn:hover { opacity: 0.88; }
+    .ai-chat-input-row { display: flex; gap: 0; border-top: 1.5px solid #d6bcfa; }
+    .ai-chat-input { flex: 1; border: none; padding: 10px 14px; font-size: 0.9rem; font-family: inherit; background: white; color: #1a202c; }
+    .ai-chat-input:focus { outline: none; }
+    .ai-chat-send { background: #805ad5; color: white; border: none; padding: 10px 18px; font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: opacity 0.2s; }
+    .ai-chat-send:hover { opacity: 0.88; }
+    .ai-chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
     @media (max-width: 600px) {
       .form-grid { grid-template-columns: 1fr; }
       .hero h1 { font-size: 1.8rem; }
@@ -318,8 +364,28 @@
 
     function buildStopItemHtml(stop, j, total) {
       const isEnd = j === 0 || j === total - 1;
+
+      // Attractions
+      let attractionsHtml = '';
+      if (stop.attractions && stop.attractions.length) {
+        const items = stop.attractions.map(a => `
+          <div class="attraction-item">
+            <span class="attraction-dot">•</span>
+            <span class="attraction-name">${escHtml(a.name)}</span>
+            ${a.note ? `<span class="attraction-note"> — ${escHtml(a.note)}</span>` : ''}
+          </div>`).join('');
+        attractionsHtml = `
+          <div class="extras-section">
+            <div class="extras-label">🎯 Things to Do</div>
+            <div class="attractions-list">${items}</div>
+          </div>`;
+      }
+
+      // Hotel with booking link
       let hotelHtml = '';
       if (stop.hotel && stop.hotel.name && !isEnd) {
+        const bookingQ = encodeURIComponent(stop.hotel.name + ' ' + (stop.hotel.address || stop.address || ''));
+        const bookingUrl = `https://www.booking.com/search.html?ss=${bookingQ}`;
         hotelHtml = `
           <div class="extras-section">
             <div class="extras-label">🏨 Where to Stay</div>
@@ -327,9 +393,12 @@
               <div class="hotel-name">${escHtml(stop.hotel.name)}</div>
               ${stop.hotel.address ? `<div class="hotel-addr">${escHtml(stop.hotel.address)}</div>` : ''}
               ${stop.hotel.notes  ? `<div class="hotel-notes">${escHtml(stop.hotel.notes)}</div>`  : ''}
+              <a class="hotel-book-btn" href="${bookingUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">🔍 Search on Booking.com</a>
             </div>
           </div>`;
       }
+
+      // Restaurants
       let restHtml = '';
       if (stop.restaurants && stop.restaurants.length) {
         const cards = stop.restaurants.map(r => `
@@ -343,6 +412,7 @@
             <div class="restaurant-list">${cards}</div>
           </div>`;
       }
+
       return `
         <div class="stop" onclick="toggleStop(this)">
           <div class="stop-header">
@@ -355,7 +425,7 @@
             <div class="stop-chevron">▼</div>
           </div>
           <div class="stop-desc">${escHtml(stop.description || '')}</div>
-          <div class="stop-extras">${hotelHtml}${restHtml}</div>
+          <div class="stop-extras">${attractionsHtml}${hotelHtml}${restHtml}</div>
         </div>`;
     }
 
@@ -430,6 +500,25 @@
             <div class="stops-title">📍 Stops — click to explore, see hotels & restaurants</div>
             <div id="stops-container-${i}">${stopsHtml}</div>
             ${itineraryHtml}
+            <div class="cost-section" id="cost-${i}">
+              <div class="cost-toggle" onclick="toggleCost(${i})">
+                <span>💰 Estimate Trip Cost</span>
+                <span class="cost-chev">▼</span>
+              </div>
+              <div class="cost-body">
+                <div class="cost-inputs">
+                  <div class="cost-input-group"><label>People</label><input type="number" id="people-${i}" value="2" min="1" max="20" onchange="calcCost(${i}, '${escHtml(route.distance)}', ${route.itinerary ? route.itinerary.length : 3})"/></div>
+                  <div class="cost-input-group"><label>Gas $/gal</label><input type="number" id="gas-${i}" value="3.50" step="0.10" min="0.5" onchange="calcCost(${i}, '${escHtml(route.distance)}', ${route.itinerary ? route.itinerary.length : 3})"/></div>
+                  <div class="cost-input-group"><label>Car MPG</label><input type="number" id="mpg-${i}" value="30" min="5" max="150" onchange="calcCost(${i}, '${escHtml(route.distance)}', ${route.itinerary ? route.itinerary.length : 3})"/></div>
+                  <div class="cost-input-group"><label>$/night hotel</label><input type="number" id="hrate-${i}" value="120" min="0" onchange="calcCost(${i}, '${escHtml(route.distance)}', ${route.itinerary ? route.itinerary.length : 3})"/></div>
+                  <div class="cost-input-group"><label>$/day food</label><input type="number" id="frate-${i}" value="60" min="0" onchange="calcCost(${i}, '${escHtml(route.distance)}', ${route.itinerary ? route.itinerary.length : 3})"/></div>
+                  <div class="cost-input-group"><label>$/day extras</label><input type="number" id="erate-${i}" value="30" min="0" onchange="calcCost(${i}, '${escHtml(route.distance)}', ${route.itinerary ? route.itinerary.length : 3})"/></div>
+                </div>
+                <div class="cost-breakdown" id="cost-bd-${i}">
+                  <div style="color:#718096;font-size:0.88rem;">Adjust the inputs above to see your estimate.</div>
+                </div>
+              </div>
+            </div>
             <div class="card-actions">
               <a class="maps-btn" href="/map/${sessionId}/${i}" target="_blank">🗺️ View Route on Map</a>
               <button class="save-btn" id="save-btn-${i}" onclick="handleSave(${i})">💾 Save Route</button>
@@ -451,6 +540,17 @@
               <div class="edit-panel-actions">
                 <button class="edit-apply-btn" onclick="applyEdit(${i})">✓ Apply Changes</button>
                 <button class="edit-cancel-btn" onclick="cancelEdit(${i})">Cancel</button>
+              </div>
+              <div class="ai-chat-section">
+                <div class="ai-chat-header">🤖 AI Route Assistant — describe changes in plain English</div>
+                <div class="ai-chat-history" id="chat-history-${i}">
+                  <div class="ai-msg ai">Hi! Tell me what to change — e.g. "add a stop in Lyon", "swap stops 2 and 3", or "find a cheaper hotel at stop 2".</div>
+                </div>
+                <div class="chat-apply-wrap" id="chat-apply-wrap-${i}" style="display:none"></div>
+                <div class="ai-chat-input-row">
+                  <input class="ai-chat-input" id="chat-input-${i}" placeholder="Ask me to modify this route…" onkeydown="if(event.key==='Enter') sendChat(${i})"/>
+                  <button class="ai-chat-send" id="chat-send-${i}" onclick="sendChat(${i})">Send</button>
+                </div>
               </div>
             </div>
           </div>`;
@@ -619,6 +719,118 @@
     // Submit on Enter key in modals
     document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') submitLogin(); });
     document.getElementById('signup-password').addEventListener('keydown', e => { if (e.key === 'Enter') submitSignup(); });
+
+    // ── Cost estimator ──
+    function toggleCost(i) {
+      document.getElementById(`cost-${i}`).classList.toggle('open');
+    }
+
+    function calcCost(i, distStr, nights) {
+      const people   = parseFloat(document.getElementById(`people-${i}`).value)  || 2;
+      const gasPrice = parseFloat(document.getElementById(`gas-${i}`).value)     || 3.5;
+      const mpg      = parseFloat(document.getElementById(`mpg-${i}`).value)     || 30;
+      const hRate    = parseFloat(document.getElementById(`hrate-${i}`).value)   || 120;
+      const fRate    = parseFloat(document.getElementById(`frate-${i}`).value)   || 60;
+      const eRate    = parseFloat(document.getElementById(`erate-${i}`).value)   || 30;
+
+      // Parse distance
+      let miles = 0;
+      const mMatch = distStr.match(/([\d,]+)\s*miles?/i);
+      const kMatch = distStr.match(/([\d,]+)\s*k?m/i);
+      if (mMatch) miles = parseFloat(mMatch[1].replace(/,/g, ''));
+      else if (kMatch) miles = parseFloat(kMatch[1].replace(/,/g, '')) * 0.621;
+
+      const fuelCost   = miles > 0 ? (miles / mpg) * gasPrice : 0;
+      const hotelCost  = hRate * nights;
+      const foodCost   = fRate * people * (nights + 1);
+      const extraCost  = eRate * people * (nights + 1);
+      const total      = fuelCost + hotelCost + foodCost + extraCost;
+
+      document.getElementById(`cost-bd-${i}`).innerHTML = `
+        <div class="cost-row"><span>⛽ Fuel (${miles > 0 ? Math.round(miles) + ' mi' : 'distance unknown'})</span><span>$${fuelCost.toFixed(0)}</span></div>
+        <div class="cost-row"><span>🏨 Hotels (${nights} night${nights !== 1 ? 's' : ''})</span><span>$${hotelCost.toFixed(0)}</span></div>
+        <div class="cost-row"><span>🍽️ Food (${people} people × ${nights + 1} days)</span><span>$${foodCost.toFixed(0)}</span></div>
+        <div class="cost-row"><span>🎟️ Activities & extras</span><span>$${extraCost.toFixed(0)}</span></div>
+        <div class="cost-total"><span>Total estimated cost</span><span>$${total.toFixed(0)}</span></div>
+        <div class="cost-per-person">$${(total / people).toFixed(0)} per person</div>`;
+    }
+
+    // ── AI Chat ──
+    function appendChatMsg(i, role, text) {
+      const hist = document.getElementById(`chat-history-${i}`);
+      const div  = document.createElement('div');
+      div.className = `ai-msg ${role}`;
+      div.textContent = text;
+      hist.appendChild(div);
+      hist.scrollTop = hist.scrollHeight;
+      return div;
+    }
+
+    async function sendChat(i) {
+      const input   = document.getElementById(`chat-input-${i}`);
+      const sendBtn = document.getElementById(`chat-send-${i}`);
+      const msg     = input.value.trim();
+      if (!msg) return;
+
+      sendBtn.disabled = true;
+      input.value = '';
+      appendChatMsg(i, 'user', msg);
+      const thinkingEl = appendChatMsg(i, 'ai', '…');
+
+      try {
+        const res  = await fetch('/chat', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            api_key: document.getElementById('api_key').value.trim(),
+            message: msg,
+            route:   currentRoutes[i]
+          })
+        });
+        const data = await res.json();
+        thinkingEl.textContent = data.reply || 'Done!';
+
+        const wrapEl = document.getElementById(`chat-apply-wrap-${i}`);
+        if (data.updated_route) {
+          wrapEl._pending = data.updated_route;
+          wrapEl.style.display = 'block';
+          wrapEl.innerHTML = `<button class="chat-apply-btn" onclick="applyChatChange(${i})">✓ Apply AI Changes to Route</button>`;
+        } else {
+          wrapEl.style.display = 'none';
+        }
+      } catch(e) {
+        thinkingEl.textContent = 'Error reaching AI assistant.';
+      }
+      sendBtn.disabled = false;
+    }
+
+    function applyChatChange(i) {
+      const wrapEl = document.getElementById(`chat-apply-wrap-${i}`);
+      const updated = wrapEl._pending;
+      if (!updated) return;
+
+      Object.assign(currentRoutes[i], updated);
+      if (updated.maps_url) {
+        const ml = document.getElementById(`maps-link-${i}`);
+        if (ml) ml.href = updated.maps_url;
+      }
+
+      // Refresh edit panel inputs
+      document.getElementById(`edit-route-name-${i}`).value = currentRoutes[i].name;
+      document.getElementById(`edit-stops-${i}`).innerHTML  = buildEditStopsHtml(currentRoutes[i].stops);
+
+      // Refresh displayed stops
+      document.getElementById(`stops-container-${i}`).innerHTML =
+        currentRoutes[i].stops.map((s, j) => buildStopItemHtml(s, j, currentRoutes[i].stops.length)).join('');
+
+      // Update title
+      const t = document.getElementById(`route-title-${i}`);
+      if (t) t.textContent = `Route ${i + 1}: ${currentRoutes[i].name}`;
+
+      wrapEl.innerHTML = '<div style="color:#553c9a;font-size:0.85rem;padding:4px 0;">✓ Changes applied to route!</div>';
+      wrapEl._pending = null;
+      setTimeout(() => { wrapEl.style.display = 'none'; }, 3000);
+    }
   </script>
 </body>
 </html>

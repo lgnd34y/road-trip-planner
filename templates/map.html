@@ -157,6 +157,13 @@
       border-radius: 10px; margin-left: 5px;
     }
     .restaurant-notes { color: #718096; font-size: 0.8rem; margin-top: 3px; font-style: italic; }
+    .attractions-list { display: flex; flex-direction: column; gap: 5px; }
+    .attraction-item  { display: flex; gap: 6px; align-items: baseline; font-size: 0.83rem; }
+    .attraction-dot   { color: #52b788; flex-shrink: 0; }
+    .attraction-name  { font-weight: 600; color: #2d3748; }
+    .attraction-note  { color: #718096; font-style: italic; font-size: 0.8rem; }
+    .hotel-book-btn   { display: inline-block; margin-top: 6px; background: #ebf8ff; border: 1px solid #bee3f8; color: #2b6cb0; font-size: 0.78rem; font-weight: 600; padding: 4px 10px; border-radius: 5px; text-decoration: none; }
+    .hotel-book-btn:hover { background: #bee3f8; }
 
     .sidebar-footer {
       padding: 14px 16px;
@@ -271,15 +278,32 @@
       const div = document.createElement('div');
       div.className = 'stop';
       div.dataset.idx = j;
+      // Attractions HTML
+      let attractionsHtml = '';
+      if (stop.attractions && stop.attractions.length) {
+        const items = stop.attractions.map(a => `
+          <div class="attraction-item">
+            <span class="attraction-dot">•</span>
+            <span class="attraction-name">${a.name || ''}</span>
+            ${a.note ? `<span class="attraction-note"> — ${a.note}</span>` : ''}
+          </div>`).join('');
+        attractionsHtml = `
+          <div class="extras-label">🎯 Things to Do</div>
+          <div class="attractions-list">${items}</div>`;
+      }
+
       // Hotel HTML
       let hotelHtml = '';
       if (stop.hotel && stop.hotel.name && !isEndpoint) {
+        const bookingQ   = encodeURIComponent(stop.hotel.name + ' ' + (stop.hotel.address || stop.address || ''));
+        const bookingUrl = `https://www.booking.com/search.html?ss=${bookingQ}`;
         hotelHtml = `
           <div class="extras-label">🏨 Where to Stay</div>
           <div class="hotel-card">
             <div class="hotel-name">${stop.hotel.name}</div>
             ${stop.hotel.address ? `<div class="hotel-addr">${stop.hotel.address}</div>` : ''}
             ${stop.hotel.notes   ? `<div class="hotel-notes">${stop.hotel.notes}</div>`  : ''}
+            <a class="hotel-book-btn" href="${bookingUrl}" target="_blank" rel="noopener noreferrer">🔍 Booking.com</a>
           </div>`;
       }
 
@@ -307,7 +331,7 @@
           <div class="stop-chev">▼</div>
         </div>
         <div class="stop-desc">${stop.description || ''}</div>
-        <div class="stop-extras">${hotelHtml}${restHtml}</div>`;
+        <div class="stop-extras">${attractionsHtml}${hotelHtml}${restHtml}</div>`;
       stopsList.appendChild(div);
     });
 

@@ -172,58 +172,106 @@ def recommend():
 
     client = anthropic.Anthropic(api_key=api_key)
 
-    system_prompt = """You are an expert road trip planner. When given a starting location, provide 3 distinct road trip routes.
+    is_day_trip = nights == "0"
 
-Return ONLY a valid JSON array with this exact structure (no markdown, no extra text):
+    if is_day_trip:
+        system_prompt = """You are an expert road trip planner. Plan 3 distinct single-day road trip itineraries.
+
+Stops are specific named attractions/landmarks (NOT cities). Traveller leaves and returns home same day.
+
+Return ONLY a valid JSON array (no markdown, no extra text):
 [
   {
     "name": "Route name",
-    "theme": "Theme description",
-    "distance": "Total distance",
+    "theme": "Theme",
+    "distance": "Total round-trip distance",
     "drive_time": "Total drive time",
-    "best_time": "Best time of year",
-    "highlight": "One don't-miss tip",
+    "best_time": "Best season",
+    "highlight": "One tip",
     "stops": [
       {
-        "name": "Place Name",
-        "address": "City, State, Country",
-        "description": "1-2 sentences on why this stop is worth visiting",
-        "hotel": {
-          "name": "Hotel or lodging name",
-          "address": "Neighborhood or city",
-          "notes": "Brief tip"
-        },
+        "name": "Specific Attraction Name",
+        "address": "Address or City, State",
+        "description": "1 sentence on what this is",
+        "attractions": [
+          {"name": "Activity or feature", "note": "Brief tip"},
+          {"name": "Activity or feature", "note": "Brief tip"}
+        ],
+        "hotel": null,
         "restaurants": [
-          {
-            "name": "Restaurant name",
-            "cuisine": "Cuisine type",
-            "notes": "Brief tip"
-          }
+          {"name": "Restaurant name", "cuisine": "Type", "notes": "Brief tip"}
         ]
       }
     ],
     "itinerary": [
       {
         "day": 1,
-        "title": "Day 1 — Departure",
-        "stops": ["Stop Name A", "Stop Name B"],
-        "plan": "1-2 sentences on what to do and where to sleep"
+        "title": "Day 1 — Full Day Out",
+        "stops": ["Attraction A", "Attraction B"],
+        "plan": "1 sentence day flow"
       }
     ]
   }
 ]
 
 Rules:
-- Each route's stops must start AND end at the starting location (circular route)
-- Include 5-7 stops between start and end
-- Provide City, State, Country for every stop address
-- If a specific destination is requested, make sure it appears in every route
-- Tailor the route length, stops, and itinerary days to match the requested nights/duration
-- The itinerary must have exactly as many days as the number of nights + 1 (e.g. 3 nights = 4 days, last day returns home)
-- If no nights specified, use the duration or default to a 3-night trip
-- Every non-home stop must include a hotel suggestion and 1 restaurant suggestion
-- Incorporate any additional details the user provides
-- Return exactly 3 routes — be concise to stay within token limits"""
+- First and last stop = starting location
+- Include 5-7 specific named attractions between start and end
+- No hotels (day trip)
+- Each stop has 2 activities in attractions array
+- Return exactly 3 routes — be very concise"""
+    else:
+        system_prompt = """You are an expert road trip planner. Provide 3 distinct road trip routes.
+
+Return ONLY a valid JSON array (no markdown, no extra text):
+[
+  {
+    "name": "Route name",
+    "theme": "Theme description",
+    "distance": "Total distance",
+    "drive_time": "Total drive time",
+    "best_time": "Best season",
+    "highlight": "One tip",
+    "stops": [
+      {
+        "name": "City or Place Name",
+        "address": "City, State, Country",
+        "description": "1 sentence on why visit",
+        "attractions": [
+          {"name": "Attraction name", "note": "Brief tip"},
+          {"name": "Attraction name", "note": "Brief tip"}
+        ],
+        "hotel": {
+          "name": "Hotel name",
+          "address": "Neighborhood",
+          "notes": "Brief tip"
+        },
+        "restaurants": [
+          {"name": "Restaurant name", "cuisine": "Type", "notes": "Brief tip"}
+        ]
+      }
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "Day 1 — Title",
+        "stops": ["Stop A", "Stop B"],
+        "plan": "1 sentence plan"
+      }
+    ]
+  }
+]
+
+Rules:
+- Start AND end at starting location (circular route)
+- Include 4-6 stops between start and end
+- Use City, State, Country for addresses
+- If a destination is requested, include it in every route
+- Tailor stops and days to the requested nights/duration
+- Include at most 7 itinerary entries total; combine days for longer trips
+- If no nights specified, default to 3-night trip
+- Non-home stops only need hotel + attractions
+- Return exactly 3 routes — be very concise"""
 
     user_message = f"Starting location: {location}"
     if destination:
@@ -278,6 +326,71 @@ def map_view(session_id, idx):
     if not routes or idx < 0 or idx >= len(routes):
         return "Route not found. Please go back and generate routes first.", 404
     return render_template("map.html", route_json=json.dumps(routes[idx]))
+
+
+@app.route("/routes/update/<int:route_id>", methods=["POST"])
+@login_required
+def update_route(route_id):
+    saved = SavedRoute.query.get_or_404(route_id)
+    if saved.user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    new_route = request.json.get("route")
+    if not new_route:
+        return jsonify({"error": "No route data"}), 400
+    saved.route_data = json.dumps(new_route)
+    saved.name = new_route.get("name", saved.name)
+    db.session.commit()
+    return jsonify({"success": True})
+
+
+@app.route("/chat", methods=["POST"])
+def chat_route():
+    data    = request.json
+    api_key = data.get("api_key", "").strip() or DEFAULT_API_KEY
+    message = data.get("message", "").strip()
+    route   = data.get("route")
+
+    if not api_key:
+        return jsonify({"reply": "No API key available for the AI assistant."}), 400
+    if not message:
+        return jsonify({"reply": "No message provided."}), 400
+
+    client = anthropic.Anthropic(api_key=api_key)
+
+    system = """You are a helpful road trip planning assistant. The user is editing a road trip route.
+
+If the user asks to modify the route (add/remove/reorder stops, change hotels, rename route, etc.) respond ONLY with valid JSON:
+{"reply": "Brief explanation of what you changed", "updated_route": <full updated route JSON with ALL original fields preserved>}
+
+If the user is just asking a question with no route changes, respond ONLY with:
+{"reply": "Your answer here"}
+
+Preserve all fields (name, theme, distance, drive_time, best_time, highlight, stops, itinerary, maps_url) in updated_route.
+Return ONLY valid JSON. No markdown."""
+
+    user_content = f"Current route:\n{json.dumps(route)}\n\nUser: {message}"
+
+    try:
+        response = client.messages.create(
+            model="claude-opus-4-6",
+            max_tokens=3000,
+            system=system,
+            messages=[{"role": "user", "content": user_content}]
+        )
+        raw = response.content[0].text.strip()
+        if "```" in raw:
+            raw = raw.split("```", 1)[1]
+            if raw.startswith("json"): raw = raw[4:]
+            raw = raw.rsplit("```", 1)[0].strip()
+        s, e = raw.find("{"), raw.rfind("}")
+        if s != -1 and e != -1:
+            raw = raw[s:e+1]
+        result = json.loads(raw)
+        return jsonify(result)
+    except json.JSONDecodeError:
+        return jsonify({"reply": response.content[0].text[:300]})
+    except Exception as ex:
+        return jsonify({"reply": f"Error: {str(ex)}"}), 500
 
 
 if __name__ == "__main__":

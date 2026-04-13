@@ -6,294 +6,202 @@
   <title>My Routes — Road Trip Planner</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f4f0; min-height: 100vh; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f0f4f0;
-      min-height: 100vh;
-    }
-
-    /* ── NAV ── */
-    nav {
-      background: linear-gradient(135deg, #1b4332, #52b788);
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 56px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-    }
-    .nav-brand {
-      color: white;
-      font-weight: 700;
-      font-size: 1.1rem;
-      text-decoration: none;
-    }
-    .nav-right { display: flex; align-items: center; gap: 14px; }
-    .nav-link {
-      color: rgba(255,255,255,0.88);
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      padding: 6px 12px;
-      border-radius: 6px;
-      transition: background 0.15s;
-    }
+    nav { background: linear-gradient(135deg, #1b4332, #52b788); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+    .nav-brand { color: white; font-weight: 700; font-size: 1.1rem; text-decoration: none; }
+    .nav-right  { display: flex; align-items: center; gap: 14px; }
+    .nav-link   { color: rgba(255,255,255,0.88); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 6px 12px; border-radius: 6px; transition: background 0.15s; }
     .nav-link:hover { background: rgba(255,255,255,0.15); color: white; }
-    .nav-link.logout { color: rgba(255,255,255,0.7); }
 
-    /* ── PAGE HEADER ── */
-    .page-header {
-      background: white;
-      border-bottom: 1px solid #e2e8f0;
-      padding: 28px 24px 24px;
-      text-align: center;
-    }
+    .page-header { background: white; border-bottom: 1px solid #e2e8f0; padding: 28px 24px 24px; text-align: center; }
     .page-header h1 { font-size: 1.6rem; color: #1b4332; margin-bottom: 4px; }
     .page-header p  { color: #718096; font-size: 0.95rem; }
 
-    /* ── CONTENT ── */
-    .container {
-      max-width: 800px;
-      margin: 32px auto;
-      padding: 0 20px;
-    }
+    .container { max-width: 820px; margin: 32px auto; padding: 0 20px; }
 
-    /* ── EMPTY STATE ── */
-    .empty-state {
-      text-align: center;
-      padding: 64px 24px;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    }
+    .empty-state { text-align: center; padding: 64px 24px; background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
     .empty-state .icon { font-size: 3.5rem; margin-bottom: 16px; }
     .empty-state h2 { font-size: 1.3rem; color: #2d3748; margin-bottom: 8px; }
     .empty-state p  { color: #718096; font-size: 0.95rem; margin-bottom: 24px; }
-    .btn-primary {
-      display: inline-block;
-      background: linear-gradient(135deg, #1b4332, #52b788);
-      color: white;
-      text-decoration: none;
-      padding: 11px 24px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: opacity 0.2s;
-    }
+    .btn-primary { display: inline-block; background: linear-gradient(135deg, #1b4332, #52b788); color: white; text-decoration: none; padding: 11px 24px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; transition: opacity 0.2s; }
     .btn-primary:hover { opacity: 0.88; }
 
-    /* ── ROUTE CARDS ── */
     .routes-list { display: flex; flex-direction: column; gap: 16px; }
 
-    .route-card {
-      background: white;
-      border-radius: 14px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-      overflow: hidden;
-      transition: box-shadow 0.2s;
-    }
-    .route-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
-
-    .card-header {
-      background: linear-gradient(135deg, #1b4332, #52b788);
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
+    .route-card { background: white; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); overflow: hidden; }
+    .card-header { background: linear-gradient(135deg, #1b4332, #52b788); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .card-title { color: white; font-weight: 700; font-size: 1.05rem; }
     .card-date  { color: rgba(255,255,255,0.75); font-size: 0.8rem; white-space: nowrap; }
 
     .card-body { padding: 16px 20px; }
+    .card-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .badge { background: #e6f4ed; color: #276749; font-size: 0.78rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
 
-    .card-badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    .badge {
-      background: #e6f4ed;
-      color: #276749;
-      font-size: 0.78rem;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 20px;
-    }
-
-    .share-box {
-      background: #f7faff;
-      border: 1px solid #bee3f8;
-      border-radius: 8px;
-      padding: 10px 14px;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .share-box { background: #f7faff; border: 1px solid #bee3f8; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
     .share-label { font-size: 0.8rem; color: #4a5568; white-space: nowrap; font-weight: 600; }
-    .share-url {
-      flex: 1;
-      font-size: 0.8rem;
-      color: #2b6cb0;
-      word-break: break-all;
-      min-width: 0;
-    }
-    .copy-btn {
-      background: #ebf8ff;
-      border: 1px solid #bee3f8;
-      color: #2b6cb0;
-      padding: 5px 10px;
-      border-radius: 6px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.15s;
-    }
+    .share-url   { flex: 1; font-size: 0.8rem; color: #2b6cb0; word-break: break-all; min-width: 0; }
+    .copy-btn { background: #ebf8ff; border: 1px solid #bee3f8; color: #2b6cb0; padding: 5px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
     .copy-btn:hover { background: #bee3f8; }
     .copy-btn.copied { background: #c6f6d5; border-color: #9ae6b4; color: #276749; }
 
     .card-actions { display: flex; gap: 10px; }
-
-    .btn-view {
-      flex: 1;
-      display: block;
-      background: linear-gradient(135deg, #1b4332, #52b788);
-      color: white;
-      text-align: center;
-      padding: 10px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: opacity 0.2s;
-    }
+    .btn-view { flex: 1; display: block; background: linear-gradient(135deg, #1b4332, #52b788); color: white; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: opacity 0.2s; }
     .btn-view:hover { opacity: 0.88; }
-
-    .btn-delete {
-      background: #fff5f5;
-      border: 1px solid #fed7d7;
-      color: #c53030;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
+    .btn-edit { flex: 1; background: white; color: #1b4332; border: 2px solid #52b788; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+    .btn-edit:hover  { background: #e6f4ed; }
+    .btn-edit.active { background: #e6f4ed; color: #276749; }
+    .btn-delete { background: #fff5f5; border: 1px solid #fed7d7; color: #c53030; padding: 10px 16px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
     .btn-delete:hover { background: #fed7d7; }
 
-    /* ── CONFIRM OVERLAY ── */
-    .confirm-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.45);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
+    /* Edit panel */
+    .edit-panel { display: none; margin-top: 18px; background: #f8fafb; border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; }
+    .edit-panel.open { display: block; }
+    .edit-section-label { font-size: 0.78rem; font-weight: 700; color: #4a5568; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; margin-top: 16px; }
+    .edit-section-label:first-child { margin-top: 0; }
+    .edit-route-name-input { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 9px 13px; font-size: 0.97rem; font-family: inherit; color: #1a202c; }
+    .edit-route-name-input:focus { outline: none; border-color: #52b788; }
+    .edit-stops-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+    .edit-stop { display: flex; align-items: center; gap: 8px; background: white; border: 1.5px solid #e2e8f0; border-radius: 9px; padding: 10px 12px; }
+    .edit-stop-controls { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+    .edit-move-btn { width: 26px; height: 22px; background: #edf2f7; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; color: #4a5568; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+    .edit-move-btn:hover { background: #e2e8f0; }
+    .edit-stop-fields { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .edit-name-input, .edit-addr-input { border: 1.5px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; font-size: 0.9rem; font-family: inherit; color: #1a202c; width: 100%; }
+    .edit-name-input:focus, .edit-addr-input:focus { outline: none; border-color: #52b788; }
+    .edit-addr-input { font-size: 0.83rem; color: #4a5568; }
+    .edit-remove-btn { width: 28px; height: 28px; background: #fff5f5; border: 1px solid #fed7d7; border-radius: 6px; color: #e53e3e; cursor: pointer; font-size: 0.9rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .edit-remove-btn:hover { background: #fed7d7; }
+    .edit-add-btn { width: 100%; background: #f0fff4; border: 1.5px dashed #9ae6b4; border-radius: 8px; padding: 9px; color: #276749; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-bottom: 16px; }
+    .edit-add-btn:hover { background: #e6f4ed; }
+    .edit-panel-actions { display: flex; gap: 10px; }
+    .edit-apply-btn { flex: 2; background: linear-gradient(135deg, #1b4332, #52b788); color: white; border: none; border-radius: 8px; padding: 11px; font-weight: 600; font-size: 0.93rem; cursor: pointer; }
+    .edit-apply-btn:hover { opacity: 0.88; }
+    .edit-cancel-btn { flex: 1; background: #edf2f7; color: #4a5568; border: none; border-radius: 8px; padding: 11px; font-weight: 600; font-size: 0.93rem; cursor: pointer; }
+    .edit-cancel-btn:hover { background: #e2e8f0; }
+
+    /* AI Chat */
+    .ai-chat-section { margin-top: 18px; border: 1.5px solid #d6bcfa; border-radius: 10px; overflow: hidden; }
+    .ai-chat-header { background: linear-gradient(135deg, #553c9a, #805ad5); color: white; padding: 10px 14px; font-size: 0.88rem; font-weight: 600; }
+    .ai-chat-history { max-height: 200px; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; background: #faf5ff; }
+    .ai-msg { max-width: 85%; padding: 9px 12px; border-radius: 10px; font-size: 0.87rem; line-height: 1.5; }
+    .ai-msg.ai   { background: white; border: 1px solid #e9d8fd; color: #44337a; align-self: flex-start; border-radius: 10px 10px 10px 2px; }
+    .ai-msg.user { background: #805ad5; color: white; align-self: flex-end; border-radius: 10px 10px 2px 10px; }
+    .chat-apply-wrap { padding: 8px 12px; background: #faf5ff; border-top: 1px solid #e9d8fd; }
+    .chat-apply-btn { background: #553c9a; color: white; border: none; border-radius: 7px; padding: 8px 16px; font-size: 0.87rem; font-weight: 600; cursor: pointer; }
+    .chat-apply-btn:hover { opacity: 0.88; }
+    .ai-chat-input-row { display: flex; border-top: 1.5px solid #d6bcfa; }
+    .ai-chat-input { flex: 1; border: none; padding: 10px 14px; font-size: 0.9rem; font-family: inherit; background: white; color: #1a202c; }
+    .ai-chat-input:focus { outline: none; }
+    .ai-chat-send { background: #805ad5; color: white; border: none; padding: 10px 18px; font-weight: 600; font-size: 0.88rem; cursor: pointer; }
+    .ai-chat-send:hover { opacity: 0.88; }
+    .ai-chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Confirm overlay */
+    .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; align-items: center; justify-content: center; }
     .confirm-overlay.open { display: flex; }
-    .confirm-box {
-      background: white;
-      border-radius: 14px;
-      padding: 28px 32px;
-      max-width: 360px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-    }
+    .confirm-box { background: white; border-radius: 14px; padding: 28px 32px; max-width: 360px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
     .confirm-box h3 { font-size: 1.1rem; color: #2d3748; margin-bottom: 8px; }
     .confirm-box p  { color: #718096; font-size: 0.9rem; margin-bottom: 22px; }
     .confirm-btns { display: flex; gap: 10px; }
-    .confirm-btns button {
-      flex: 1;
-      padding: 10px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.92rem;
-      cursor: pointer;
-      border: none;
-    }
-    .btn-cancel-confirm {
-      background: #edf2f7;
-      color: #4a5568;
-    }
-    .btn-cancel-confirm:hover { background: #e2e8f0; }
-    .btn-delete-confirm {
-      background: #fc8181;
-      color: white;
-    }
+    .confirm-btns button { flex: 1; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.92rem; cursor: pointer; border: none; }
+    .btn-cancel-confirm { background: #edf2f7; color: #4a5568; }
+    .btn-delete-confirm { background: #fc8181; color: white; }
     .btn-delete-confirm:hover { background: #f56565; }
+
+    /* Save indicator */
+    .save-indicator { display: none; background: #e6f4ed; color: #276749; font-size: 0.85rem; font-weight: 600; padding: 8px 14px; border-radius: 7px; margin-top: 10px; text-align: center; }
   </style>
 </head>
 <body>
 
-  <!-- NAV -->
   <nav>
     <a class="nav-brand" href="/">🗺️ Road Trip Planner</a>
     <div class="nav-right">
       <a class="nav-link" href="/">Plan a Trip</a>
-      <a class="nav-link logout" href="/auth/logout">Logout</a>
+      <a class="nav-link" href="/auth/logout">Logout</a>
     </div>
   </nav>
 
-  <!-- PAGE HEADER -->
   <div class="page-header">
     <h1>My Saved Routes</h1>
-    <p>All your road trips in one place</p>
+    <p>All your road trips in one place — view, edit, and share them</p>
   </div>
 
-  <!-- CONTENT -->
   <div class="container">
     {% if routes %}
       <div class="routes-list">
         {% for r in routes %}
-          {% set data = r.route_data | tojson | safe %}
-          <div class="route-card" id="card-{{ r.id }}">
-            <div class="card-header">
-              <div class="card-title">{{ r.name }}</div>
-              <div class="card-date">{{ r.created_at.strftime('%b %d, %Y') }}</div>
-            </div>
-            <div class="card-body">
-
-              <!-- Badges from route data -->
-              <div class="card-badges" id="badges-{{ r.id }}"></div>
-
-              <!-- Share link -->
-              <div class="share-box">
-                <span class="share-label">🔗 Share:</span>
-                <span class="share-url" id="url-{{ r.id }}"></span>
-                <button class="copy-btn" onclick="copyLink('{{ r.share_id }}', this)">Copy</button>
-              </div>
-
-              <!-- Actions -->
-              <div class="card-actions">
-                <a class="btn-view" href="/share/{{ r.share_id }}">🗺️ View on Map</a>
-                <button class="btn-delete" onclick="confirmDelete({{ r.id }}, '{{ r.name | e }}')">🗑️ Delete</button>
-              </div>
-            </div>
+        <div class="route-card" id="card-{{ r.id }}">
+          <div class="card-header">
+            <div class="card-title" id="card-title-{{ r.id }}">{{ r.name }}</div>
+            <div class="card-date">{{ r.created_at.strftime('%b %d, %Y') }}</div>
           </div>
+          <div class="card-body">
 
-          <script>
-            (function() {
-              const data = {{ r.route_data | safe }};
-              const shareUrl = window.location.origin + '/share/{{ r.share_id }}';
-              document.getElementById('url-{{ r.id }}').textContent = shareUrl;
+            <div class="card-badges" id="badges-{{ r.id }}"></div>
 
-              const badgeContainer = document.getElementById('badges-{{ r.id }}');
-              [['📏', data.distance], ['🕐', data.drive_time], ['📅', data.best_time]].forEach(([icon, val]) => {
-                if (!val) return;
-                const b = document.createElement('span');
-                b.className = 'badge';
-                b.textContent = icon + ' ' + val;
-                badgeContainer.appendChild(b);
-              });
-            })();
-          </script>
+            <div class="share-box">
+              <span class="share-label">🔗 Share:</span>
+              <span class="share-url" id="url-{{ r.id }}"></span>
+              <button class="copy-btn" onclick="copyLink('{{ r.share_id }}', this)">Copy</button>
+            </div>
+
+            <div class="card-actions">
+              <a class="btn-view" href="/share/{{ r.share_id }}">🗺️ View on Map</a>
+              <button class="btn-edit" id="edit-btn-{{ r.id }}" onclick="toggleEdit({{ r.id }})">✏️ Edit</button>
+              <button class="btn-delete" onclick="confirmDelete({{ r.id }}, '{{ r.name | e }}')">🗑️</button>
+            </div>
+
+            <div class="edit-panel" id="edit-panel-{{ r.id }}">
+              <div class="edit-section-label">Route Name</div>
+              <input class="edit-route-name-input" id="edit-name-{{ r.id }}" placeholder="Route name"/>
+              <div class="edit-section-label">Stops — reorder, edit, or remove</div>
+              <div class="edit-stops-list" id="edit-stops-{{ r.id }}"></div>
+              <button class="edit-add-btn" onclick="addStop({{ r.id }})">+ Add Stop</button>
+              <div class="edit-panel-actions">
+                <button class="edit-apply-btn" onclick="saveEdit({{ r.id }})">💾 Save Changes</button>
+                <button class="edit-cancel-btn" onclick="cancelEdit({{ r.id }})">Cancel</button>
+              </div>
+              <div class="save-indicator" id="save-indicator-{{ r.id }}">✓ Changes saved!</div>
+
+              <div class="ai-chat-section">
+                <div class="ai-chat-header">🤖 AI Route Assistant — describe changes in plain English</div>
+                <div class="ai-chat-history" id="chat-history-{{ r.id }}">
+                  <div class="ai-msg ai">Hi! Tell me what to change — e.g. "add a stop in Lyon" or "swap stops 2 and 3".</div>
+                </div>
+                <div class="chat-apply-wrap" id="chat-apply-{{ r.id }}" style="display:none"></div>
+                <div class="ai-chat-input-row">
+                  <input class="ai-chat-input" id="chat-input-{{ r.id }}" placeholder="Ask me to modify this route…" onkeydown="if(event.key==='Enter') sendChat({{ r.id }})"/>
+                  <button class="ai-chat-send" id="chat-send-{{ r.id }}" onclick="sendChat({{ r.id }})">Send</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <script>
+          (function() {
+            const rid   = {{ r.id }};
+            const data  = {{ r.route_data | safe }};
+            const shareUrl = window.location.origin + '/share/{{ r.share_id }}';
+            document.getElementById('url-' + rid).textContent = shareUrl;
+
+            // Badges
+            const bc = document.getElementById('badges-' + rid);
+            [['📏', data.distance], ['🕐', data.drive_time], ['📅', data.best_time]].forEach(([icon, val]) => {
+              if (!val) return;
+              const b = document.createElement('span');
+              b.className = 'badge';
+              b.textContent = icon + ' ' + val;
+              bc.appendChild(b);
+            });
+
+            // Store route data for editing
+            savedRoutes[rid] = data;
+          })();
+        </script>
         {% endfor %}
       </div>
     {% else %}
@@ -306,7 +214,6 @@
     {% endif %}
   </div>
 
-  <!-- DELETE CONFIRM DIALOG -->
   <div class="confirm-overlay" id="confirm-overlay" onclick="closeConfirm(event)">
     <div class="confirm-box">
       <h3>Delete Route?</h3>
@@ -319,44 +226,219 @@
   </div>
 
   <script>
-    let pendingDeleteId = null;
+    const savedRoutes = {};
 
+    function escHtml(s) {
+      return (s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function buildEditStopsHtml(stops) {
+      return (stops || []).map(stop => `
+        <div class="edit-stop">
+          <div class="edit-stop-controls">
+            <button class="edit-move-btn" onclick="moveStop(this,-1)">↑</button>
+            <button class="edit-move-btn" onclick="moveStop(this,1)">↓</button>
+          </div>
+          <div class="edit-stop-fields">
+            <input class="edit-name-input" value="${escHtml(stop.name)}" placeholder="Place name"/>
+            <input class="edit-addr-input" value="${escHtml(stop.address)}" placeholder="City, State, Country"/>
+          </div>
+          <button class="edit-remove-btn" onclick="removeStop(this)">✕</button>
+        </div>`).join('');
+    }
+
+    function moveStop(btn, dir) {
+      const row = btn.closest('.edit-stop');
+      const p   = row.parentElement;
+      if (dir === -1) { const prev = row.previousElementSibling; if (prev) p.insertBefore(row, prev); }
+      else            { const next = row.nextElementSibling;     if (next) p.insertBefore(next, row); }
+    }
+
+    function removeStop(btn) {
+      const list = btn.closest('.edit-stops-list');
+      if (list.querySelectorAll('.edit-stop').length <= 2) { alert('A route needs at least 2 stops.'); return; }
+      btn.closest('.edit-stop').remove();
+    }
+
+    function addStop(rid) {
+      const list = document.getElementById('edit-stops-' + rid);
+      const div  = document.createElement('div');
+      div.className = 'edit-stop';
+      div.innerHTML = `
+        <div class="edit-stop-controls">
+          <button class="edit-move-btn" onclick="moveStop(this,-1)">↑</button>
+          <button class="edit-move-btn" onclick="moveStop(this,1)">↓</button>
+        </div>
+        <div class="edit-stop-fields">
+          <input class="edit-name-input" value="" placeholder="Place name"/>
+          <input class="edit-addr-input" value="" placeholder="City, State, Country"/>
+        </div>
+        <button class="edit-remove-btn" onclick="removeStop(this)">✕</button>`;
+      const rows = list.querySelectorAll('.edit-stop');
+      list.insertBefore(div, rows[rows.length - 1] || null);
+    }
+
+    function toggleEdit(rid) {
+      const panel = document.getElementById('edit-panel-' + rid);
+      const btn   = document.getElementById('edit-btn-' + rid);
+      const isOpen = panel.classList.toggle('open');
+      btn.classList.toggle('active', isOpen);
+      if (isOpen) {
+        const route = savedRoutes[rid];
+        if (route) {
+          document.getElementById('edit-name-' + rid).value = route.name || '';
+          document.getElementById('edit-stops-' + rid).innerHTML = buildEditStopsHtml(route.stops);
+        }
+      }
+    }
+
+    function cancelEdit(rid) {
+      document.getElementById('edit-panel-' + rid).classList.remove('open');
+      document.getElementById('edit-btn-' + rid).classList.remove('active');
+    }
+
+    async function saveEdit(rid) {
+      const nameVal = document.getElementById('edit-name-' + rid).value.trim();
+      const rows    = document.getElementById('edit-stops-' + rid).querySelectorAll('.edit-stop');
+
+      const origMap = {};
+      (savedRoutes[rid].stops || []).forEach(s => { origMap[s.name.trim().toLowerCase()] = s; });
+
+      const newStops = Array.from(rows).map(row => {
+        const name = row.querySelector('.edit-name-input').value.trim();
+        const addr = row.querySelector('.edit-addr-input').value.trim();
+        if (!name && !addr) return null;
+        const orig = origMap[name.toLowerCase()] || {};
+        return { name: name || addr, address: addr || name,
+                 description: orig.description || '',
+                 attractions: orig.attractions || [],
+                 hotel: orig.hotel || null,
+                 restaurants: orig.restaurants || [] };
+      }).filter(Boolean);
+
+      if (newStops.length < 2) { alert('Please include at least 2 stops.'); return; }
+
+      const updated = Object.assign({}, savedRoutes[rid], {
+        name: nameVal || savedRoutes[rid].name,
+        stops: newStops,
+        maps_url: 'https://www.google.com/maps/dir/' + newStops.map(s => encodeURIComponent(s.address)).join('/')
+      });
+
+      try {
+        const res = await fetch('/routes/update/' + rid, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ route: updated })
+        });
+        const data = await res.json();
+        if (data.success) {
+          savedRoutes[rid] = updated;
+          // Update visible title
+          const t = document.getElementById('card-title-' + rid);
+          if (t) t.textContent = updated.name;
+
+          const ind = document.getElementById('save-indicator-' + rid);
+          ind.style.display = 'block';
+          setTimeout(() => { ind.style.display = 'none'; cancelEdit(rid); }, 2000);
+        } else {
+          alert('Error saving: ' + (data.error || 'unknown'));
+        }
+      } catch(e) {
+        alert('Network error saving changes.');
+      }
+    }
+
+    // AI Chat
+    function appendMsg(rid, role, text) {
+      const hist = document.getElementById('chat-history-' + rid);
+      const div  = document.createElement('div');
+      div.className = 'ai-msg ' + role;
+      div.textContent = text;
+      hist.appendChild(div);
+      hist.scrollTop = hist.scrollHeight;
+      return div;
+    }
+
+    async function sendChat(rid) {
+      const input   = document.getElementById('chat-input-' + rid);
+      const sendBtn = document.getElementById('chat-send-' + rid);
+      const msg     = input.value.trim();
+      if (!msg) return;
+
+      sendBtn.disabled = true;
+      input.value = '';
+      appendMsg(rid, 'user', msg);
+      const thinkEl = appendMsg(rid, 'ai', '…');
+
+      try {
+        const res  = await fetch('/chat', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ message: msg, route: savedRoutes[rid] })
+        });
+        const data = await res.json();
+        thinkEl.textContent = data.reply || 'Done!';
+
+        const wrap = document.getElementById('chat-apply-' + rid);
+        if (data.updated_route) {
+          wrap._pending = data.updated_route;
+          wrap.style.display = 'block';
+          wrap.innerHTML = `<button class="chat-apply-btn" onclick="applyChatChange(${rid})">✓ Apply AI Changes</button>`;
+        } else {
+          wrap.style.display = 'none';
+        }
+      } catch(e) {
+        thinkEl.textContent = 'Error reaching AI assistant.';
+      }
+      sendBtn.disabled = false;
+    }
+
+    function applyChatChange(rid) {
+      const wrap    = document.getElementById('chat-apply-' + rid);
+      const updated = wrap._pending;
+      if (!updated) return;
+
+      Object.assign(savedRoutes[rid], updated);
+      document.getElementById('edit-name-' + rid).value = savedRoutes[rid].name || '';
+      document.getElementById('edit-stops-' + rid).innerHTML = buildEditStopsHtml(savedRoutes[rid].stops);
+
+      const t = document.getElementById('card-title-' + rid);
+      if (t) t.textContent = savedRoutes[rid].name;
+
+      wrap.innerHTML = '<div style="color:#553c9a;font-size:0.85rem;padding:4px 0;">✓ Changes applied — click Save Changes to keep them.</div>';
+      wrap._pending = null;
+      setTimeout(() => { wrap.style.display = 'none'; }, 4000);
+    }
+
+    // Delete
     function confirmDelete(id, name) {
-      pendingDeleteId = id;
       document.getElementById('confirm-msg').textContent = `"${name}" will be permanently deleted.`;
       document.getElementById('confirm-overlay').classList.add('open');
       document.getElementById('confirm-delete-btn').onclick = () => deleteRoute(id);
     }
-
-    function closeConfirm(e) {
-      if (e.target === document.getElementById('confirm-overlay')) closeConfirmDirect();
-    }
-    function closeConfirmDirect() {
-      document.getElementById('confirm-overlay').classList.remove('open');
-      pendingDeleteId = null;
-    }
+    function closeConfirm(e) { if (e.target === document.getElementById('confirm-overlay')) closeConfirmDirect(); }
+    function closeConfirmDirect() { document.getElementById('confirm-overlay').classList.remove('open'); }
 
     async function deleteRoute(id) {
       closeConfirmDirect();
-      const res = await fetch(`/routes/delete/${id}`, { method: 'POST' });
+      const res = await fetch('/routes/delete/' + id, { method: 'POST' });
       if (res.ok) {
-        const card = document.getElementById(`card-${id}`);
+        const card = document.getElementById('card-' + id);
         card.style.transition = 'opacity 0.3s, transform 0.3s';
         card.style.opacity = '0';
         card.style.transform = 'translateY(-8px)';
         setTimeout(() => {
           card.remove();
-          const remaining = document.querySelectorAll('.route-card');
-          if (remaining.length === 0) location.reload();
+          if (!document.querySelector('.route-card')) location.reload();
         }, 300);
       } else {
-        alert('Failed to delete route. Please try again.');
+        alert('Failed to delete. Please try again.');
       }
     }
 
+    // Copy link
     function copyLink(shareId, btn) {
-      const url = window.location.origin + '/share/' + shareId;
-      navigator.clipboard.writeText(url).then(() => {
+      navigator.clipboard.writeText(window.location.origin + '/share/' + shareId).then(() => {
         btn.textContent = 'Copied!';
         btn.classList.add('copied');
         setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
