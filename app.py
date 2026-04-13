@@ -279,6 +279,13 @@ Rules:
 - Non-home stops only need hotel + attractions
 - Return exactly 3 routes — be very concise"""
 
+    # For long trips, add an explicit compression instruction
+    nights_int = 0
+    try:
+        nights_int = int(nights) if nights else 0
+    except ValueError:
+        pass
+
     user_message = f"Starting location: {location}"
     if destination:
         user_message += f"\nMust include: {destination}"
@@ -289,10 +296,14 @@ Rules:
     if extra_info:
         user_message += f"\nDetails: {extra_info}"
 
+    # Long trips: fewer stops, shorter text, grouped itinerary days to stay under token limit
+    if nights_int >= 7:
+        user_message += f"\nIMPORTANT: This is a {nights_int}-night trip. Use max 5 stops total. Limit each description/note to 1 short sentence. Group every 2-3 nights into a single itinerary entry (so max 5 itinerary entries total). Be extremely concise — every extra word risks truncating the JSON."
+
     try:
         response = client.messages.create(
             model="claude-opus-4-6",
-            max_tokens=8000,
+            max_tokens=6000,
             system=system_prompt,
             messages=[{"role": "user", "content": user_message}]
         )

@@ -341,7 +341,17 @@
 
       try {
         const res  = await fetch('/recommend', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-        const data = await res.json();
+        let data;
+        const text = await res.text();
+        try {
+          data = JSON.parse(text);
+        } catch(_) {
+          // Server returned HTML (crash or timeout)
+          if (res.status === 504 || res.status === 502) {
+            throw new Error('The server timed out — try fewer nights or a shorter trip.');
+          }
+          throw new Error('Server error. This usually means the trip is too long to generate at once — try reducing the number of nights.');
+        }
         if (!res.ok) throw new Error(data.error || 'Something went wrong.');
         currentRoutes    = data.routes;
         currentSessionId = data.session_id;
