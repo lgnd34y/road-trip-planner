@@ -322,9 +322,12 @@ Rules:
 
 @app.route("/map/<session_id>/<int:idx>")
 def map_view(session_id, idx):
+    # "inline" means route data is carried in the URL hash — just serve the shell
+    if session_id == "inline":
+        return render_template("map.html", route_json="null")
     routes = route_store.get(session_id)
     if not routes or idx < 0 or idx >= len(routes):
-        return "Route not found. Please go back and generate routes first.", 404
+        return render_template("map.html", route_json="null")
     return render_template("map.html", route_json=json.dumps(routes[idx]))
 
 

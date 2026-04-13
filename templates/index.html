@@ -520,7 +520,7 @@
               </div>
             </div>
             <div class="card-actions">
-              <a class="maps-btn" href="/map/${sessionId}/${i}" target="_blank">🗺️ View Route on Map</a>
+              <a class="maps-btn" href="#" target="_blank" id="map-btn-${i}" onclick="openMap(event,${i})">🗺️ View Route on Map</a>
               <button class="save-btn" id="save-btn-${i}" onclick="handleSave(${i})">💾 Save Route</button>
               <button class="edit-btn" id="edit-btn-${i}" onclick="toggleEdit(${i})">✏️ Edit Route</button>
             </div>
@@ -557,6 +557,12 @@
 
         resultsDiv.appendChild(card);
       });
+    }
+
+    function openMap(e, i) {
+      e.preventDefault();
+      const hash = btoa(unescape(encodeURIComponent(JSON.stringify(currentRoutes[i]))));
+      window.open('/map/inline/0#' + hash, '_blank');
     }
 
     function toggleCard(card) { card.classList.toggle('open'); }

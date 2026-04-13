@@ -251,7 +251,18 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const route  = {{ route_json | safe }};
+    // Prefer hash-encoded route data (passed from main page) over server-side data
+    let route;
+    if (window.location.hash && window.location.hash.length > 1) {
+      try {
+        route = JSON.parse(decodeURIComponent(escape(atob(window.location.hash.slice(1)))));
+      } catch(e) {}
+    }
+    if (!route) route = {{ route_json | safe }};
+    if (!route) {
+      document.body.innerHTML = '<p style="padding:40px;font-family:sans-serif">Route data not found. Please go back and generate routes again.</p>';
+      throw new Error('No route data');
+    }
     const stops  = route.stops;
     const coords = new Array(stops.length).fill(null);
     const markers = new Array(stops.length).fill(null);
