@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Road Trip Itinerary</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      color: #1a202c;
+      background: white;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 48px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* ── Screen-only controls ── */
+    .screen-controls {
+      background: #1b4332;
+      color: white;
+      padding: 14px 20px;
+      border-radius: 10px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .screen-controls span { font-family: -apple-system, sans-serif; font-size: 0.9rem; }
+    .print-now-btn {
+      background: #52b788;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      padding: 9px 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: -apple-system, sans-serif;
+    }
+    .print-now-btn:hover { background: #40a074; }
+    .back-link {
+      color: rgba(255,255,255,0.8);
+      font-family: -apple-system, sans-serif;
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+    .back-link:hover { color: white; }
+
+    /* ── Header ── */
+    .itinerary-header {
+      border-bottom: 3px solid #1b4332;
+      padding-bottom: 18px;
+      margin-bottom: 24px;
+    }
+    .itinerary-header h1 {
+      font-size: 2rem;
+      color: #1b4332;
+      margin-bottom: 4px;
+    }
+    .itinerary-header .theme {
+      font-size: 1rem;
+      color: #4a5568;
+      font-style: italic;
+    }
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 12px;
+    }
+    .meta-item { font-size: 0.88rem; color: #4a5568; }
+    .meta-item strong { color: #1b4332; }
+
+    .highlight-box {
+      background: #fffbea;
+      border-left: 4px solid #f6ad55;
+      padding: 10px 14px;
+      margin: 18px 0;
+      font-size: 0.9rem;
+      color: #744210;
+      border-radius: 0 6px 6px 0;
+    }
+    .highlight-box strong { color: #c05621; }
+
+    /* ── Section headings ── */
+    h2 {
+      font-size: 1.1rem;
+      color: #1b4332;
+      border-bottom: 1.5px solid #c6f6d5;
+      padding-bottom: 5px;
+      margin: 28px 0 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* ── Itinerary days ── */
+    .day {
+      margin-bottom: 20px;
+      padding: 14px 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      break-inside: avoid;
+    }
+    .day-header {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .day-num {
+      background: #1b4332;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 12px;
+      font-family: -apple-system, sans-serif;
+      white-space: nowrap;
+    }
+    .day-title { font-weight: 700; font-size: 0.97rem; color: #2d3748; font-family: -apple-system, sans-serif; }
+    .day-stops-preview { font-size: 0.82rem; color: #718096; margin-bottom: 6px; font-family: -apple-system, sans-serif; }
+    .day-plan { font-size: 0.9rem; color: #4a5568; }
+
+    /* ── Stops list ── */
+    .stop {
+      margin-bottom: 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #e2e8f0;
+      break-inside: avoid;
+    }
+    .stop:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .stop-header-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .stop-num {
+      background: #52b788;
+      color: white;
+      font-size: 0.72rem;
+      font-weight: 700;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-family: -apple-system, sans-serif;
+    }
+    .stop-num.endpoint { background: #1b4332; }
+    .stop-name { font-weight: 700; font-size: 1rem; color: #2d3748; }
+    .stop-address { font-size: 0.82rem; color: #718096; margin-bottom: 4px; font-family: -apple-system, sans-serif; }
+    .stop-label { font-size: 0.72rem; color: #52b788; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-family: -apple-system, sans-serif; }
+    .stop-desc { font-size: 0.88rem; color: #4a5568; margin: 6px 0; }
+
+    .extras-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .extras-col {}
+    .extras-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 5px;
+      font-family: -apple-system, sans-serif;
+    }
+    .hotel-block { font-size: 0.85rem; }
+    .hotel-name { font-weight: 600; color: #276749; }
+    .hotel-addr { color: #718096; font-size: 0.8rem; }
+    .hotel-notes { color: #4a5568; font-size: 0.8rem; font-style: italic; }
+
+    .attractions-list { list-style: none; }
+    .attractions-list li { font-size: 0.85rem; color: #4a5568; padding: 1px 0; }
+    .attractions-list li::before { content: "• "; color: #52b788; font-weight: 700; }
+
+    .restaurant-block { font-size: 0.85rem; margin-bottom: 4px; }
+    .restaurant-name { font-weight: 600; color: #744210; }
+    .restaurant-cuisine { font-size: 0.75rem; color: #975a16; font-style: italic; }
+    .restaurant-notes { color: #4a5568; font-size: 0.8rem; }
+
+    /* ── Maps link ── */
+    .maps-link-section {
+      margin-top: 28px;
+      padding: 14px 16px;
+      border: 1.5px solid #c6f6d5;
+      border-radius: 8px;
+      background: #f0fff4;
+      font-family: -apple-system, sans-serif;
+    }
+    .maps-link-section p { font-size: 0.85rem; color: #276749; margin-bottom: 4px; font-weight: 600; }
+    .maps-link-section a { font-size: 0.8rem; color: #2b6cb0; word-break: break-all; }
+
+    /* ── Footer ── */
+    .print-footer {
+      margin-top: 36px;
+      padding-top: 14px;
+      border-top: 1px solid #e2e8f0;
+      font-size: 0.78rem;
+      color: #a0aec0;
+      text-align: center;
+      font-family: -apple-system, sans-serif;
+    }
+
+    /* ── Loading / error ── */
+    .loading {
+      text-align: center;
+      padding: 80px 20px;
+      color: #718096;
+      font-family: -apple-system, sans-serif;
+    }
+
+    /* ── Print styles ── */
+    @media print {
+      body { padding: 20px 28px; font-size: 12px; }
+      .screen-controls { display: none !important; }
+      .day, .stop { break-inside: avoid; }
+      h2 { break-after: avoid; }
+      a { color: #2b6cb0 !important; }
+      @page { margin: 1.5cm; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="screen-controls" id="screen-controls">
+    <a class="back-link" href="javascript:history.back()">← Back</a>
+    <span>🖨️ Ready to print your itinerary</span>
+    <button class="print-now-btn" onclick="window.print()">Print / Save as PDF</button>
+  </div>
+
+  <div id="content"><div class="loading">Loading itinerary…</div></div>
+
+  <script>
+    function escHtml(s) {
+      return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function render(route) {
+      document.title = route.name + ' — Road Trip Itinerary';
+
+      const stops = route.stops || [];
+      const days  = route.itinerary || [];
+
+      // ── Stops HTML ──
+      const stopsHtml = stops.map((stop, j) => {
+        const isEnd = j === 0 || j === stops.length - 1;
+        const label = j === 0 ? 'Start / End' : isEnd ? 'Return Home' : `Stop ${j}`;
+
+        // Attractions
+        let attractHtml = '';
+        if (stop.attractions && stop.attractions.length) {
+          const items = stop.attractions.map(a =>
+            `<li>${escHtml(a.name)}${a.note ? ' — <em>' + escHtml(a.note) + '</em>' : ''}</li>`
+          ).join('');
+          attractHtml = `
+            <div class="extras-col">
+              <div class="extras-label">🎯 Things to Do</div>
+              <ul class="attractions-list">${items}</ul>
+            </div>`;
+        }
+
+        // Hotel
+        let hotelHtml = '';
+        if (stop.hotel && stop.hotel.name && !isEnd) {
+          hotelHtml = `
+            <div class="extras-col">
+              <div class="extras-label">🏨 Where to Stay</div>
+              <div class="hotel-block">
+                <div class="hotel-name">${escHtml(stop.hotel.name)}</div>
+                ${stop.hotel.address ? `<div class="hotel-addr">${escHtml(stop.hotel.address)}</div>` : ''}
+                ${stop.hotel.notes   ? `<div class="hotel-notes">${escHtml(stop.hotel.notes)}</div>`  : ''}
+              </div>
+            </div>`;
+        }
+
+        // Restaurants
+        let restHtml = '';
+        if (stop.restaurants && stop.restaurants.length) {
+          const cards = stop.restaurants.map(r => `
+            <div class="restaurant-block">
+              <span class="restaurant-name">${escHtml(r.name)}</span>
+              ${r.cuisine ? `<span class="restaurant-cuisine"> · ${escHtml(r.cuisine)}</span>` : ''}
+              ${r.notes   ? `<div class="restaurant-notes">${escHtml(r.notes)}</div>` : ''}
+            </div>`).join('');
+          restHtml = `
+            <div class="extras-col">
+              <div class="extras-label">🍽️ Where to Eat</div>
+              ${cards}
+            </div>`;
+        }
+
+        const extrasHtml = (attractHtml || hotelHtml || restHtml)
+          ? `<div class="extras-grid">${attractHtml}${hotelHtml}${restHtml}</div>` : '';
+
+        return `
+          <div class="stop">
+            <div class="stop-header-row">
+              <span class="stop-num ${isEnd ? 'endpoint' : ''}">${isEnd ? '⬛' : j}</span>
+              <span class="stop-name">${escHtml(stop.name)}</span>
+            </div>
+            <div class="stop-address">${escHtml(stop.address)}</div>
+            <div class="stop-label">${label}</div>
+            ${stop.description ? `<div class="stop-desc">${escHtml(stop.description)}</div>` : ''}
+            ${extrasHtml}
+          </div>`;
+      }).join('');
+
+      // ── Itinerary days HTML ──
+      const daysHtml = days.map(day => `
+        <div class="day">
+          <div class="day-header">
+            <span class="day-num">Day ${day.day}</span>
+            <span class="day-title">${escHtml(day.title)}</span>
+          </div>
+          ${day.stops && day.stops.length ? `<div class="day-stops-preview">${day.stops.map(s => escHtml(s)).join(' → ')}</div>` : ''}
+          ${day.plan ? `<div class="day-plan">${escHtml(day.plan)}</div>` : ''}
+        </div>`).join('');
+
+      document.getElementById('content').innerHTML = `
+        <div class="itinerary-header">
+          <h1>${escHtml(route.name)}</h1>
+          <div class="theme">${escHtml(route.theme || '')}</div>
+          <div class="meta-row">
+            ${route.distance  ? `<div class="meta-item"><strong>📏 Distance:</strong> ${escHtml(route.distance)}</div>`  : ''}
+            ${route.drive_time? `<div class="meta-item"><strong>🕐 Drive time:</strong> ${escHtml(route.drive_time)}</div>`:''}
+            ${route.best_time ? `<div class="meta-item"><strong>📅 Best time:</strong> ${escHtml(route.best_time)}</div>` : ''}
+          </div>
+        </div>
+
+        ${route.highlight ? `<div class="highlight-box"><strong>⭐ Don't Miss:</strong> ${escHtml(route.highlight)}</div>` : ''}
+
+        ${daysHtml ? `<h2>Day-by-Day Itinerary</h2>${daysHtml}` : ''}
+
+        <h2>All Stops</h2>
+        ${stopsHtml}
+
+        ${route.maps_url ? `
+          <div class="maps-link-section">
+            <p>🗺️ Open full route in Google Maps:</p>
+            <a href="${escHtml(route.maps_url)}">${escHtml(route.maps_url)}</a>
+          </div>` : ''}
+
+        <div class="print-footer">
+          Generated by Road Trip Planner &nbsp;·&nbsp; roadtripplanner.app
+        </div>`;
+    }
+
+    // Load route from URL hash
+    if (window.location.hash && window.location.hash.length > 1) {
+      try {
+        const route = JSON.parse(decodeURIComponent(escape(atob(window.location.hash.slice(1)))));
+        render(route);
+      } catch(e) {
+        document.getElementById('content').innerHTML =
+          '<div class="loading">Could not load itinerary data. Please go back and try again.</div>';
+      }
+    } else {
+      document.getElementById('content').innerHTML =
+        '<div class="loading">No itinerary data found. Please go back and use the Print button on a route.</div>';
+    }
+  </script>
+</body>
+</html>

@@ -168,6 +168,7 @@
               <button class="btn-edit"   id="edit-btn-{{ r.id }}"   onclick="toggleEdit({{ r.id }})">✏️ Edit</button>
               <button class="btn-copy"   id="copy-btn-{{ r.id }}"   onclick="copyRoute({{ r.id }})">📋 Copy</button>
               <button class="btn-invite" id="invite-btn-{{ r.id }}" onclick="toggleInvite({{ r.id }})">👥 Invite</button>
+              <button class="btn-copy"   onclick="printRoute({{ r.id }})" title="Print itinerary">🖨️</button>
               <button class="btn-delete" onclick="confirmDelete({{ r.id }}, '{{ r.name | e }}')">🗑️</button>
             </div>
 
@@ -463,6 +464,14 @@
       } else {
         alert('Failed to delete. Please try again.');
       }
+    }
+
+    // Print itinerary
+    function printRoute(rid) {
+      const route = savedRoutes[rid];
+      if (!route) return;
+      const hash = btoa(unescape(encodeURIComponent(JSON.stringify(route))));
+      window.open('/print#' + hash, '_blank');
     }
 
     // Copy share link

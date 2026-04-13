@@ -147,6 +147,11 @@ def share_route(share_id):
     return render_template("map.html", route_json=saved.route_data)
 
 
+@app.route("/print")
+def print_view():
+    return render_template("print.html")
+
+
 # ── Main ─────────────────────────────────────────────────────
 @app.route("/")
 def index():
