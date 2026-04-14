@@ -438,7 +438,12 @@
     <div class="nav-right">
       {% if current_user.is_authenticated %}
         <span class="nav-user">Hi, {{ current_user.username }}</span>
-        <a class="nav-link" href="/routes/saved">My Routes</a>
+        <a class="nav-link" href="/routes/saved" style="position:relative">
+          My Routes
+          {% if inbox_count > 0 %}
+          <span style="position:absolute;top:-4px;right:-8px;background:#ef4444;color:white;font-size:10px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1">{{ inbox_count }}</span>
+          {% endif %}
+        </a>
         <a class="nav-link" href="/auth/logout">Logout</a>
       {% else %}
         <button class="nav-btn" onclick="openModal('login')">Log In</button>
@@ -495,6 +500,22 @@
   <div id="loader"><div class="spinner"></div><span>Planning your road trips…</span></div>
   <div id="error-box"><div class="error-inner" id="error-inner"></div></div>
   <div id="results"></div>
+
+  <!-- SHARE TO USER MODAL -->
+  <div class="modal-backdrop" id="share-to-modal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeIndexShareModal()">×</button>
+      <h2>Send to a user</h2>
+      <p>Enter their username — the route will appear in their inbox on My Routes.</p>
+      <div class="modal-error" id="share-to-error"></div>
+      <div class="modal-field">
+        <label>Username</label>
+        <input type="text" id="share-to-username" placeholder="e.g. john123" autocomplete="off"
+               onkeydown="if(event.key==='Enter') submitIndexShare()"/>
+      </div>
+      <button class="modal-submit" id="share-to-submit" onclick="submitIndexShare()">Send Route</button>
+    </div>
+  </div>
 
   <!-- GLOBAL AI CHAT WIDGET -->
   <button class="gchat-btn" id="gchat-btn" onclick="toggleGlobalChat()" title="AI Travel Assistant">
@@ -783,8 +804,9 @@
             </div>
             <div class="card-actions">
               <a class="maps-btn" href="#" target="_blank" id="map-btn-${i}" onclick="openMap(event,${i})">🗺️ View Route on Map</a>
-              <button class="save-btn" id="save-btn-${i}" onclick="handleSave(${i})">💾 Save Route</button>
-              <button class="edit-btn" id="edit-btn-${i}" onclick="toggleEdit(${i})">✏️ Edit Route</button>
+              <button class="save-btn" id="save-btn-${i}" onclick="handleSave(${i})">💾 Save</button>
+              <button class="edit-btn" id="share-to-btn-${i}" onclick="openIndexShareModal(${i})">↗ Send</button>
+              <button class="edit-btn" id="edit-btn-${i}" onclick="toggleEdit(${i})">✏️ Edit</button>
               <button class="edit-btn" onclick="openPrint(${i})" title="Print itinerary">🖨️</button>
             </div>
             <div class="share-box" id="share-box-${i}">
@@ -1219,6 +1241,61 @@
     // Mark chat button with indicator dot when routes are available
     function markGchatReady() {
       document.getElementById('gchat-btn').classList.add('has-routes');
+    }
+
+    // ── Share-to-user (index page) ──
+    let _shareToRouteIdx = null;
+
+    function openIndexShareModal(i) {
+      if (!isLoggedIn) { openModal('login'); return; }
+      _shareToRouteIdx = i;
+      document.getElementById('share-to-username').value = '';
+      document.getElementById('share-to-error').style.display = 'none';
+      document.getElementById('share-to-error').textContent = '';
+      const btn = document.getElementById('share-to-submit');
+      btn.disabled = false;
+      btn.textContent = 'Send Route';
+      document.getElementById('share-to-modal').classList.add('open');
+      setTimeout(() => document.getElementById('share-to-username').focus(), 80);
+    }
+
+    function closeIndexShareModal() {
+      document.getElementById('share-to-modal').classList.remove('open');
+      _shareToRouteIdx = null;
+    }
+
+    document.getElementById('share-to-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('share-to-modal')) closeIndexShareModal();
+    });
+
+    async function submitIndexShare() {
+      const username = document.getElementById('share-to-username').value.trim();
+      const errEl    = document.getElementById('share-to-error');
+      const btn      = document.getElementById('share-to-submit');
+
+      errEl.style.display = 'none';
+      if (!username) { errEl.textContent = 'Please enter a username.'; errEl.style.display = 'block'; return; }
+      if (_shareToRouteIdx === null) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+
+      try {
+        const res  = await fetch('/routes/share-to-user', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ username, route: currentRoutes[_shareToRouteIdx] })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Something went wrong.');
+        btn.textContent = `✓ Sent to ${data.to}!`;
+        setTimeout(() => closeIndexShareModal(), 1800);
+      } catch(e) {
+        errEl.textContent = e.message;
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Send Route';
+      }
     }
   </script>
 </body>

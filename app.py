@@ -45,6 +45,17 @@ class SavedRoute(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class SharedRoute(db.Model):
+    """A route sent from one user directly to another user's inbox."""
+    id            = db.Column(db.Integer, primary_key=True)
+    from_user_id  = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    to_user_id    = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    from_username = db.Column(db.String(80),  nullable=False)   # denormalised for easy display
+    route_name    = db.Column(db.String(200), nullable=False)
+    route_data    = db.Column(db.Text,        nullable=False)
+    created_at    = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -127,7 +138,9 @@ def save_route():
 def saved_routes():
     routes = SavedRoute.query.filter_by(user_id=current_user.id)\
                              .order_by(SavedRoute.created_at.desc()).all()
-    return render_template("saved.html", routes=routes)
+    inbox  = SharedRoute.query.filter_by(to_user_id=current_user.id)\
+                              .order_by(SharedRoute.created_at.desc()).all()
+    return render_template("saved.html", routes=routes, inbox=inbox)
 
 
 @app.route("/routes/delete/<int:route_id>", methods=["POST"])
@@ -137,6 +150,68 @@ def delete_route(route_id):
     if route.user_id != current_user.id:
         return jsonify({"error": "Unauthorized"}), 403
     db.session.delete(route)
+    db.session.commit()
+    return jsonify({"success": True})
+
+
+@app.route("/routes/share-to-user", methods=["POST"])
+@login_required
+def share_to_user():
+    data     = request.json
+    username = data.get("username", "").strip().lower()
+    route    = data.get("route")
+
+    if not username or not route:
+        return jsonify({"error": "Username and route are required"}), 400
+
+    target = User.query.filter(
+        db.func.lower(User.username) == username
+    ).first()
+    if not target:
+        return jsonify({"error": f"No account found with username \"{username}\""}), 404
+    if target.id == current_user.id:
+        return jsonify({"error": "You can't share a route with yourself"}), 400
+
+    shared = SharedRoute(
+        from_user_id  = current_user.id,
+        to_user_id    = target.id,
+        from_username = current_user.username,
+        route_name    = route.get("name", "Shared Route"),
+        route_data    = json.dumps(route)
+    )
+    db.session.add(shared)
+    db.session.commit()
+    return jsonify({"success": True, "to": target.username})
+
+
+@app.route("/routes/inbox/save/<int:shared_id>", methods=["POST"])
+@login_required
+def inbox_save(shared_id):
+    shared = SharedRoute.query.get_or_404(shared_id)
+    if shared.to_user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    saved = SavedRoute(
+        user_id    = current_user.id,
+        share_id   = str(uuid.uuid4())[:10],
+        name       = shared.route_name,
+        route_data = shared.route_data
+    )
+    db.session.add(saved)
+    db.session.delete(shared)
+    db.session.commit()
+    return jsonify({"success": True, "id": saved.id, "name": saved.name,
+                    "share_id": saved.share_id,
+                    "created_at": saved.created_at.strftime("%b %d, %Y")})
+
+
+@app.route("/routes/inbox/dismiss/<int:shared_id>", methods=["POST"])
+@login_required
+def inbox_dismiss(shared_id):
+    shared = SharedRoute.query.get_or_404(shared_id)
+    if shared.to_user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    db.session.delete(shared)
     db.session.commit()
     return jsonify({"success": True})
 
@@ -156,7 +231,10 @@ def print_view():
 @app.route("/")
 def index():
     print(f"[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC] 👀 Visit — IP: {request.remote_addr}", flush=True)
-    return render_template("index.html")
+    inbox_count = 0
+    if current_user.is_authenticated:
+        inbox_count = SharedRoute.query.filter_by(to_user_id=current_user.id).count()
+    return render_template("index.html", inbox_count=inbox_count)
 
 
 @app.route("/recommend", methods=["POST"])

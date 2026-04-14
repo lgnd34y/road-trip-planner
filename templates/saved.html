@@ -135,6 +135,45 @@
 
     /* Save indicator */
     .save-indicator { display: none; background: #e6f4ed; color: #276749; font-size: 0.85rem; font-weight: 600; padding: 8px 14px; border-radius: 7px; margin-top: 10px; text-align: center; }
+
+    /* Share-to-user modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 2000; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; max-width: 380px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.14); }
+    .modal-box h3 { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .modal-box .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+    .modal-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .modal-field label { font-size: 13px; font-weight: 500; }
+    .modal-field input { border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; font-size: 14px; font-family: inherit; color: var(--text); background: var(--surface); transition: border-color 0.15s; }
+    .modal-field input:focus { outline: none; border-color: var(--border-hover); box-shadow: 0 0 0 3px rgba(24,24,27,0.06); }
+    .modal-error { display: none; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 8px 11px; font-size: 13px; color: #dc2626; margin-bottom: 12px; }
+    .modal-success { display: none; background: var(--brand-bg); border: 1px solid var(--brand-border); border-radius: 6px; padding: 8px 11px; font-size: 13px; color: #15803d; margin-bottom: 12px; }
+    .modal-actions { display: flex; gap: 8px; }
+    .modal-submit { flex: 1; background: var(--primary); color: var(--primary-fg); border: none; border-radius: var(--radius); padding: 9px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+    .modal-submit:hover { background: #27272a; }
+    .modal-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .modal-cancel { flex: 1; background: var(--bg); color: var(--muted); border: 1px solid var(--border); border-radius: var(--radius); padding: 9px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+    .modal-cancel:hover { border-color: var(--border-hover); color: var(--text); }
+
+    /* Inbox */
+    .inbox-section { margin-bottom: 32px; }
+    .inbox-heading { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .inbox-badge { background: var(--primary); color: var(--primary-fg); font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 99px; }
+    .inbox-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; gap: 14px; margin-bottom: 8px; transition: border-color 0.15s; }
+    .inbox-card:hover { border-color: var(--border-hover); }
+    .inbox-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .inbox-info { flex: 1; min-width: 0; }
+    .inbox-route-name { font-weight: 600; font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .inbox-from { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .inbox-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .inbox-save-btn { background: var(--primary); color: var(--primary-fg); border: none; border-radius: 6px; padding: 6px 13px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+    .inbox-save-btn:hover { background: #27272a; }
+    .inbox-dismiss-btn { background: var(--bg); color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 13px; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+    .inbox-dismiss-btn:hover { border-color: var(--border-hover); color: var(--text); }
+
+    /* Share button on route cards */
+    .btn-share { background: var(--bg); color: var(--muted); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+    .btn-share:hover { border-color: var(--border-hover); color: var(--text); }
   </style>
 </head>
 <body>
@@ -146,6 +185,11 @@
       <a class="nav-link" href="/auth/logout">Logout</a>
     </div>
   </nav>
+  <style>
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .nav-link { color: var(--muted); font-size: 13px; text-decoration: none; padding: 5px 10px; border-radius: var(--radius); transition: color 0.15s, background 0.15s; }
+    .nav-link:hover { color: var(--text); background: var(--bg); }
+  </style>
 
   <div class="page-header">
     <h1>My Saved Routes</h1>
@@ -153,6 +197,30 @@
   </div>
 
   <div class="container">
+
+    <!-- INBOX -->
+    {% if inbox %}
+    <div class="inbox-section">
+      <div class="inbox-heading">
+        Shared with you
+        <span class="inbox-badge">{{ inbox|length }}</span>
+      </div>
+      {% for item in inbox %}
+      <div class="inbox-card" id="inbox-{{ item.id }}">
+        <div class="inbox-icon">📬</div>
+        <div class="inbox-info">
+          <div class="inbox-route-name">{{ item.route_name }}</div>
+          <div class="inbox-from">Shared by <strong>{{ item.from_username }}</strong> · {{ item.created_at.strftime('%b %d, %Y') }}</div>
+        </div>
+        <div class="inbox-actions">
+          <button class="inbox-save-btn" onclick="inboxSave({{ item.id }}, this)">Save to My Routes</button>
+          <button class="inbox-dismiss-btn" onclick="inboxDismiss({{ item.id }}, this)" title="Dismiss">✕</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
     {% if routes %}
       <div class="routes-list">
         {% for r in routes %}
@@ -174,6 +242,7 @@
             <div class="card-actions">
               <a class="btn-view" href="/share/{{ r.share_id }}">🗺️ View on Map</a>
               <button class="btn-edit"   id="edit-btn-{{ r.id }}"   onclick="toggleEdit({{ r.id }})">✏️ Edit</button>
+              <button class="btn-share"                             onclick="openShareModal({{ r.id }})">↗ Send</button>
               <button class="btn-copy"   id="copy-btn-{{ r.id }}"   onclick="copyRoute({{ r.id }})">📋 Copy</button>
               <button class="btn-invite" id="invite-btn-{{ r.id }}" onclick="toggleInvite({{ r.id }})">👥 Invite</button>
               <button class="btn-copy"   onclick="printRoute({{ r.id }})" title="Print itinerary">🖨️</button>
@@ -259,6 +328,25 @@
       <div class="confirm-btns">
         <button class="btn-cancel-confirm" onclick="closeConfirmDirect()">Cancel</button>
         <button class="btn-delete-confirm" id="confirm-delete-btn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHARE TO USER MODAL -->
+  <div class="modal-overlay" id="share-modal" onclick="closeShareModal(event)">
+    <div class="modal-box">
+      <h3>Send route to a user</h3>
+      <p class="modal-sub">Enter their username and the route will appear in their inbox on My Routes.</p>
+      <div class="modal-error"   id="share-error"></div>
+      <div class="modal-success" id="share-success"></div>
+      <div class="modal-field">
+        <label>Username</label>
+        <input type="text" id="share-username" placeholder="e.g. john123" autocomplete="off"
+               onkeydown="if(event.key==='Enter') submitShareToUser()"/>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-submit" id="share-submit" onclick="submitShareToUser()">Send Route</button>
+        <button class="modal-cancel" onclick="closeShareModalDirect()">Cancel</button>
       </div>
     </div>
   </div>
@@ -612,6 +700,143 @@
         genBtn.textContent = 'Generate New Link';
         genBtn.style.display = 'inline-block';
         genBtn.disabled = false;
+      }
+    }
+
+    // ── Share-to-user modal ──
+    let _shareRouteId = null;
+
+    function openShareModal(rid) {
+      _shareRouteId = rid;
+      document.getElementById('share-username').value = '';
+      document.getElementById('share-error').style.display   = 'none';
+      document.getElementById('share-success').style.display = 'none';
+      document.getElementById('share-submit').disabled = false;
+      document.getElementById('share-submit').textContent = 'Send Route';
+      document.getElementById('share-modal').classList.add('open');
+      setTimeout(() => document.getElementById('share-username').focus(), 80);
+    }
+
+    function closeShareModal(e) {
+      if (e.target === document.getElementById('share-modal')) closeShareModalDirect();
+    }
+    function closeShareModalDirect() {
+      document.getElementById('share-modal').classList.remove('open');
+      _shareRouteId = null;
+    }
+
+    async function submitShareToUser() {
+      const username = document.getElementById('share-username').value.trim();
+      const errEl    = document.getElementById('share-error');
+      const okEl     = document.getElementById('share-success');
+      const btn      = document.getElementById('share-submit');
+
+      errEl.style.display = 'none';
+      okEl.style.display  = 'none';
+
+      if (!username) { errEl.textContent = 'Please enter a username.'; errEl.style.display = 'block'; return; }
+      if (!_shareRouteId || !savedRoutes[_shareRouteId]) { errEl.textContent = 'Route data not found.'; errEl.style.display = 'block'; return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+
+      try {
+        const res  = await fetch('/routes/share-to-user', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ username, route: savedRoutes[_shareRouteId] })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Something went wrong.');
+        okEl.textContent = `✓ Sent to ${data.to}! It will appear in their inbox.`;
+        okEl.style.display = 'block';
+        btn.textContent = '✓ Sent!';
+        setTimeout(() => closeShareModalDirect(), 2200);
+      } catch(e) {
+        errEl.textContent = e.message;
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Send Route';
+      }
+    }
+
+    // ── Inbox actions ──
+    async function inboxSave(id, btn) {
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+      try {
+        const res  = await fetch('/routes/inbox/save/' + id, { method: 'POST' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        // Remove the inbox card
+        const card = document.getElementById('inbox-' + id);
+        card.style.transition = 'opacity 0.3s';
+        card.style.opacity = '0';
+        setTimeout(() => {
+          card.remove();
+          // If inbox is now empty, remove the heading
+          if (!document.querySelector('.inbox-card')) {
+            const sec = document.querySelector('.inbox-section');
+            if (sec) sec.remove();
+          }
+        }, 300);
+
+        // Inject the new saved route card at the top of the routes list
+        const list = document.querySelector('.routes-list');
+        if (list) {
+          const tpl = document.createElement('div');
+          tpl.innerHTML = `
+            <div class="route-card" id="card-${data.id}" style="opacity:0;transition:opacity 0.4s">
+              <div class="card-header">
+                <div class="card-title" id="card-title-${data.id}">${escHtml(data.name)}</div>
+                <div class="card-date">${data.created_at}</div>
+              </div>
+              <div class="card-body">
+                <div class="card-badges" id="badges-${data.id}"></div>
+                <div class="share-box">
+                  <span class="share-label">🔗 Share:</span>
+                  <span class="share-url">${window.location.origin}/share/${data.share_id}</span>
+                  <button class="copy-btn" onclick="copyLink('${data.share_id}', this)">Copy</button>
+                </div>
+                <div class="card-actions">
+                  <a class="btn-view" href="/share/${data.share_id}">🗺️ View on Map</a>
+                  <button class="btn-share" onclick="openShareModal(${data.id})">↗ Send</button>
+                  <button class="btn-copy" id="copy-btn-${data.id}" onclick="copyRoute(${data.id})">📋 Copy</button>
+                  <button class="btn-delete" onclick="confirmDelete(${data.id}, '${escHtml(data.name)}')">🗑️</button>
+                </div>
+              </div>
+            </div>`;
+          const newCard = tpl.firstElementChild;
+          list.prepend(newCard);
+          // We don't have full route data here — mark as placeholder so edit works after reload
+          savedRoutes[data.id] = { name: data.name, stops: [] };
+          requestAnimationFrame(() => { newCard.style.opacity = '1'; });
+        }
+      } catch(e) {
+        btn.textContent = '❌ Error';
+        btn.disabled = false;
+      }
+    }
+
+    async function inboxDismiss(id, btn) {
+      btn.disabled = true;
+      try {
+        const res = await fetch('/routes/inbox/dismiss/' + id, { method: 'POST' });
+        if (!res.ok) throw new Error();
+        const card = document.getElementById('inbox-' + id);
+        card.style.transition = 'opacity 0.3s, transform 0.3s';
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(8px)';
+        setTimeout(() => {
+          card.remove();
+          if (!document.querySelector('.inbox-card')) {
+            const sec = document.querySelector('.inbox-section');
+            if (sec) sec.remove();
+          }
+        }, 300);
+      } catch(e) {
+        btn.disabled = false;
       }
     }
   </script>
