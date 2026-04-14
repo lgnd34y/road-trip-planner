@@ -290,23 +290,29 @@
 
         <script>
           (function() {
+            try {
             const rid   = {{ r.id }};
             const data  = {{ r.route_data | safe }};
+
+            // Always register route data first so editing always works
+            savedRoutes[rid] = data;
+
             const shareUrl = window.location.origin + '/share/{{ r.share_id }}';
-            document.getElementById('url-' + rid).textContent = shareUrl;
+            const urlEl = document.getElementById('url-' + rid);
+            if (urlEl) urlEl.textContent = shareUrl;
 
             // Badges
             const bc = document.getElementById('badges-' + rid);
-            [['📏', data.distance], ['🕐', data.drive_time], ['📅', data.best_time]].forEach(([icon, val]) => {
-              if (!val) return;
-              const b = document.createElement('span');
-              b.className = 'badge';
-              b.textContent = icon + ' ' + val;
-              bc.appendChild(b);
-            });
-
-            // Store route data for editing
-            savedRoutes[rid] = data;
+            if (bc) {
+              [['📏', data.distance], ['🕐', data.drive_time], ['📅', data.best_time]].forEach(([icon, val]) => {
+                if (!val) return;
+                const b = document.createElement('span');
+                b.className = 'badge';
+                b.textContent = icon + ' ' + val;
+                bc.appendChild(b);
+              });
+            }
+            } catch(e) { console.error('Route init error:', e); }
           })();
         </script>
         {% endfor %}
@@ -411,10 +417,12 @@
       btn.classList.toggle('active', isOpen);
       if (isOpen) {
         const route = savedRoutes[rid];
-        if (route) {
-          document.getElementById('edit-name-' + rid).value = route.name || '';
-          document.getElementById('edit-stops-' + rid).innerHTML = buildEditStopsHtml(route.stops);
+        if (!route) {
+          panel.innerHTML = '<p style="color:#ef4444;font-size:13px;padding:8px 0">Could not load route data. Please refresh the page.</p>';
+          return;
         }
+        document.getElementById('edit-name-' + rid).value = route.name || '';
+        document.getElementById('edit-stops-' + rid).innerHTML = buildEditStopsHtml(route.stops || []);
       }
     }
 
@@ -424,53 +432,67 @@
     }
 
     async function saveEdit(rid) {
-      const nameVal = document.getElementById('edit-name-' + rid).value.trim();
-      const rows    = document.getElementById('edit-stops-' + rid).querySelectorAll('.edit-stop');
-
-      const origMap = {};
-      (savedRoutes[rid].stops || []).forEach(s => { origMap[s.name.trim().toLowerCase()] = s; });
-
-      const newStops = Array.from(rows).map(row => {
-        const name = row.querySelector('.edit-name-input').value.trim();
-        const addr = row.querySelector('.edit-addr-input').value.trim();
-        if (!name && !addr) return null;
-        const orig = origMap[name.toLowerCase()] || {};
-        return { name: name || addr, address: addr || name,
-                 description: orig.description || '',
-                 attractions: orig.attractions || [],
-                 hotel: orig.hotel || null,
-                 restaurants: orig.restaurants || [] };
-      }).filter(Boolean);
-
-      if (newStops.length < 2) { alert('Please include at least 2 stops.'); return; }
-
-      const updated = Object.assign({}, savedRoutes[rid], {
-        name: nameVal || savedRoutes[rid].name,
-        stops: newStops,
-        maps_url: 'https://www.google.com/maps/dir/' + newStops.map(s => encodeURIComponent(s.address)).join('/')
-      });
-
+      const saveBtn = document.querySelector(`#edit-panel-${rid} .edit-apply-btn`);
       try {
-        const res = await fetch('/routes/update/' + rid, {
+        if (!savedRoutes[rid]) throw new Error('Route data not loaded. Please refresh the page.');
+
+        const nameVal = document.getElementById('edit-name-' + rid).value.trim();
+        const rows    = document.getElementById('edit-stops-' + rid).querySelectorAll('.edit-stop');
+
+        const origMap = {};
+        (savedRoutes[rid].stops || []).forEach(s => { origMap[s.name.trim().toLowerCase()] = s; });
+
+        const newStops = Array.from(rows).map(row => {
+          const name = row.querySelector('.edit-name-input').value.trim();
+          const addr = row.querySelector('.edit-addr-input').value.trim();
+          if (!name && !addr) return null;
+          const orig = origMap[name.toLowerCase()] || {};
+          return { name: name || addr, address: addr || name,
+                   description: orig.description || '',
+                   attractions: orig.attractions || [],
+                   hotel: orig.hotel || null,
+                   restaurants: orig.restaurants || [] };
+        }).filter(Boolean);
+
+        if (newStops.length < 2) { alert('Please include at least 2 stops.'); return; }
+
+        const updated = Object.assign({}, savedRoutes[rid], {
+          name: nameVal || savedRoutes[rid].name,
+          stops: newStops,
+          maps_url: 'https://www.google.com/maps/dir/' + newStops.map(s => encodeURIComponent(s.address)).join('/')
+        });
+
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
+
+        const res  = await fetch('/routes/update/' + rid, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ route: updated })
         });
-        const data = await res.json();
-        if (data.success) {
-          savedRoutes[rid] = updated;
-          // Update visible title
-          const t = document.getElementById('card-title-' + rid);
-          if (t) t.textContent = updated.name;
 
-          const ind = document.getElementById('save-indicator-' + rid);
-          ind.style.display = 'block';
-          setTimeout(() => { ind.style.display = 'none'; cancelEdit(rid); }, 2000);
-        } else {
-          alert('Error saving: ' + (data.error || 'unknown'));
-        }
+        let data;
+        const text = await res.text();
+        try { data = JSON.parse(text); } catch(_) { throw new Error('Server returned an unexpected response. Try again.'); }
+
+        if (!res.ok || !data.success) throw new Error(data.error || 'Save failed.');
+
+        // Success
+        savedRoutes[rid] = updated;
+        const t = document.getElementById('card-title-' + rid);
+        if (t) t.textContent = updated.name;
+
+        const ind = document.getElementById('save-indicator-' + rid);
+        if (ind) ind.style.display = 'block';
+        if (saveBtn) { saveBtn.textContent = '✓ Saved!'; }
+        setTimeout(() => {
+          if (ind) ind.style.display = 'none';
+          cancelEdit(rid);
+          if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Save Changes'; }
+        }, 1800);
+
       } catch(e) {
-        alert('Network error saving changes.');
+        alert('Error: ' + e.message);
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Save Changes'; }
       }
     }
 
