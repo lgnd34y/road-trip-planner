@@ -4,6 +4,8 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Road Trip Itinerary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -20,36 +22,38 @@
 
     /* ── Screen-only controls ── */
     .screen-controls {
-      background: #1b4332;
-      color: white;
-      padding: 14px 20px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
       border-radius: 10px;
       margin-bottom: 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+      padding: 12px 18px;
+      font-family: 'Inter', -apple-system, sans-serif;
     }
-    .screen-controls span { font-family: -apple-system, sans-serif; font-size: 0.9rem; }
+    .screen-controls span { font-size: 13px; color: #71717a; }
     .print-now-btn {
-      background: #52b788;
-      color: white;
+      background: #18181b;
+      color: #fafafa;
       border: none;
-      border-radius: 7px;
-      padding: 9px 20px;
-      font-size: 0.9rem;
-      font-weight: 600;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 500;
       cursor: pointer;
-      font-family: -apple-system, sans-serif;
+      font-family: 'Inter', -apple-system, sans-serif;
+      transition: background 0.15s;
     }
-    .print-now-btn:hover { background: #40a074; }
+    .print-now-btn:hover { background: #27272a; }
     .back-link {
-      color: rgba(255,255,255,0.8);
-      font-family: -apple-system, sans-serif;
-      font-size: 0.85rem;
+      color: #71717a;
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 13px;
       text-decoration: none;
     }
-    .back-link:hover { color: white; }
+    .back-link:hover { color: #09090b; }
 
     /* ── Header ── */
     .itinerary-header {

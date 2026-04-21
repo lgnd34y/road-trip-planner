@@ -559,7 +559,7 @@
   <div class="hero">
     <div class="hero-badge">✦ AI-powered planning</div>
     <h1>Plan your perfect road trip</h1>
-    <p>Tell us where you want to go and we'll build a custom route with stops, hotels, and day-by-day plans.</p>
+    <p>Describe your trip and we'll map out every stop, hotel, and day — so all you have to do is drive.</p>
   </div>
 
   <!-- MODE TABS -->
@@ -642,7 +642,10 @@
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
           <button class="guided-back-btn" onclick="showStep(1)">← Back</button>
-          <button class="guided-next-btn" id="guided-next-2" onclick="showStep(3)" disabled>Next →</button>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="guided-back-btn" id="guided-regen-btn" onclick="regenSuggestions()" style="display:none;">↺ Refresh</button>
+            <button class="guided-next-btn" id="guided-next-2" onclick="showStep(3)" disabled>Next →</button>
+          </div>
         </div>
       </div>
 
@@ -998,7 +1001,7 @@
           <div class="route-header" onclick="toggleCard(this.parentElement)">
             <div class="route-header-left">
               <h3 id="route-title-${i}">Route ${i + 1}: ${escHtml(route.name)}</h3>
-              <p>${escHtml(route.theme)}</p>
+              <p style="margin-top:4px;"><span style="display:inline-block;background:var(--bg);border:1px solid var(--border);color:var(--muted);font-size:11px;font-weight:500;padding:2px 9px;border-radius:99px;">${escHtml(route.theme)}</span></p>
               <div class="route-badges">
                 <span class="badge">📏 ${escHtml(route.distance)}</span>
                 <span class="badge">🕐 ${escHtml(route.drive_time)}</span>
@@ -1079,6 +1082,9 @@
       // Auto-open first card
       const firstCard = document.getElementById('route-card-0');
       if (firstCard) firstCard.classList.add('open');
+      // Pre-expand first stop of first card
+      const firstStop = firstCard && firstCard.querySelector('.stop');
+      if (firstStop) firstStop.classList.add('open');
 
       // Show new search bar, scroll to results
       document.getElementById('new-search-bar').style.display = 'block';
@@ -1482,6 +1488,14 @@
     // Mark chat button with indicator dot when routes are available
     function markGchatReady() {
       document.getElementById('gchat-btn').classList.add('has-routes');
+      // Update greeting to reference the loaded routes
+      if (currentRoutes.length) {
+        const names = currentRoutes.map(r => r.name).join(', ');
+        const msgs = document.getElementById('gchat-messages');
+        if (msgs && msgs.children.length === 1) {
+          msgs.children[0].textContent = `I've got your ${currentRoutes.length} routes loaded — ${names}. Ask me anything: which to pick, what to pack, flight options, hidden stops, budget tips, and more.`;
+        }
+      }
     }
 
     // ── Mode Tabs ──
@@ -1563,6 +1577,27 @@
           <div class="suggestion-theme">${escHtml(s.theme || '')}</div>
           <div class="suggestion-desc">${escHtml(s.description || '')}</div>
         </button>`).join('');
+      const regenBtn = document.getElementById('guided-regen-btn');
+      if (regenBtn) regenBtn.style.display = '';
+    }
+
+    async function regenSuggestions() {
+      _guidedDest = '';
+      document.getElementById('guided-next-2').disabled = true;
+      const grid = document.getElementById('suggestion-grid');
+      grid.innerHTML = '<div class="guided-loading"><div class="spinner"></div><span>Finding more ideas…</span></div>';
+      try {
+        const res  = await fetch('/guided/suggestions', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ location: _guidedLocation, api_key: document.getElementById('api_key').value.trim() })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        renderSuggestions(data.suggestions || []);
+      } catch(e) {
+        grid.innerHTML = `<div style="color:#dc2626;font-size:13px;padding:8px 0;">Failed: ${escHtml(e.message)}</div>`;
+      }
     }
 
     function selectSuggestion(card) {
