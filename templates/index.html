@@ -494,6 +494,17 @@
     .guided-dot.active { background: var(--primary); box-shadow: 0 0 0 3px rgba(24,24,27,0.12); }
     .guided-dot-line { flex: 1; height: 1px; background: var(--border); }
 
+    /* ── NEW SEARCH BAR ── */
+    .new-search-bar {
+      display: none; max-width: 720px; margin: 0 auto 16px; padding: 0 24px;
+    }
+    .new-search-btn {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 7px 14px; font-size: 13px; font-weight: 500; font-family: inherit;
+      color: var(--muted); cursor: pointer; transition: all 0.15s;
+    }
+    .new-search-btn:hover { border-color: var(--border-hover); color: var(--text); }
+
     /* ── MOBILE ── */
     @media (max-width: 768px) {
       nav { padding: 0 16px; }
@@ -518,6 +529,7 @@
       .route-body   { padding: 0 16px 16px; }
       .cost-inputs  { grid-template-columns: 1fr; }
       .modal { padding: 20px 16px; margin: 12px; }
+      .suggestion-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -677,8 +689,11 @@
     </div>
   </div><!-- /mode-guided -->
 
-  <div id="loader"><div class="spinner"></div><span>Planning your road trips…</span></div>
+  <div id="loader"><div class="spinner"></div><span id="loader-msg">Planning your road trips…</span></div>
   <div id="error-box"><div class="error-inner" id="error-inner"></div></div>
+  <div class="new-search-bar" id="new-search-bar">
+    <button class="new-search-btn" onclick="newSearch()">← New search</button>
+  </div>
   <div id="results"></div>
 
   <!-- SHARE TO USER MODAL -->
@@ -753,12 +768,47 @@
     let currentRoutes = [];
     let currentSessionId = '';
 
+    // ── Rotating loader messages ──
+    const loaderMessages = [
+      'Planning your road trips…',
+      'Plotting your pit stops…',
+      'Scoping out the best diners…',
+      'Hunting down hidden gems…',
+      'Checking the scenic routes…',
+      'Finding where to sleep…',
+      'Almost there…',
+    ];
+    let _loaderInterval = null;
+    function startLoader() {
+      document.getElementById('loader').style.display = 'flex';
+      let idx = 0;
+      document.getElementById('loader-msg').textContent = loaderMessages[0];
+      _loaderInterval = setInterval(() => {
+        idx = (idx + 1) % loaderMessages.length;
+        document.getElementById('loader-msg').textContent = loaderMessages[idx];
+      }, 2200);
+    }
+    function stopLoader() {
+      document.getElementById('loader').style.display = 'none';
+      clearInterval(_loaderInterval);
+    }
+
+    // ── New search ──
+    function newSearch() {
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('new-search-bar').style.display = 'none';
+      document.getElementById('error-box').style.display = 'none';
+      document.getElementById('mode-quick').style.display = '';
+      document.querySelector('.mode-tabs').style.display = '';
+      currentRoutes = [];
+    }
+
     // ── Form ──
     document.getElementById('trip-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       document.getElementById('error-box').style.display = 'none';
       document.getElementById('results').innerHTML = '';
-      document.getElementById('loader').style.display = 'flex';
+      startLoader();
       document.querySelector('.btn').disabled = true;
 
       const payload = {
@@ -777,7 +827,6 @@
         try {
           data = JSON.parse(text);
         } catch(_) {
-          // Server returned HTML (crash or timeout)
           if (res.status === 504 || res.status === 502) {
             throw new Error('The server timed out — try fewer nights or a shorter trip.');
           }
@@ -786,12 +835,15 @@
         if (!res.ok) throw new Error(data.error || 'Something went wrong.');
         currentRoutes    = data.routes;
         currentSessionId = data.session_id;
+        // Hide form, show results
+        document.getElementById('mode-quick').style.display = 'none';
+        document.querySelector('.mode-tabs').style.display = 'none';
         renderRoutes(data.routes, data.session_id, payload);
       } catch (err) {
         document.getElementById('error-inner').textContent = err.message;
         document.getElementById('error-box').style.display = 'block';
       } finally {
-        document.getElementById('loader').style.display = 'none';
+        stopLoader();
         document.querySelector('.btn').disabled = false;
       }
     });
@@ -889,7 +941,9 @@
     // ── Render routes ──
     function renderRoutes(routes, sessionId, payload) {
       const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = '<div class="results-heading">Your road trip options</div>';
+      const loc = payload.location || '';
+      const dest = payload.destination ? ` → ${payload.destination}` : '';
+      resultsDiv.innerHTML = `<div class="results-heading" style="display:flex;align-items:center;justify-content:space-between;">${routes.length} route${routes.length !== 1 ? 's' : ''} from ${loc}${dest}</div>`;
 
       routes.forEach((route, i) => {
         const card = document.createElement('div');
@@ -994,7 +1048,6 @@
               <input type="text" id="share-url-${i}" readonly/>
               <button class="copy-btn" onclick="copyLink(${i})">Copy Link</button>
             </div>
-            <a class="maps-link" id="maps-link-${i}" href="${route.maps_url}" target="_blank">Open directly in Google Maps ↗</a>
             ${avoidTip}
             <div class="edit-panel" id="edit-panel-${i}">
               <div class="edit-section-label">Route Name</div>
@@ -1022,6 +1075,14 @@
 
         resultsDiv.appendChild(card);
       });
+
+      // Auto-open first card
+      const firstCard = document.getElementById('route-card-0');
+      if (firstCard) firstCard.classList.add('open');
+
+      // Show new search bar, scroll to results
+      document.getElementById('new-search-bar').style.display = 'block';
+      resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       markGchatReady();
     }
@@ -1555,7 +1616,7 @@
 
       document.getElementById('error-box').style.display = 'none';
       document.getElementById('results').innerHTML = '';
-      document.getElementById('loader').style.display = 'flex';
+      startLoader();
 
       try {
         const res  = await fetch('/recommend', {
@@ -1575,10 +1636,10 @@
       } catch(err) {
         document.getElementById('error-inner').textContent = err.message;
         document.getElementById('error-box').style.display = 'block';
-        // Bring form back so user can try again
         document.getElementById('mode-quick').style.display = '';
+        document.querySelector('.mode-tabs').style.display = '';
       } finally {
-        document.getElementById('loader').style.display = 'none';
+        stopLoader();
         btn.disabled = false;
         btn.textContent = '✨ Generate My Trip';
       }
