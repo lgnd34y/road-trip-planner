@@ -202,15 +202,9 @@
       <a class="nav-link" href="/auth/logout">Logout</a>
     </div>
   </nav>
-  <style>
-    .nav-right { display: flex; align-items: center; gap: 8px; }
-    .nav-link { color: var(--muted); font-size: 13px; text-decoration: none; padding: 5px 10px; border-radius: var(--radius); transition: color 0.15s, background 0.15s; }
-    .nav-link:hover { color: var(--text); background: var(--bg); }
-  </style>
 
   <div class="page-header">
     <h1>My Saved Routes</h1>
-    <p>All your road trips in one place — view, edit, and share them</p>
   </div>
 
   <div class="container">
@@ -628,74 +622,6 @@
         btn.classList.add('copied');
         setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
       });
-    }
-
-    // ── Copy route ──
-    async function copyRoute(id) {
-      const btn = document.getElementById('copy-btn-' + id);
-      btn.disabled = true;
-      btn.textContent = 'Copying…';
-      try {
-        const res  = await fetch('/routes/copy/' + id, { method: 'POST' });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error);
-
-        // Inject new card at top of list
-        const list = document.querySelector('.routes-list');
-        const tpl  = document.createElement('div');
-        tpl.innerHTML = `
-          <div class="route-card" id="card-${data.id}" style="opacity:0;transition:opacity 0.4s">
-            <div class="card-header">
-              <div class="card-title" id="card-title-${data.id}">${escHtml(data.name)}</div>
-              <div class="card-date">${data.created_at}</div>
-            </div>
-            <div class="card-body">
-              <div class="card-badges" id="badges-${data.id}"></div>
-              <div class="share-box">
-                <span class="share-label">🔗 Share:</span>
-                <span class="share-url" id="url-${data.id}">${window.location.origin}/share/${data.share_id}</span>
-                <button class="copy-btn" onclick="copyLink('${data.share_id}', this)">Copy</button>
-              </div>
-              <div class="card-actions">
-                <a class="btn-view" href="/share/${data.share_id}">🗺️ View on Map</a>
-                <button class="btn-copy"   id="copy-btn-${data.id}"   onclick="copyRoute(${data.id})">📋 Copy</button>
-                <button class="btn-invite" id="invite-btn-${data.id}" onclick="toggleInvite(${data.id})">👥 Invite</button>
-                <button class="btn-delete" onclick="confirmDelete(${data.id}, '${escHtml(data.name)}')">🗑️</button>
-              </div>
-              <div class="invite-box" id="invite-box-${data.id}">
-                <div class="invite-label">👥 Collaborative Editing Link</div>
-                <div class="invite-url-row">
-                  <span class="invite-url" id="invite-url-${data.id}">Click "Generate Link" to create a shareable edit link</span>
-                  <button class="invite-copy-btn" id="invite-copy-${data.id}" style="display:none" onclick="copyInviteLink(${data.id})">Copy</button>
-                  <button class="invite-copy-btn" id="invite-gen-${data.id}" onclick="generateInvite(${data.id})">Generate Link</button>
-                  <button class="invite-revoke-btn" id="invite-revoke-${data.id}" style="display:none" onclick="revokeInvite(${data.id})">Revoke</button>
-                </div>
-                <div class="invite-note">Anyone with this link can view and edit this route. Revoke it anytime to remove their access.</div>
-              </div>
-            </div>
-          </div>`;
-        const newCard = tpl.firstElementChild;
-        list.prepend(newCard);
-
-        // Copy badge data from original
-        const origBadges = document.getElementById('badges-' + id);
-        const newBadges  = document.getElementById('badges-' + data.id);
-        if (origBadges && newBadges) newBadges.innerHTML = origBadges.innerHTML;
-
-        savedRoutes[data.id] = JSON.parse(JSON.stringify(savedRoutes[id]));
-        savedRoutes[data.id].name = data.name;
-
-        requestAnimationFrame(() => { newCard.style.opacity = '1'; });
-        btn.textContent = '✓ Copied!';
-        setTimeout(() => { btn.textContent = '📋 Copy'; btn.disabled = false; }, 2000);
-      } catch(e) {
-        btn.textContent = '❌ Error';
-        btn.disabled = false;
-      }
-    }
-
-    function escHtml(s) {
-      return (s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
     // ── Invite / collab ──
