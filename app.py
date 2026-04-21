@@ -271,12 +271,12 @@ Return ONLY a valid JSON array (no markdown, no extra text):
     "distance": "Total round-trip distance",
     "drive_time": "Total drive time",
     "best_time": "Best season",
-    "highlight": "One tip",
+    "highlight": "One vivid sentence on what makes this route unmissable — lead with the experience, not a list of features",
     "stops": [
       {
         "name": "Specific Attraction Name",
         "address": "Address or City, State",
-        "description": "1 sentence on what this is",
+        "description": "1 sentence — lead with what the traveler experiences or feels here, not just what exists. Be specific and vivid, not brochure-generic.",
         "attractions": [
           {"name": "Activity or feature", "note": "Brief tip"},
           {"name": "Activity or feature", "note": "Brief tip"}
@@ -292,7 +292,7 @@ Return ONLY a valid JSON array (no markdown, no extra text):
         "day": 1,
         "title": "Day 1 — Full Day Out",
         "stops": ["Attraction A", "Attraction B"],
-        "plan": "1 sentence day flow"
+        "plan": "1 sentence day flow — make it feel like a real day, not a schedule"
       }
     ],
     "flights": []
@@ -317,12 +317,12 @@ Return ONLY a valid JSON array (no markdown, no extra text):
     "distance": "Total distance",
     "drive_time": "Total drive time",
     "best_time": "Best season",
-    "highlight": "One tip",
+    "highlight": "One vivid sentence on what makes this route unmissable — lead with the experience, not a list of features",
     "stops": [
       {
         "name": "City or Place Name",
         "address": "City, State, Country",
-        "description": "1 sentence on why visit",
+        "description": "1 sentence — lead with what the traveler experiences or feels here, not just what exists. Be specific and vivid, not brochure-generic.",
         "attractions": [
           {"name": "Attraction name", "note": "Brief tip"},
           {"name": "Attraction name", "note": "Brief tip"}
@@ -342,7 +342,7 @@ Return ONLY a valid JSON array (no markdown, no extra text):
         "day": 1,
         "title": "Day 1 — Title",
         "stops": ["Stop A", "Stop B"],
-        "plan": "1 sentence plan"
+        "plan": "1 sentence — describe the day like you're telling a friend, not writing a schedule"
       }
     ],
     "flights": [
@@ -579,7 +579,7 @@ def guided_suggestions():
     {{
       "name": "City or region name only (e.g. 'Sedona, AZ' or 'Rocky Mountain National Park')",
       "theme": "2-3 word vibe (e.g. 'Desert Adventure' or 'Coastal Escape')",
-      "description": "One plain sentence on what makes it worth the drive",
+      "description": "One sentence — lead with what the traveler experiences or feels, not just what exists there. Be specific and vivid, not brochure-generic.",
       "emoji": "Single relevant emoji"
     }}
   ]
