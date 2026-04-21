@@ -1496,7 +1496,7 @@
         return;
       }
       grid.innerHTML = suggestions.map(s => `
-        <button class="suggestion-card" onclick="selectSuggestion(this, ${JSON.stringify(s.name)})">
+        <button class="suggestion-card" data-dest="${escHtml(s.name)}" onclick="selectSuggestion(this)">
           <div class="suggestion-emoji">${s.emoji || '📍'}</div>
           <div class="suggestion-name">${escHtml(s.name)}</div>
           <div class="suggestion-theme">${escHtml(s.theme || '')}</div>
@@ -1504,10 +1504,10 @@
         </button>`).join('');
     }
 
-    function selectSuggestion(card, dest) {
+    function selectSuggestion(card) {
       document.querySelectorAll('.suggestion-card').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
-      _guidedDest = dest;
+      _guidedDest = card.dataset.dest;
       document.getElementById('guided-next-2').disabled = false;
     }
 
