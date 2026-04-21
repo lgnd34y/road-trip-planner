@@ -561,6 +561,50 @@ def update_route(route_id):
     return jsonify({"success": True})
 
 
+@app.route("/guided/suggestions", methods=["POST"])
+def guided_suggestions():
+    data     = request.json
+    api_key  = data.get("api_key", "").strip() or DEFAULT_API_KEY
+    location = data.get("location", "").strip()
+
+    if not api_key:
+        return jsonify({"error": "No API key"}), 400
+    if not location:
+        return jsonify({"error": "Location required"}), 400
+
+    client = anthropic.Anthropic(api_key=api_key)
+    prompt = f"""Suggest 6 diverse road trip destination ideas reachable from {location}. Return ONLY valid JSON (no markdown):
+{{
+  "suggestions": [
+    {{
+      "name": "Short catchy trip name (4 words max)",
+      "destination": "Primary destination city or region",
+      "theme": "2-3 word vibe label",
+      "description": "One sentence on what makes this special",
+      "emoji": "Single relevant emoji"
+    }}
+  ]
+}}
+Make suggestions diverse — vary distance, terrain, and vibe (coastal, mountain, city, rural, historical, adventure). Keep names exciting and concise."""
+
+    try:
+        response = client.messages.create(
+            model="claude-opus-4-6",
+            max_tokens=700,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        raw = response.content[0].text.strip()
+        if "```" in raw:
+            raw = raw.split("```", 1)[1]
+            if raw.startswith("json"): raw = raw[4:]
+            raw = raw.rsplit("```", 1)[0].strip()
+        s, e = raw.find("{"), raw.rfind("}")
+        if s != -1 and e != -1: raw = raw[s:e+1]
+        return jsonify(json.loads(raw))
+    except Exception as ex:
+        return jsonify({"error": str(ex)}), 500
+
+
 @app.route("/chat", methods=["POST"])
 def chat_route():
     data    = request.json

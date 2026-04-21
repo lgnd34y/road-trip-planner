@@ -403,6 +403,97 @@
     .gchat-send:hover { background: #27272a; }
     .gchat-send:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    /* ── MODE TABS ── */
+    .mode-tabs {
+      max-width: 580px; margin: 0 auto 24px; padding: 0 24px;
+      display: flex; gap: 4px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 4px;
+    }
+    .mode-tab {
+      flex: 1; padding: 8px 12px; border-radius: 7px; font-size: 13px; font-weight: 500;
+      font-family: inherit; cursor: pointer; transition: all 0.15s; border: none;
+      background: transparent; color: var(--muted); text-align: center;
+    }
+    .mode-tab.active { background: var(--primary); color: var(--primary-fg); }
+    .mode-tab:not(.active):hover { background: var(--bg); color: var(--text); }
+
+    /* ── GUIDED WIZARD ── */
+    .guided-wrap { max-width: 580px; margin: 0 auto 52px; padding: 0 24px; display: none; }
+    .guided-wrap.visible { display: block; }
+
+    .guided-step { display: none; }
+    .guided-step.active { display: block; }
+
+    .guided-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 28px; box-shadow: var(--shadow-sm);
+    }
+    .guided-step-label {
+      font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.06em; margin-bottom: 10px;
+    }
+    .guided-card h2 { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; color: var(--text); margin-bottom: 6px; }
+    .guided-card p  { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+
+    .guided-input-row { display: flex; gap: 8px; }
+    .guided-input-row input { flex: 1; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; font-size: 14px; font-family: inherit; color: var(--text); background: var(--surface); transition: border-color 0.15s; }
+    .guided-input-row input:focus { outline: none; border-color: var(--border-hover); box-shadow: 0 0 0 3px rgba(24,24,27,0.06); }
+    .guided-input-row input::placeholder { color: var(--subtle); }
+    .guided-go-btn { background: var(--primary); color: var(--primary-fg); border: 1px solid var(--primary); border-radius: var(--radius); padding: 8px 20px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+    .guided-go-btn:hover { background: #27272a; }
+    .guided-go-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Suggestion grid */
+    .suggestion-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+    .suggestion-card {
+      border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 14px 12px;
+      cursor: pointer; transition: all 0.15s; background: var(--surface); text-align: left;
+    }
+    .suggestion-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow-sm); }
+    .suggestion-card.selected { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(24,24,27,0.08); }
+    .suggestion-emoji { font-size: 1.5rem; margin-bottom: 7px; }
+    .suggestion-name { font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 2px; }
+    .suggestion-theme { font-size: 11px; font-weight: 500; color: var(--brand); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px; }
+    .suggestion-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+    /* Duration pills */
+    .duration-pills { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
+    .duration-pill {
+      border: 1px solid var(--border); border-radius: 99px; padding: 6px 16px;
+      font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer;
+      background: var(--surface); font-family: inherit; transition: all 0.15s;
+    }
+    .duration-pill:hover { border-color: var(--border-hover); color: var(--text); }
+    .duration-pill.selected { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+
+    /* Preference chips */
+    .pref-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
+    .pref-chip {
+      border: 1px solid var(--border); border-radius: 99px; padding: 5px 14px;
+      font-size: 12px; font-weight: 500; color: var(--muted); cursor: pointer;
+      background: var(--surface); font-family: inherit; transition: all 0.15s;
+    }
+    .pref-chip:hover { border-color: var(--border-hover); color: var(--text); }
+    .pref-chip.selected { background: var(--brand-bg); color: var(--brand); border-color: var(--brand-border); }
+
+    .guided-back-btn { background: transparent; border: 1px solid var(--border); border-radius: var(--radius); padding: 7px 16px; font-size: 13px; font-weight: 500; font-family: inherit; color: var(--muted); cursor: pointer; margin-right: 8px; transition: all 0.15s; }
+    .guided-back-btn:hover { border-color: var(--border-hover); color: var(--text); }
+    .guided-next-btn { background: var(--primary); color: var(--primary-fg); border: none; border-radius: var(--radius); padding: 8px 22px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+    .guided-next-btn:hover { background: #27272a; }
+    .guided-next-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .guided-loading { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 28px 0; color: var(--muted); font-size: 13px; }
+
+    /* Step progress indicator */
+    .guided-progress {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 22px;
+    }
+    .guided-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background 0.2s; }
+    .guided-dot.done { background: var(--primary); }
+    .guided-dot.active { background: var(--primary); box-shadow: 0 0 0 3px rgba(24,24,27,0.12); }
+    .guided-dot-line { flex: 1; height: 1px; background: var(--border); }
+
     /* ── MOBILE ── */
     @media (max-width: 768px) {
       nav { padding: 0 16px; }
@@ -459,8 +550,14 @@
     <p>Tell us where you want to go and we'll build a custom route with stops, hotels, and day-by-day plans.</p>
   </div>
 
+  <!-- MODE TABS -->
+  <div class="mode-tabs" style="max-width:580px;margin:0 auto 20px;padding:4px 4px;">
+    <button class="mode-tab active" id="tab-quick" onclick="switchMode('quick')">⚡ Quick Plan</button>
+    <button class="mode-tab" id="tab-guided" onclick="switchMode('guided')">🧭 Guided Planning</button>
+  </div>
+
   <!-- FORM -->
-  <div class="form-wrap">
+  <div class="form-wrap" id="mode-quick">
     <div class="form-card">
     <form id="trip-form">
       <div class="form-grid">
@@ -495,7 +592,90 @@
       </div>
     </form>
     </div>
-  </div>
+  </div><!-- /mode-quick -->
+
+  <!-- GUIDED PLANNING WIZARD -->
+  <div class="guided-wrap" id="mode-guided">
+    <div class="guided-card">
+
+      <!-- Progress dots -->
+      <div class="guided-progress">
+        <div class="guided-dot active" id="gdot-1"></div>
+        <div class="guided-dot-line"></div>
+        <div class="guided-dot" id="gdot-2"></div>
+        <div class="guided-dot-line"></div>
+        <div class="guided-dot" id="gdot-3"></div>
+        <div class="guided-dot-line"></div>
+        <div class="guided-dot" id="gdot-4"></div>
+      </div>
+
+      <!-- Step 1: Starting location -->
+      <div class="guided-step active" id="gstep-1">
+        <div class="guided-step-label">Step 1 of 4</div>
+        <h2>Where are you starting from?</h2>
+        <p>Enter your starting city or town and we'll generate destination ideas for you.</p>
+        <div class="guided-input-row">
+          <input type="text" id="guided-location" placeholder="e.g. Denver, Colorado" onkeydown="if(event.key==='Enter') startGuided()"/>
+          <button class="guided-go-btn" id="guided-go-btn" onclick="startGuided()">Get ideas →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Pick a destination -->
+      <div class="guided-step" id="gstep-2">
+        <div class="guided-step-label">Step 2 of 4</div>
+        <h2>Where do you want to go?</h2>
+        <p>Pick a destination that sounds right for you.</p>
+        <div class="suggestion-grid" id="suggestion-grid">
+          <div class="guided-loading"><div class="spinner"></div><span>Generating ideas…</span></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+          <button class="guided-back-btn" onclick="showStep(1)">← Back</button>
+          <button class="guided-next-btn" id="guided-next-2" onclick="showStep(3)" disabled>Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Duration -->
+      <div class="guided-step" id="gstep-3">
+        <div class="guided-step-label">Step 3 of 4</div>
+        <h2>How long is your trip?</h2>
+        <p>Select the length of your road trip.</p>
+        <div class="duration-pills">
+          <button class="duration-pill" onclick="selectDuration(this,'Day trip')">Day trip</button>
+          <button class="duration-pill" onclick="selectDuration(this,'Weekend (2–3 days)')">Weekend</button>
+          <button class="duration-pill" onclick="selectDuration(this,'4–5 days')">4–5 days</button>
+          <button class="duration-pill" onclick="selectDuration(this,'1 week')">1 week</button>
+          <button class="duration-pill" onclick="selectDuration(this,'2 weeks')">2 weeks</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+          <button class="guided-back-btn" onclick="showStep(2)">← Back</button>
+          <button class="guided-next-btn" id="guided-next-3" onclick="showStep(4)" disabled>Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Preferences + Generate -->
+      <div class="guided-step" id="gstep-4">
+        <div class="guided-step-label">Step 4 of 4</div>
+        <h2>Any special preferences?</h2>
+        <p>Pick as many as you like, or skip and generate.</p>
+        <div class="pref-chips">
+          <button class="pref-chip" onclick="togglePref(this)">👨‍👩‍👧 With kids</button>
+          <button class="pref-chip" onclick="togglePref(this)">💰 Budget-friendly</button>
+          <button class="pref-chip" onclick="togglePref(this)">🏕️ Outdoor adventure</button>
+          <button class="pref-chip" onclick="togglePref(this)">🍽️ Foodie stops</button>
+          <button class="pref-chip" onclick="togglePref(this)">🏛️ History & culture</button>
+          <button class="pref-chip" onclick="togglePref(this)">🛣️ Scenic byways</button>
+          <button class="pref-chip" onclick="togglePref(this)">🚫 Avoid highways</button>
+          <button class="pref-chip" onclick="togglePref(this)">🐶 Pet-friendly</button>
+          <button class="pref-chip" onclick="togglePref(this)">💎 Luxury travel</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+          <button class="guided-back-btn" onclick="showStep(3)">← Back</button>
+          <button class="guided-next-btn" id="guided-generate-btn" onclick="generateGuided()">✨ Generate My Trip</button>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /mode-guided -->
 
   <div id="loader"><div class="spinner"></div><span>Planning your road trips…</span></div>
   <div id="error-box"><div class="error-inner" id="error-inner"></div></div>
@@ -1241,6 +1421,167 @@
     // Mark chat button with indicator dot when routes are available
     function markGchatReady() {
       document.getElementById('gchat-btn').classList.add('has-routes');
+    }
+
+    // ── Mode Tabs ──
+    function switchMode(mode) {
+      const quickEl   = document.getElementById('mode-quick');
+      const guidedEl  = document.getElementById('mode-guided');
+      const tabQuick  = document.getElementById('tab-quick');
+      const tabGuided = document.getElementById('tab-guided');
+      if (mode === 'quick') {
+        quickEl.style.display  = '';
+        guidedEl.classList.remove('visible');
+        tabQuick.classList.add('active');
+        tabGuided.classList.remove('active');
+      } else {
+        quickEl.style.display  = 'none';
+        guidedEl.classList.add('visible');
+        tabGuided.classList.add('active');
+        tabQuick.classList.remove('active');
+      }
+    }
+
+    // ── Guided Wizard State ──
+    let _guidedLocation    = '';
+    let _guidedDest        = '';        // chosen destination name
+    let _guidedDuration    = '';
+    let _guidedPrefs       = [];
+
+    function showStep(n) {
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`gstep-${i}`).classList.toggle('active', i === n);
+        const dot = document.getElementById(`gdot-${i}`);
+        dot.classList.toggle('active', i === n);
+        dot.classList.toggle('done', i < n);
+      }
+    }
+
+    async function startGuided() {
+      const loc = document.getElementById('guided-location').value.trim();
+      if (!loc) {
+        document.getElementById('guided-location').focus();
+        return;
+      }
+      _guidedLocation = loc;
+      _guidedDest     = '';
+      _guidedDuration = '';
+      _guidedPrefs    = [];
+
+      // Reset step-2 next button
+      document.getElementById('guided-next-2').disabled = true;
+
+      showStep(2);
+      const grid = document.getElementById('suggestion-grid');
+      grid.innerHTML = '<div class="guided-loading"><div class="spinner"></div><span>Generating ideas for ' + escHtml(loc) + '…</span></div>';
+
+      try {
+        const res  = await fetch('/guided/suggestions', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ location: loc, api_key: document.getElementById('api_key').value.trim() })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        renderSuggestions(data.suggestions || []);
+      } catch(e) {
+        grid.innerHTML = `<div style="color:#dc2626;font-size:13px;padding:8px 0;">Failed to load suggestions: ${escHtml(e.message)}</div>`;
+      }
+    }
+
+    function renderSuggestions(suggestions) {
+      const grid = document.getElementById('suggestion-grid');
+      if (!suggestions.length) {
+        grid.innerHTML = '<div style="color:var(--muted);font-size:13px;">No suggestions found. Try a different starting location.</div>';
+        return;
+      }
+      grid.innerHTML = suggestions.map(s => `
+        <button class="suggestion-card" onclick="selectSuggestion(this, ${JSON.stringify(escHtml(s.destination || s.name))})">
+          <div class="suggestion-emoji">${s.emoji || '📍'}</div>
+          <div class="suggestion-name">${escHtml(s.name)}</div>
+          <div class="suggestion-theme">${escHtml(s.theme || '')}</div>
+          <div class="suggestion-desc">${escHtml(s.description || '')}</div>
+        </button>`).join('');
+    }
+
+    function selectSuggestion(card, dest) {
+      document.querySelectorAll('.suggestion-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      _guidedDest = dest;
+      document.getElementById('guided-next-2').disabled = false;
+    }
+
+    function selectDuration(pill, val) {
+      document.querySelectorAll('.duration-pill').forEach(p => p.classList.remove('selected'));
+      pill.classList.add('selected');
+      _guidedDuration = val;
+      document.getElementById('guided-next-3').disabled = false;
+    }
+
+    function togglePref(chip) {
+      chip.classList.toggle('selected');
+      const label = chip.textContent.trim().replace(/^[\p{Emoji}\s]+/u, '').trim();
+      if (chip.classList.contains('selected')) {
+        _guidedPrefs.push(label);
+      } else {
+        _guidedPrefs = _guidedPrefs.filter(p => p !== label);
+      }
+    }
+
+    async function generateGuided() {
+      const btn = document.getElementById('guided-generate-btn');
+      btn.disabled = true;
+      btn.textContent = 'Planning…';
+
+      // Build a prompt-like payload for /recommend
+      const extraParts = [];
+      if (_guidedPrefs.length) extraParts.push(_guidedPrefs.join(', '));
+
+      const payload = {
+        api_key:     document.getElementById('api_key').value.trim(),
+        location:    _guidedLocation,
+        destination: _guidedDest,
+        duration:    _guidedDuration,
+        extra_info:  extraParts.join('. '),
+      };
+
+      // Derive nights from duration
+      const nightMap = { 'Day trip': '0', 'Weekend (2–3 days)': '2', '4–5 days': '4', '1 week': '7', '2 weeks': '14' };
+      payload.nights = nightMap[_guidedDuration] || '';
+
+      // Switch back to quick-plan view area so results show
+      switchMode('quick');
+      document.getElementById('mode-quick').style.display = 'none'; // hide form, keep results
+
+      document.getElementById('error-box').style.display = 'none';
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('loader').style.display = 'flex';
+
+      try {
+        const res  = await fetch('/recommend', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        let data;
+        const text = await res.text();
+        try { data = JSON.parse(text); } catch(_) {
+          throw new Error('Server error. Try a shorter trip duration.');
+        }
+        if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+        currentRoutes    = data.routes;
+        currentSessionId = data.session_id;
+        renderRoutes(data.routes, data.session_id, payload);
+      } catch(err) {
+        document.getElementById('error-inner').textContent = err.message;
+        document.getElementById('error-box').style.display = 'block';
+        // Bring form back so user can try again
+        document.getElementById('mode-quick').style.display = '';
+      } finally {
+        document.getElementById('loader').style.display = 'none';
+        btn.disabled = false;
+        btn.textContent = '✨ Generate My Trip';
+      }
     }
 
     // ── Share-to-user (index page) ──
