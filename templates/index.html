@@ -1496,7 +1496,7 @@
         return;
       }
       grid.innerHTML = suggestions.map(s => `
-        <button class="suggestion-card" onclick="selectSuggestion(this, ${JSON.stringify(escHtml(s.destination || s.name))})">
+        <button class="suggestion-card" onclick="selectSuggestion(this, ${JSON.stringify(s.name)})">
           <div class="suggestion-emoji">${s.emoji || '📍'}</div>
           <div class="suggestion-name">${escHtml(s.name)}</div>
           <div class="suggestion-theme">${escHtml(s.theme || '')}</div>

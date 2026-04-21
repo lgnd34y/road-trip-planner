@@ -573,19 +573,18 @@ def guided_suggestions():
         return jsonify({"error": "Location required"}), 400
 
     client = anthropic.Anthropic(api_key=api_key)
-    prompt = f"""Suggest 6 diverse road trip destination ideas reachable from {location}. Return ONLY valid JSON (no markdown):
+    prompt = f"""Suggest 6 diverse road trip destinations reachable from {location}. Return ONLY valid JSON (no markdown):
 {{
   "suggestions": [
     {{
-      "name": "Short catchy trip name (4 words max)",
-      "destination": "Primary destination city or region",
-      "theme": "2-3 word vibe label",
-      "description": "One sentence on what makes this special",
+      "name": "City or region name only (e.g. 'Sedona, AZ' or 'Rocky Mountain National Park')",
+      "theme": "2-3 word vibe (e.g. 'Desert Adventure' or 'Coastal Escape')",
+      "description": "One plain sentence on what makes it worth the drive",
       "emoji": "Single relevant emoji"
     }}
   ]
 }}
-Make suggestions diverse — vary distance, terrain, and vibe (coastal, mountain, city, rural, historical, adventure). Keep names exciting and concise."""
+Vary distance, terrain, and vibe (coastal, mountain, city, rural, historical, adventure). Use real place names only — no marketing slogans."""
 
     try:
         response = client.messages.create(
