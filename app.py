@@ -458,8 +458,8 @@ Rules:
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
-            max_tokens=3500,
+            model="claude-haiku-4-5-20251001",
+            max_tokens=3000,
             system=system_prompt,
             messages=[{"role": "user", "content": user_message}]
         )
@@ -596,7 +596,7 @@ Base these on real current prices for the specific region, not generic defaults.
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-sonnet-4-6",
             max_tokens=400,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -644,7 +644,7 @@ Include 5-7 categories (e.g. Clothing, Toiletries, Documents, Tech, Snacks & Dri
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-sonnet-4-6",
             max_tokens=800,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -840,7 +840,7 @@ Vary distance, terrain, and vibe (coastal, mountain, city, rural, historical, ad
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-sonnet-4-6",
             max_tokens=700,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -905,7 +905,7 @@ No markdown. Be concise and friendly."""
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-sonnet-4-6",
             max_tokens=3000,
             system=system,
             messages=[{"role": "user", "content": user_content}]
@@ -959,7 +959,7 @@ Example: if 3 stops reordered as 2,1,3 → {{"order": [2,1,3], "reason": "..."}}
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-sonnet-4-6",
             max_tokens=300,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -1011,7 +1011,7 @@ Keep start ({start}) and end ({end}) the same. Make each alternative meaningfull
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-sonnet-4-6",
             max_tokens=600,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -1061,7 +1061,7 @@ Suggest 5-8 real, specific POIs that are actually along or near the route. Vary 
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-sonnet-4-6",
             max_tokens=700,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -1110,7 +1110,7 @@ Return ONLY valid JSON (no markdown):
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-sonnet-4-6",
             max_tokens=600,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -1161,7 +1161,7 @@ Only include real, known toll roads and crossings for this specific route. If no
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-sonnet-4-6",
             max_tokens=600,
             messages=[{"role": "user", "content": prompt}]
         )
