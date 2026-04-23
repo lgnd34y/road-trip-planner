@@ -184,9 +184,126 @@
     .inbox-dismiss-btn { background: var(--bg); color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 13px; font-family: inherit; cursor: pointer; }
     .inbox-dismiss-btn:hover { border-color: var(--border-hover); color: var(--text); }
 
-    @media (max-width: 600px) {
-      .card-actions { flex-wrap: wrap; }
+    .inbox-stops-preview { font-size: 11px; color: var(--subtle); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
+
+    /* ── NOTES ── */
+    .notes-section { margin-top: 14px; }
+    .notes-label { font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+    .notes-textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 60px; color: var(--text); background: var(--surface); transition: border-color 0.15s; }
+    .notes-textarea:focus { outline: none; border-color: var(--border-hover); }
+    .notes-textarea::placeholder { color: var(--subtle); }
+    .notes-saved-indicator { font-size: 11px; color: var(--brand); margin-top: 4px; display: none; }
+
+    /* ── CSV ── */
+    .btn-csv { background: var(--surface); color: var(--muted); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+    .btn-csv:hover { border-color: var(--border-hover); color: var(--text); }
+
+    /* ── COUNTDOWN BADGE ── */
+    .countdown-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 99px; margin-left: 8px; vertical-align: middle; }
+    .countdown-badge.future { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+    .countdown-badge.past   { background: var(--bg); border: 1px solid var(--border); color: var(--subtle); }
+    .countdown-badge.today  { background: #fef9c3; border: 1px solid #fde047; color: #a16207; }
+
+    /* ── VISITED STOPS ── */
+    .visited-section { margin-top: 14px; }
+    .visited-label { font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .visited-stop-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .visited-stop-row:last-child { border-bottom: none; }
+    .visited-check { width: 16px; height: 16px; cursor: pointer; accent-color: var(--brand); flex-shrink: 0; }
+    .visited-stop-name { flex: 1; }
+    .visited-stop-name.done { text-decoration: line-through; color: var(--subtle); }
+
+    /* ── PHOTO NOTES ── */
+    .photo-section { margin-top: 14px; }
+    .photo-label { font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .photo-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .stop-thumb { width: 68px; height: 68px; border-radius: var(--radius); object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: border-color 0.15s; }
+    .stop-thumb:hover { border-color: var(--brand); }
+    .photo-btn { font-size: 11px; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius); padding: 4px 10px; cursor: pointer; color: var(--muted); font-family: inherit; transition: all 0.15s; }
+    .photo-btn:hover { border-color: var(--brand); color: var(--brand); }
+
+    /* ── PACKING MODAL ── */
+    .packing-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 3000; align-items: center; justify-content: center; }
+    .packing-modal-overlay.open { display: flex; }
+    .packing-modal-inner { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; max-width: 520px; width: 92%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.14); }
+    .packing-modal-inner h3 { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .packing-modal-inner .packing-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+    .packing-category { margin-bottom: 16px; }
+    .packing-category-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 7px; }
+    .packing-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13px; cursor: pointer; }
+    .packing-item input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--brand); cursor: pointer; flex-shrink: 0; }
+    .packing-item span.checked { text-decoration: line-through; color: var(--subtle); }
+    .packing-close-btn { margin-top: 16px; width: 100%; background: var(--primary); color: var(--primary-fg); border: none; border-radius: var(--radius); padding: 9px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; }
+    .packing-close-btn:hover { background: #27272a; }
+
+    /* ── PUBLIC TOGGLE ── */
+    .btn-public { background: var(--surface); color: var(--muted); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+    .btn-public:hover { border-color: var(--border-hover); color: var(--text); }
+    .btn-public.public-on { background: #f0fdf4; color: var(--brand); border-color: var(--brand-border); }
+
+    /* ── BUDGET TRACKER ── */
+    .budget-section { margin-top: 14px; }
+    .budget-label { font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .budget-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .budget-input { flex: 1; border: 1px solid var(--border); border-radius: var(--radius); padding: 7px 10px; font-size: 13px; font-family: inherit; color: var(--text); background: var(--surface); }
+    .budget-input:focus { outline: none; border-color: var(--border-hover); }
+    .budget-set-btn { background: var(--primary); color: var(--primary-fg); border: none; border-radius: var(--radius); padding: 7px 14px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .budget-set-btn:hover { background: #27272a; }
+    .budget-bar-wrap { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); height: 8px; overflow: hidden; margin-bottom: 4px; }
+    .budget-bar-fill { height: 8px; background: var(--brand); border-radius: var(--radius); transition: width 0.4s; }
+    .budget-bar-fill.over { background: #ef4444; }
+    .budget-summary { font-size: 12px; color: var(--muted); }
+
+    /* ── CHECK-IN TIMELINE ── */
+    .checkin-section { margin-top: 14px; }
+    .checkin-label { font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .checkin-list { display: flex; flex-direction: column; gap: 4px; }
+    .checkin-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .checkin-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+    .checkin-dot.done { background: var(--brand); }
+    .checkin-name { flex: 1; color: var(--muted); }
+    .checkin-time { color: var(--subtle); font-size: 11px; white-space: nowrap; }
+    .checkin-btn { background: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 8px; font-size: 11px; font-family: inherit; cursor: pointer; color: var(--muted); }
+    .checkin-btn:hover { border-color: var(--brand); color: var(--brand); }
+
+    /* ── TRIP JOURNAL ── */
+    .journal-section { margin-top: 14px; }
+    .journal-label { font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .journal-textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 80px; color: var(--text); background: var(--surface); }
+    .journal-textarea:focus { outline: none; border-color: var(--border-hover); }
+    .journal-star-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .journal-stop-rating { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+    .star-input { font-size: 16px; cursor: pointer; color: var(--border); }
+    .star-input.active { color: #f59e0b; }
+    .journal-save-btn { background: var(--primary); color: var(--primary-fg); border: none; border-radius: var(--radius); padding: 7px 16px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; margin-top: 8px; }
+    .journal-save-btn:hover { background: #27272a; }
+    .journal-saved-indicator { font-size: 11px; color: var(--brand); margin-left: 8px; display: none; }
+
+    /* ── MOBILE ── */
+    .btn-more-toggle { display: none; }
+    @media (max-width: 480px) {
+      .btn-more-toggle { display: block; background: var(--surface); color: var(--muted); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 14px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; transition: all 0.15s; width: 100%; text-align: center; }
+      .btn-more-toggle:hover { border-color: var(--border-hover); color: var(--text); }
+      .card-actions { flex-direction: column; }
+      .card-actions .btn-edit,
+      .card-actions .btn-share,
+      .card-actions .btn-duplicate,
+      .card-actions .btn-invite,
+      .card-actions .btn-copy,
+      .card-actions .btn-csv,
+      .card-actions .btn-public { display: none; }
+      .card-actions.expanded .btn-edit,
+      .card-actions.expanded .btn-share,
+      .card-actions.expanded .btn-duplicate,
+      .card-actions.expanded .btn-invite,
+      .card-actions.expanded .btn-copy,
+      .card-actions.expanded .btn-csv,
+      .card-actions.expanded .btn-public { display: block; width: 100%; }
       .btn-view { flex: none; width: 100%; }
+      .btn-delete { flex: none; width: 100%; }
+    }
+
+    @media (max-width: 600px) {
       .page-header { padding: 32px 20px 24px; }
       .page-header h1 { font-size: 1.4rem; }
     }
@@ -198,6 +315,9 @@
     <a class="nav-brand" href="/">Road Trip Planner</a>
     <div class="nav-right">
       <a class="nav-link" href="/">Plan a Trip</a>
+      <a class="nav-link" href="/explore">Explore</a>
+      <a class="nav-link" href="/trips">Trips</a>
+      <a class="nav-link" href="/stats">Stats</a>
       <a class="nav-link" href="/auth/logout">Logout</a>
     </div>
   </nav>
@@ -221,6 +341,9 @@
         <div class="inbox-info">
           <div class="inbox-route-name">{{ item.route_name }}</div>
           <div class="inbox-from">Shared by <strong>{{ item.from_username }}</strong> · {{ item.created_at.strftime('%b %d, %Y') }}</div>
+          {% if item.stop_preview %}
+          <div class="inbox-stops-preview">{{ item.stop_preview }}</div>
+          {% endif %}
         </div>
         <div class="inbox-actions">
           <button class="inbox-save-btn" onclick="inboxSave({{ item.id }}, this)">Save to My Routes</button>
@@ -249,14 +372,61 @@
               <button class="copy-btn" onclick="copyLink('{{ r.share_id }}', this)">Copy</button>
             </div>
 
-            <div class="card-actions">
-              <a class="btn-view" href="/share/{{ r.share_id }}">🗺️ View on Map</a>
-              <button class="btn-edit"      id="edit-btn-{{ r.id }}"   onclick="toggleEdit({{ r.id }})">✏️ Edit</button>
-              <button class="btn-share"                                onclick="openShareModal({{ r.id }})">↗ Send</button>
+            <div class="card-actions" id="actions-{{ r.id }}">
+              <a class="btn-view" href="/share/{{ r.share_id }}">View on Map</a>
+              <button class="btn-edit"      id="edit-btn-{{ r.id }}"   onclick="toggleEdit({{ r.id }})">Edit</button>
+              <button class="btn-share"                                onclick="openShareModal({{ r.id }})">Send</button>
               <button class="btn-duplicate"                            onclick="duplicateRoute({{ r.id }})">Duplicate</button>
-              <button class="btn-invite"    id="invite-btn-{{ r.id }}" onclick="toggleInvite({{ r.id }})">👥 Invite</button>
-              <button class="btn-copy"      onclick="printRoute({{ r.id }})" title="Print itinerary">🖨️</button>
-              <button class="btn-delete"    onclick="confirmDelete({{ r.id }}, '{{ r.name | e }}')">🗑️</button>
+              <button class="btn-invite"    id="invite-btn-{{ r.id }}" onclick="toggleInvite({{ r.id }})">Invite</button>
+              <button class="btn-copy"      onclick="printRoute({{ r.id }})" title="Print itinerary">Print</button>
+              <a class="btn-edit" href="/trip-mode/{{ r.share_id }}" target="_blank">🗺 Trip Mode</a>
+              <button class="btn-csv"       onclick="downloadCSV({{ r.id }})" title="Download stops as CSV">CSV</button>
+              <button class="btn-public"    id="btn-public-{{ r.id }}" onclick="togglePublic({{ r.id }})">🌐 Public</button>
+              <button class="btn-edit"      onclick="openPackingModal({{ r.id }})">🎒 Packing</button>
+              <button class="btn-edit"      onclick="emailItinerary({{ r.id }})">📧 Email</button>
+              <button class="btn-delete"    onclick="confirmDelete({{ r.id }}, '{{ r.name | e }}')">Delete</button>
+              <button class="btn-more-toggle" onclick="toggleMoreActions({{ r.id }})">More ▼</button>
+            </div>
+
+            <div class="notes-section">
+              <div class="notes-label">Notes</div>
+              <textarea class="notes-textarea" id="notes-{{ r.id }}" placeholder="Add your own trip notes, reminders, or packing list…" onblur="saveNotes({{ r.id }})"></textarea>
+              <div class="notes-saved-indicator" id="notes-saved-{{ r.id }}">✓ Saved</div>
+            </div>
+
+            <div class="visited-section">
+              <div class="visited-label">Stops visited</div>
+              <div id="visited-{{ r.id }}"></div>
+            </div>
+
+            <div class="photo-section">
+              <div class="photo-label">Photo notes</div>
+              <div class="photo-list" id="photo-list-{{ r.id }}"></div>
+            </div>
+
+            <div class="budget-section">
+              <div class="budget-label">Trip budget</div>
+              <div class="budget-input-row">
+                <input class="budget-input" type="number" min="0" id="budget-input-{{ r.id }}" placeholder="Total budget ($)"/>
+                <button class="budget-set-btn" onclick="setBudget({{ r.id }})">Set</button>
+              </div>
+              <div class="budget-bar-wrap"><div class="budget-bar-fill" id="budget-bar-{{ r.id }}" style="width:0%"></div></div>
+              <div class="budget-summary" id="budget-summary-{{ r.id }}"></div>
+            </div>
+
+            <div class="checkin-section">
+              <div class="checkin-label">Check-in log</div>
+              <div class="checkin-list" id="checkin-list-{{ r.id }}"></div>
+            </div>
+
+            <div class="journal-section">
+              <div class="journal-label">Trip journal</div>
+              <div class="journal-star-row" id="journal-stars-{{ r.id }}"></div>
+              <textarea class="journal-textarea" id="journal-text-{{ r.id }}" placeholder="How was the trip? Write your reflections, highlights, and memories…"></textarea>
+              <div>
+                <button class="journal-save-btn" onclick="saveJournal({{ r.id }})">Save Journal</button>
+                <span class="journal-saved-indicator" id="journal-saved-{{ r.id }}">✓ Saved</span>
+              </div>
             </div>
 
             <div class="invite-box" id="invite-box-{{ r.id }}">
@@ -311,6 +481,10 @@
             const urlEl = document.getElementById('url-' + rid);
             if (urlEl) urlEl.textContent = shareUrl;
 
+            // Pre-populate notes
+            const notesEl = document.getElementById('notes-' + rid);
+            if (notesEl && data.user_notes) notesEl.value = data.user_notes;
+
             // Badges
             const bc = document.getElementById('badges-' + rid);
             if (bc) {
@@ -321,7 +495,32 @@
                 b.textContent = icon + ' ' + val;
                 bc.appendChild(b);
               });
+
+              // Countdown badge
+              if (data.departure_date) {
+                const dep = new Date(data.departure_date + 'T00:00:00');
+                const today = new Date(); today.setHours(0,0,0,0);
+                const diff = Math.round((dep - today) / 86400000);
+                const cb = document.createElement('span');
+                cb.className = 'countdown-badge ' + (diff > 0 ? 'future' : diff === 0 ? 'today' : 'past');
+                cb.textContent = diff > 0 ? '🗓 ' + diff + ' days away' : diff === 0 ? '🗓 Today!' : '🗓 ' + Math.abs(diff) + ' days ago';
+                bc.appendChild(cb);
+              }
             }
+
+            // Public button state
+            const pubBtn = document.getElementById('btn-public-' + rid);
+            if (pubBtn && {{ 'true' if r.is_public else 'false' }}) {
+              pubBtn.classList.add('public-on');
+              pubBtn.textContent = '🌐 Public ✓';
+            }
+
+            // Visited stops & photo notes
+            renderVisitedStops(rid);
+            renderPhotoSection(rid);
+            renderBudget(rid);
+            renderCheckins(rid);
+            loadJournal(rid);
             } catch(e) { console.error('Route init error:', e); }
           })();
         </script>
@@ -345,6 +544,16 @@
         <button class="btn-cancel-confirm" onclick="closeConfirmDirect()">Cancel</button>
         <button class="btn-delete-confirm" id="confirm-delete-btn">Delete</button>
       </div>
+    </div>
+  </div>
+
+  <!-- PACKING MODAL -->
+  <div class="packing-modal-overlay" id="packing-modal" onclick="closePackingModal(event)">
+    <div class="packing-modal-inner">
+      <h3>🎒 Packing List</h3>
+      <p class="packing-sub" id="packing-modal-sub">Generated for your route</p>
+      <div id="packing-modal-body"></div>
+      <button class="packing-close-btn" onclick="closePackingModalDirect()">Done</button>
     </div>
   </div>
 
@@ -563,7 +772,7 @@
       const t = document.getElementById('card-title-' + rid);
       if (t) t.textContent = savedRoutes[rid].name;
 
-      wrap.innerHTML = '<div style="color:#553c9a;font-size:0.85rem;padding:4px 0;">✓ Changes applied — click Save Changes to keep them.</div>';
+      wrap.innerHTML = '<div style="color:var(--brand);font-size:0.85rem;padding:4px 0;">✓ Changes applied — click Save Changes to keep them.</div>';
       wrap._pending = null;
       setTimeout(() => { wrap.style.display = 'none'; }, 4000);
     }
@@ -795,6 +1004,204 @@
       }
     }
 
+    async function saveNotes(rid) {
+      const el = document.getElementById('notes-' + rid);
+      if (!el) return;
+      const note = el.value;
+      // Update local copy so saveEdit doesn't wipe it
+      if (savedRoutes[rid]) savedRoutes[rid].user_notes = note;
+      try {
+        await fetch('/routes/notes/' + rid, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ note })
+        });
+        const ind = document.getElementById('notes-saved-' + rid);
+        if (ind) { ind.style.display = 'block'; setTimeout(() => { ind.style.display = 'none'; }, 2000); }
+      } catch(e) { /* silent */ }
+    }
+
+    function downloadCSV(rid) {
+      const route = savedRoutes[rid];
+      if (!route) return;
+      const rows = [['Stop','Address']].concat(
+        (route.stops || []).map(s => [s.name || '', s.address || ''])
+      );
+      const csv = rows.map(r => r.map(v => '"' + (v + '').replace(/"/g, '""') + '"').join(',')).join('\n');
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = (route.name || 'route').replace(/[^a-z0-9]/gi, '_') + '.csv';
+      a.click();
+    }
+
+    function toggleMoreActions(rid) {
+      const actions = document.getElementById('actions-' + rid);
+      const btn = actions && actions.querySelector('.btn-more-toggle');
+      if (!actions) return;
+      const expanded = actions.classList.toggle('expanded');
+      if (btn) btn.textContent = expanded ? 'Less ▲' : 'More ▼';
+    }
+
+    // ── Toggle public ──
+    async function togglePublic(rid) {
+      const btn = document.getElementById('btn-public-' + rid);
+      if (!btn) return;
+      try {
+        const res  = await fetch('/routes/toggle-public/' + rid, { method: 'POST' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        if (data.is_public) {
+          btn.classList.add('public-on');
+          btn.textContent = '🌐 Public ✓';
+        } else {
+          btn.classList.remove('public-on');
+          btn.textContent = '🌐 Public';
+        }
+      } catch(e) { alert('Could not update public status.'); }
+    }
+
+    // ── Packing list modal ──
+    function closePackingModal(e) {
+      if (e.target === document.getElementById('packing-modal')) closePackingModalDirect();
+    }
+    function closePackingModalDirect() {
+      document.getElementById('packing-modal').classList.remove('open');
+    }
+
+    async function openPackingModal(rid) {
+      const route = savedRoutes[rid];
+      if (!route) return;
+      const modal = document.getElementById('packing-modal');
+      const body  = document.getElementById('packing-modal-body');
+      const sub   = document.getElementById('packing-modal-sub');
+      sub.textContent = route.name || 'Your route';
+      body.innerHTML = '<p style="color:var(--muted);font-size:13px;">Generating packing list…</p>';
+      modal.classList.add('open');
+
+      const storageKey = 'packing_checked_' + rid;
+      try {
+        const res  = await fetch('/api/packing-list', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ route })
+        });
+        const data = await res.json();
+        const categories = data.categories || [];
+        const checked = JSON.parse(localStorage.getItem(storageKey) || '{}');
+
+        body.innerHTML = categories.map((cat, ci) => `
+          <div class="packing-category">
+            <div class="packing-category-title">${escHtml(cat.name)}</div>
+            ${(cat.items || []).map((item, ii) => {
+              const key = ci + '_' + ii;
+              const isDone = !!checked[key];
+              return `<label class="packing-item">
+                <input type="checkbox" ${isDone ? 'checked' : ''} onchange="
+                  var k=JSON.parse(localStorage.getItem('${storageKey}')||'{}');
+                  k['${key}']=this.checked;
+                  localStorage.setItem('${storageKey}',JSON.stringify(k));
+                  this.nextElementSibling.className=this.checked?'checked':'';
+                "/>
+                <span class="${isDone ? 'checked' : ''}">${escHtml(item)}</span>
+              </label>`;
+            }).join('')}
+          </div>`).join('');
+      } catch(e) {
+        body.innerHTML = '<p style="color:#ef4444;font-size:13px;">Could not generate packing list. Please try again.</p>';
+      }
+    }
+
+    // ── Email itinerary ──
+    function emailItinerary(rid) {
+      const route = savedRoutes[rid];
+      if (!route) return;
+      const stops = (route.stops || []).map((s, i) => `${i + 1}. ${s.name} — ${s.address}`).join('%0A');
+      const subject = encodeURIComponent('Road Trip: ' + (route.name || 'My Route'));
+      const body = encodeURIComponent(
+        'Here\'s my road trip itinerary!\n\n' +
+        (route.name || 'Route') + '\n' +
+        (route.distance ? 'Distance: ' + route.distance + '\n' : '') +
+        (route.drive_time ? 'Drive time: ' + route.drive_time + '\n' : '') +
+        '\nStops:\n' + (route.stops || []).map((s, i) => `${i + 1}. ${s.name} — ${s.address}`).join('\n') +
+        '\n\nView on map: ' + window.location.origin + '/share/' + (route.share_id || '')
+      );
+      window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
+    }
+
+    // ── Visited stops ──
+    function renderVisitedStops(rid) {
+      const el = document.getElementById('visited-' + rid);
+      if (!el) return;
+      const route = savedRoutes[rid];
+      const stops = (route && route.stops) || [];
+      if (!stops.length) { el.innerHTML = '<p style="color:var(--subtle);font-size:12px;">No stops yet.</p>'; return; }
+      const key = 'visited_' + rid;
+      const visited = JSON.parse(localStorage.getItem(key) || '{}');
+      el.innerHTML = stops.map((s, i) => {
+        const done = !!visited[i];
+        return `<div class="visited-stop-row">
+          <input class="visited-check" type="checkbox" ${done ? 'checked' : ''} onchange="markVisited(${rid}, ${i}, this.checked)"/>
+          <span class="visited-stop-name ${done ? 'done' : ''}" id="visited-name-${rid}-${i}">${escHtml(s.name)}</span>
+        </div>`;
+      }).join('');
+    }
+
+    function markVisited(rid, idx, checked) {
+      const key = 'visited_' + rid;
+      const visited = JSON.parse(localStorage.getItem(key) || '{}');
+      visited[idx] = checked;
+      localStorage.setItem(key, JSON.stringify(visited));
+      const nameEl = document.getElementById('visited-name-' + rid + '-' + idx);
+      if (nameEl) nameEl.className = 'visited-stop-name ' + (checked ? 'done' : '');
+    }
+
+    // ── Photo notes ──
+    function renderPhotoSection(rid) {
+      const list = document.getElementById('photo-list-' + rid);
+      if (!list) return;
+      const route = savedRoutes[rid];
+      const stops = (route && route.stops) || [];
+      list.innerHTML = stops.map((s, i) => {
+        const stored = localStorage.getItem('photo_' + rid + '_' + i);
+        if (stored) {
+          return `<img class="stop-thumb" src="${stored}" title="${escHtml(s.name)}" onclick="viewPhoto('${escHtml(stored)}', '${escHtml(s.name)}')"/>`;
+        }
+        return `<button class="photo-btn" onclick="savePhoto(${rid}, ${i})">📷 ${escHtml(s.name)}</button>`;
+      }).join('');
+    }
+
+    function savePhoto(rid, idx) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = () => {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+          localStorage.setItem('photo_' + rid + '_' + idx, e.target.result);
+          renderPhotoSection(rid);
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    }
+
+    function viewPhoto(src, name) {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:12px;';
+      overlay.onclick = () => overlay.remove();
+      const img = document.createElement('img');
+      img.src = src;
+      img.style.cssText = 'max-width:90vw;max-height:80vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,0.5);';
+      const cap = document.createElement('div');
+      cap.textContent = name;
+      cap.style.cssText = 'color:rgba(255,255,255,0.7);font-size:13px;font-family:Inter,sans-serif;';
+      overlay.appendChild(img);
+      overlay.appendChild(cap);
+      document.body.appendChild(overlay);
+    }
+
     async function inboxDismiss(id, btn) {
       btn.disabled = true;
       try {
@@ -814,6 +1221,132 @@
       } catch(e) {
         btn.disabled = false;
       }
+    }
+
+    // ── Budget tracker ──
+    function renderBudget(rid) {
+      const key = 'budget_' + rid;
+      const stored = JSON.parse(localStorage.getItem(key) || '{}');
+      const budget = stored.budget || 0;
+      const spent  = stored.spent  || 0;
+      const input  = document.getElementById('budget-input-' + rid);
+      if (input && budget) input.value = budget;
+      updateBudgetBar(rid, budget, spent);
+    }
+
+    function setBudget(rid) {
+      const input = document.getElementById('budget-input-' + rid);
+      const val   = parseFloat(input && input.value) || 0;
+      const key   = 'budget_' + rid;
+      const stored = JSON.parse(localStorage.getItem(key) || '{}');
+      stored.budget = val;
+      localStorage.setItem(key, JSON.stringify(stored));
+
+      // Estimate spend from route cost data if available
+      const route = savedRoutes[rid];
+      let estimated = 0;
+      if (route) {
+        const stops = (route.stops || []).length;
+        const nights = (route.itinerary || []).length || 1;
+        estimated = nights * 120 + stops * 30; // rough estimate
+      }
+      stored.spent = estimated;
+      localStorage.setItem(key, JSON.stringify(stored));
+      updateBudgetBar(rid, val, stored.spent);
+    }
+
+    function updateBudgetBar(rid, budget, spent) {
+      const bar  = document.getElementById('budget-bar-' + rid);
+      const summ = document.getElementById('budget-summary-' + rid);
+      if (!budget) { if (summ) summ.textContent = 'Set a budget to track spending.'; return; }
+      const pct  = Math.min((spent / budget) * 100, 100);
+      const over = spent > budget;
+      if (bar)  { bar.style.width = pct + '%'; bar.className = 'budget-bar-fill' + (over ? ' over' : ''); }
+      if (summ) summ.textContent = `Est. $${Math.round(spent).toLocaleString()} of $${Math.round(budget).toLocaleString()} budget ${over ? '(over budget!)' : ''}`;
+    }
+
+    // ── Check-in timeline ──
+    function renderCheckins(rid) {
+      const el = document.getElementById('checkin-list-' + rid);
+      if (!el) return;
+      const route = savedRoutes[rid];
+      const stops = (route && route.stops) || [];
+      const key   = 'checkins_' + rid;
+      const checkins = JSON.parse(localStorage.getItem(key) || '{}');
+      el.innerHTML = stops.map((s, i) => {
+        const time = checkins[i];
+        return `<div class="checkin-row">
+          <div class="checkin-dot ${time ? 'done' : ''}"></div>
+          <span class="checkin-name">${escHtml(s.name)}</span>
+          <span class="checkin-time">${time ? new Date(time).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}</span>
+          <button class="checkin-btn" onclick="checkinStop(${rid}, ${i})">${time ? 'Undo' : 'Check in'}</button>
+        </div>`;
+      }).join('');
+    }
+
+    function checkinStop(rid, idx) {
+      const key = 'checkins_' + rid;
+      const checkins = JSON.parse(localStorage.getItem(key) || '{}');
+      if (checkins[idx]) { delete checkins[idx]; } else { checkins[idx] = Date.now(); }
+      localStorage.setItem(key, JSON.stringify(checkins));
+      renderCheckins(rid);
+    }
+
+    // ── Trip journal ──
+    async function loadJournal(rid) {
+      const starsEl = document.getElementById('journal-stars-' + rid);
+      const textEl  = document.getElementById('journal-text-' + rid);
+      if (!starsEl || !textEl) return;
+
+      const route = savedRoutes[rid];
+      const stops = (route && route.stops) || [];
+
+      // Build per-stop star rating UI
+      starsEl.innerHTML = stops.map((s, i) =>
+        `<div class="journal-stop-rating">
+          <span style="font-size:11px;color:var(--subtle)">${escHtml(s.name.split(',')[0])}:</span>
+          ${[1,2,3,4,5].map(n => `<span class="star-input" id="star-${rid}-${i}-${n}" onclick="setStopRating(${rid},${i},${n})">★</span>`).join('')}
+        </div>`
+      ).join('');
+
+      try {
+        const res  = await fetch('/routes/journal/' + rid);
+        const data = await res.json();
+        if (data.content) textEl.value = data.content;
+        const ratings = data.stop_ratings || {};
+        Object.entries(ratings).forEach(([stopIdx, rating]) => {
+          for (let n = 1; n <= 5; n++) {
+            const star = document.getElementById(`star-${rid}-${stopIdx}-${n}`);
+            if (star) star.className = 'star-input' + (n <= rating ? ' active' : '');
+          }
+        });
+      } catch(e) { /* silent */ }
+    }
+
+    function setStopRating(rid, stopIdx, rating) {
+      for (let n = 1; n <= 5; n++) {
+        const star = document.getElementById(`star-${rid}-${stopIdx}-${n}`);
+        if (star) star.className = 'star-input' + (n <= rating ? ' active' : '');
+      }
+      // Store locally for save
+      if (!window._journalRatings) window._journalRatings = {};
+      if (!window._journalRatings[rid]) window._journalRatings[rid] = {};
+      window._journalRatings[rid][stopIdx] = rating;
+    }
+
+    async function saveJournal(rid) {
+      const textEl = document.getElementById('journal-text-' + rid);
+      const indEl  = document.getElementById('journal-saved-' + rid);
+      const content = textEl ? textEl.value : '';
+      const stop_ratings = (window._journalRatings && window._journalRatings[rid]) || {};
+      try {
+        await fetch('/routes/journal/' + rid, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ content, stop_ratings })
+        });
+        if (indEl) { indEl.style.display = 'inline'; setTimeout(() => { indEl.style.display = 'none'; }, 2000); }
+      } catch(e) { alert('Could not save journal.'); }
     }
   </script>
 </body>

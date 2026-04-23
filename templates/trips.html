@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Trips — Road Trip Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #fafafa; --surface: #ffffff; --border: #e4e4e7; --border-hover: #d4d4d8;
+      --text: #09090b; --muted: #71717a; --subtle: #a1a1aa;
+      --primary: #18181b; --primary-fg: #fafafa;
+      --brand: #16a34a; --brand-bg: #f0fdf4; --brand-border: #bbf7d0;
+      --radius: 8px; --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-brand { color: var(--text); font-weight: 700; font-size: 15px; text-decoration: none; letter-spacing: -0.02em; }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .nav-link { color: var(--muted); font-size: 13px; text-decoration: none; padding: 5px 10px; border-radius: var(--radius); transition: color 0.15s, background 0.15s; }
+    .nav-link:hover { color: var(--text); background: var(--bg); }
+    .page-header { padding: 36px 24px 24px; max-width: 720px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .page-header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.03em; }
+    .container { max-width: 720px; margin: 0 auto 80px; padding: 0 24px; }
+    .new-trip-form { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 20px; display: flex; gap: 8px; }
+    .new-trip-input { flex: 1; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; font-size: 14px; font-family: inherit; color: var(--text); background: var(--surface); }
+    .new-trip-input:focus { outline: none; border-color: var(--border-hover); }
+    .new-trip-btn { background: var(--primary); color: var(--primary-fg); border: none; border-radius: var(--radius); padding: 8px 18px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .new-trip-btn:hover { background: #27272a; }
+    .trip-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
+    .trip-header { padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .trip-name { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+    .trip-meta { font-size: 12px; color: var(--subtle); margin-top: 2px; }
+    .trip-delete-btn { background: none; border: none; color: var(--subtle); font-size: 13px; cursor: pointer; padding: 4px 8px; border-radius: 5px; }
+    .trip-delete-btn:hover { color: #ef4444; background: #fef2f2; }
+    .trip-routes { padding: 12px 18px; }
+    .trip-route-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .trip-route-item:last-child { border-bottom: none; }
+    .trip-route-name { color: var(--text); font-weight: 500; }
+    .trip-route-remove { background: none; border: none; color: var(--subtle); cursor: pointer; font-size: 12px; padding: 2px 6px; border-radius: 4px; }
+    .trip-route-remove:hover { color: #ef4444; background: #fef2f2; }
+    .trip-add-row { display: flex; gap: 8px; margin-top: 10px; }
+    .trip-add-select { flex: 1; border: 1px solid var(--border); border-radius: var(--radius); padding: 7px 10px; font-size: 13px; font-family: inherit; color: var(--text); background: var(--surface); }
+    .trip-add-btn { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 7px 14px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; color: var(--text); }
+    .trip-add-btn:hover { border-color: var(--border-hover); }
+    .empty-state { text-align: center; padding: 64px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+    .empty-state h2 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+    .empty-state p { color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-brand" href="/">Road Trip Planner</a>
+    <div class="nav-right">
+      <a class="nav-link" href="/">Plan a Trip</a>
+      <a class="nav-link" href="/routes/saved">My Routes</a>
+      <a class="nav-link" href="/explore">Explore</a>
+      <a class="nav-link" href="/auth/logout">Logout</a>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h1>My Trips</h1>
+  </div>
+
+  <div class="container">
+    <div class="new-trip-form">
+      <input class="new-trip-input" id="new-trip-name" placeholder="New trip name (e.g. Summer 2026 Road Trip)…" onkeydown="if(event.key==='Enter') createTrip()"/>
+      <button class="new-trip-btn" onclick="createTrip()">+ Create Trip</button>
+    </div>
+
+    <div id="trips-list">
+      {% if groups %}
+        {% for g in groups %}
+        <div class="trip-card" id="trip-{{ g.id }}">
+          <div class="trip-header">
+            <div>
+              <div class="trip-name">{{ g.name }}</div>
+              <div class="trip-meta">{{ g.routes|length }} route{{ 's' if g.routes|length != 1 else '' }} · Created {{ g.created_at }}</div>
+            </div>
+            <button class="trip-delete-btn" onclick="deleteTrip({{ g.id }})">Delete</button>
+          </div>
+          <div class="trip-routes" id="trip-routes-{{ g.id }}">
+            {% for r in g.routes %}
+            <div class="trip-route-item" id="trip-route-{{ g.id }}-{{ r.id }}">
+              <span class="trip-route-name">{{ r.name }}</span>
+              <button class="trip-route-remove" onclick="removeRoute({{ g.id }}, {{ r.id }})">✕ Remove</button>
+            </div>
+            {% endfor %}
+            <div class="trip-add-row">
+              <select class="trip-add-select" id="add-select-{{ g.id }}">
+                <option value="">Add a saved route…</option>
+                {% for r in saved_routes %}
+                <option value="{{ r.id }}">{{ r.name }}</option>
+                {% endfor %}
+              </select>
+              <button class="trip-add-btn" onclick="addRoute({{ g.id }})">Add</button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="empty-state" id="empty-state">
+        <h2>No trips yet</h2>
+        <p>Create a trip above to group your saved routes into a multi-leg journey.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    async function createTrip() {
+      const input = document.getElementById('new-trip-name');
+      const name  = input.value.trim();
+      if (!name) return;
+      const res  = await fetch('/trips/create', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ name }) });
+      const data = await res.json();
+      if (!data.success) { alert(data.error); return; }
+      input.value = '';
+      // Remove empty state if present
+      const es = document.getElementById('empty-state');
+      if (es) es.remove();
+      // Inject new trip card
+      const div = document.createElement('div');
+      div.id = 'trip-' + data.id;
+      div.className = 'trip-card';
+      div.innerHTML = `
+        <div class="trip-header">
+          <div>
+            <div class="trip-name">${escHtml(data.name)}</div>
+            <div class="trip-meta">0 routes · Created just now</div>
+          </div>
+          <button class="trip-delete-btn" onclick="deleteTrip(${data.id})">Delete</button>
+        </div>
+        <div class="trip-routes" id="trip-routes-${data.id}">
+          <div class="trip-add-row">
+            <select class="trip-add-select" id="add-select-${data.id}">
+              <option value="">Add a saved route…</option>
+              ${savedRoutesOptions}
+            </select>
+            <button class="trip-add-btn" onclick="addRoute(${data.id})">Add</button>
+          </div>
+        </div>`;
+      document.getElementById('trips-list').prepend(div);
+    }
+
+    async function addRoute(gid) {
+      const sel      = document.getElementById('add-select-' + gid);
+      const route_id = parseInt(sel.value);
+      if (!route_id) return;
+      const name = sel.options[sel.selectedIndex].text;
+      const res  = await fetch(`/trips/${gid}/add`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ route_id }) });
+      const data = await res.json();
+      if (!data.success) { alert(data.error); return; }
+      const container = document.getElementById('trip-routes-' + gid);
+      const row = document.createElement('div');
+      row.className = 'trip-route-item';
+      row.id = `trip-route-${gid}-${route_id}`;
+      row.innerHTML = `<span class="trip-route-name">${escHtml(name)}</span><button class="trip-route-remove" onclick="removeRoute(${gid}, ${route_id})">✕ Remove</button>`;
+      container.insertBefore(row, container.querySelector('.trip-add-row'));
+      sel.value = '';
+    }
+
+    async function removeRoute(gid, rid) {
+      const res = await fetch(`/trips/${gid}/remove`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ route_id: rid }) });
+      const data = await res.json();
+      if (data.success) {
+        const el = document.getElementById(`trip-route-${gid}-${rid}`);
+        if (el) el.remove();
+      }
+    }
+
+    async function deleteTrip(gid) {
+      if (!confirm('Delete this trip? Your saved routes will not be affected.')) return;
+      const res = await fetch(`/trips/${gid}/delete`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        const card = document.getElementById('trip-' + gid);
+        if (card) { card.style.opacity = '0'; card.style.transition = 'opacity 0.3s'; setTimeout(() => card.remove(), 300); }
+      }
+    }
+
+    function escHtml(s) {
+      return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // Build options string for dynamically added trips
+    const savedRoutesOptions = `{% for r in saved_routes %}<option value="{{ r.id }}">{{ r.name | e }}</option>{% endfor %}`;
+  </script>
+</body>
+</html>

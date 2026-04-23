@@ -42,6 +42,7 @@ class SavedRoute(db.Model):
     edit_token = db.Column(db.String(36), unique=True, nullable=True)
     name       = db.Column(db.String(200), nullable=False)
     route_data = db.Column(db.Text, nullable=False)
+    is_public  = db.Column(db.Boolean, default=False, nullable=False, server_default='0')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -56,6 +57,34 @@ class SharedRoute(db.Model):
     created_at    = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class TripGroup(db.Model):
+    id         = db.Column(db.Integer, primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    name       = db.Column(db.String(200), nullable=False)
+    route_ids  = db.Column(db.Text, nullable=False, default="[]")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class RouteReview(db.Model):
+    id         = db.Column(db.Integer, primary_key=True)
+    route_id   = db.Column(db.Integer, db.ForeignKey("saved_route.id"), nullable=False)
+    user_id    = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    username   = db.Column(db.String(80), nullable=False)
+    rating     = db.Column(db.Integer, nullable=False)   # 1-5
+    review_text = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class TripJournal(db.Model):
+    id          = db.Column(db.Integer, primary_key=True)
+    route_id    = db.Column(db.Integer, db.ForeignKey("saved_route.id"), nullable=False)
+    user_id     = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    content     = db.Column(db.Text, nullable=True)
+    stop_ratings = db.Column(db.Text, nullable=True)  # JSON: {"0": 4, "1": 5, ...}
+    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at  = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -63,6 +92,19 @@ def load_user(user_id):
 
 with app.app_context():
     db.create_all()
+
+# Migrate: add is_public column if it doesn't exist (SQLite doesn't support ALTER TABLE ADD COLUMN IF NOT EXISTS)
+with app.app_context():
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(db.text("ALTER TABLE saved_route ADD COLUMN is_public BOOLEAN NOT NULL DEFAULT 0"))
+            conn.commit()
+    except Exception:
+        pass  # column already exists
+
+# Migrate: create new tables if they don't exist
+with app.app_context():
+    db.create_all()  # safe to call again — creates new tables, skips existing
 
 
 # ── Helpers ─────────────────────────────────────────────────
@@ -116,6 +158,15 @@ def logout():
     return redirect(url_for("index"))
 
 
+@app.route("/sw.js")
+def service_worker():
+    from flask import send_from_directory
+    response = send_from_directory("static", "sw.js")
+    response.headers["Content-Type"] = "application/javascript"
+    response.headers["Service-Worker-Allowed"] = "/"
+    return response
+
+
 # ── Save / share ─────────────────────────────────────────────
 @app.route("/routes/save", methods=["POST"])
 @login_required
@@ -140,6 +191,13 @@ def saved_routes():
                              .order_by(SavedRoute.created_at.desc()).all()
     inbox  = SharedRoute.query.filter_by(to_user_id=current_user.id)\
                               .order_by(SharedRoute.created_at.desc()).all()
+    for item in inbox:
+        try:
+            rd = json.loads(item.route_data)
+            mid = rd.get("stops", [])[1:-1][:3]
+            item.stop_preview = " → ".join(s.get("name", "") for s in mid if s.get("name"))
+        except Exception:
+            item.stop_preview = ""
     return render_template("saved.html", routes=routes, inbox=inbox)
 
 
@@ -230,7 +288,10 @@ def print_view():
 # ── Main ─────────────────────────────────────────────────────
 @app.route("/")
 def index():
-    print(f"[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC] 👀 Visit — IP: {request.remote_addr}", flush=True)
+    try:
+        print(f"[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC] Visit -- IP: {request.remote_addr}", flush=True)
+    except Exception:
+        pass
     inbox_count = 0
     if current_user.is_authenticated:
         inbox_count = SharedRoute.query.filter_by(to_user_id=current_user.id).count()
@@ -252,7 +313,10 @@ def recommend():
     if not location:
         return jsonify({"error": "Location is required"}), 400
 
-    print(f"[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC] 🚗 From: {location} | Dest: {destination or 'any'} | Duration: {duration or 'any'} | Nights: {nights or 'any'} | IP: {request.remote_addr}", flush=True)
+    try:
+        print(f"[{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC] Trip -- From: {location} | Dest: {destination or 'any'} | Duration: {duration or 'any'} | Nights: {nights or 'any'} | IP: {request.remote_addr}", flush=True)
+    except Exception:
+        pass
 
     client = anthropic.Anthropic(api_key=api_key)
 
@@ -546,6 +610,175 @@ Base these on real current prices for the specific region, not generic defaults.
         return jsonify({"error": str(ex)}), 500
 
 
+@app.route("/api/packing-list", methods=["POST"])
+def packing_list():
+    data    = request.json
+    api_key = data.get("api_key", "").strip() or DEFAULT_API_KEY
+    route   = data.get("route")
+
+    if not api_key:
+        return jsonify({"error": "No API key"}), 400
+    if not route:
+        return jsonify({"error": "No route"}), 400
+
+    stops  = [s.get("name", "") for s in route.get("stops", [])]
+    theme  = route.get("theme", "")
+    nights = len(route.get("itinerary", [])) or 1
+
+    client = anthropic.Anthropic(api_key=api_key)
+    prompt = f"""Create a practical packing list for this road trip:
+Route theme: {theme}
+Stops: {', '.join(stops[:8])}
+Duration: {nights} night(s)
+
+Return ONLY valid JSON (no markdown):
+{{
+  "categories": [
+    {{"name": "Category Name", "items": ["item 1", "item 2", "item 3"]}}
+  ]
+}}
+
+Include 5-7 categories (e.g. Clothing, Toiletries, Documents, Tech, Snacks & Drinks, Emergency Kit, Activity Gear). Tailor items to the route's theme and duration. Be practical and specific."""
+
+    try:
+        response = client.messages.create(
+            model="claude-opus-4-6",
+            max_tokens=800,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        raw = response.content[0].text.strip()
+        if "```" in raw:
+            raw = raw.split("```", 1)[1]
+            if raw.startswith("json"): raw = raw[4:]
+            raw = raw.rsplit("```", 1)[0].strip()
+        s, e = raw.find("{"), raw.rfind("}")
+        if s != -1 and e != -1: raw = raw[s:e+1]
+        return jsonify(json.loads(raw))
+    except Exception as ex:
+        return jsonify({"error": str(ex)}), 500
+
+
+@app.route("/explore")
+def explore():
+    routes = SavedRoute.query.filter_by(is_public=True)\
+                             .order_by(SavedRoute.created_at.desc()).limit(60).all()
+    parsed = []
+    for r in routes:
+        try:
+            data = json.loads(r.route_data)
+            parsed.append({
+                "id": r.id,
+                "name": r.name,
+                "share_id": r.share_id,
+                "created_at": r.created_at.strftime("%b %d, %Y"),
+                "theme": data.get("theme", ""),
+                "distance": data.get("distance", ""),
+                "drive_time": data.get("drive_time", ""),
+                "best_time": data.get("best_time", ""),
+                "highlight": data.get("highlight", ""),
+                "stop_count": len(data.get("stops", [])),
+                "avg_rating": round(float(db.session.query(db.func.avg(RouteReview.rating)).filter_by(route_id=r.id).scalar() or 0), 1),
+                "review_count": RouteReview.query.filter_by(route_id=r.id).count(),
+            })
+        except Exception:
+            pass
+    return render_template("explore.html", routes=parsed)
+
+
+@app.route("/routes/toggle-public/<int:route_id>", methods=["POST"])
+@login_required
+def toggle_public(route_id):
+    saved = SavedRoute.query.get_or_404(route_id)
+    if saved.user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    saved.is_public = not saved.is_public
+    db.session.commit()
+    return jsonify({"success": True, "is_public": saved.is_public})
+
+
+@app.route("/trips")
+@login_required
+def trips():
+    groups = TripGroup.query.filter_by(user_id=current_user.id)\
+                            .order_by(TripGroup.created_at.desc()).all()
+    saved  = SavedRoute.query.filter_by(user_id=current_user.id)\
+                             .order_by(SavedRoute.created_at.desc()).all()
+    # Build name lookup
+    route_names = {r.id: r.name for r in saved}
+    parsed_groups = []
+    for g in groups:
+        try:
+            ids = json.loads(g.route_ids)
+        except Exception:
+            ids = []
+        parsed_groups.append({
+            "id": g.id,
+            "name": g.name,
+            "created_at": g.created_at.strftime("%b %d, %Y"),
+            "routes": [{"id": rid, "name": route_names.get(rid, "(deleted)")} for rid in ids],
+        })
+    saved_list = [{"id": r.id, "name": r.name} for r in saved]
+    return render_template("trips.html", groups=parsed_groups, saved_routes=saved_list)
+
+
+@app.route("/trips/create", methods=["POST"])
+@login_required
+def create_trip():
+    name = request.json.get("name", "").strip()
+    if not name:
+        return jsonify({"error": "Name required"}), 400
+    group = TripGroup(user_id=current_user.id, name=name)
+    db.session.add(group)
+    db.session.commit()
+    return jsonify({"success": True, "id": group.id, "name": group.name})
+
+
+@app.route("/trips/<int:group_id>/add", methods=["POST"])
+@login_required
+def trip_add_route(group_id):
+    group = TripGroup.query.get_or_404(group_id)
+    if group.user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    route_id = request.json.get("route_id")
+    try:
+        ids = json.loads(group.route_ids)
+    except Exception:
+        ids = []
+    if route_id not in ids:
+        ids.append(route_id)
+    group.route_ids = json.dumps(ids)
+    db.session.commit()
+    return jsonify({"success": True})
+
+
+@app.route("/trips/<int:group_id>/remove", methods=["POST"])
+@login_required
+def trip_remove_route(group_id):
+    group = TripGroup.query.get_or_404(group_id)
+    if group.user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    route_id = request.json.get("route_id")
+    try:
+        ids = json.loads(group.route_ids)
+    except Exception:
+        ids = []
+    ids = [i for i in ids if i != route_id]
+    group.route_ids = json.dumps(ids)
+    db.session.commit()
+    return jsonify({"success": True})
+
+
+@app.route("/trips/<int:group_id>/delete", methods=["POST"])
+@login_required
+def delete_trip(group_id):
+    group = TripGroup.query.get_or_404(group_id)
+    if group.user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    db.session.delete(group)
+    db.session.commit()
+    return jsonify({"success": True})
+
+
 @app.route("/routes/update/<int:route_id>", methods=["POST"])
 @login_required
 def update_route(route_id):
@@ -559,6 +792,23 @@ def update_route(route_id):
     saved.name = new_route.get("name", saved.name)
     db.session.commit()
     return jsonify({"success": True})
+
+
+@app.route("/routes/notes/<int:route_id>", methods=["POST"])
+@login_required
+def save_route_notes(route_id):
+    saved = SavedRoute.query.get_or_404(route_id)
+    if saved.user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    note = request.json.get("note", "")[:2000]
+    try:
+        data = json.loads(saved.route_data)
+        data["user_notes"] = note
+        saved.route_data = json.dumps(data)
+        db.session.commit()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/guided/suggestions", methods=["POST"])
@@ -672,6 +922,384 @@ No markdown. Be concise and friendly."""
         return jsonify({"reply": response.content[0].text[:300]})
     except Exception as ex:
         return jsonify({"reply": f"Error: {str(ex)}"}), 500
+
+
+@app.route("/api/optimize-route", methods=["POST"])
+def optimize_route():
+    data    = request.json
+    api_key = data.get("api_key", "").strip() or DEFAULT_API_KEY
+    route   = data.get("route")
+    mode    = data.get("mode", "shortest")  # "shortest" or "scenic"
+
+    if not api_key:
+        return jsonify({"error": "No API key"}), 400
+    if not route:
+        return jsonify({"error": "No route"}), 400
+
+    stops = route.get("stops", [])
+    if len(stops) < 3:
+        return jsonify({"error": "Need at least 3 stops to optimize"}), 400
+
+    first, last = stops[0], stops[-1]
+    middle = stops[1:-1]
+
+    client = anthropic.Anthropic(api_key=api_key)
+    stop_list = "\n".join(f"{i+1}. {s['name']} ({s['address']})" for i, s in enumerate(middle))
+    prompt = f"""Reorder these middle stops for the {'shortest total driving distance' if mode == 'shortest' else 'most scenic and logical flow'}. Keep the same start ({first['name']}) and end ({last['name']}).
+
+Middle stops to reorder:
+{stop_list}
+
+Return ONLY valid JSON (no markdown):
+{{"order": [<1-based indices in new order>], "reason": "One sentence explaining the optimization"}}
+
+Example: if 3 stops reordered as 2,1,3 → {{"order": [2,1,3], "reason": "..."}}"""
+
+    try:
+        response = client.messages.create(
+            model="claude-opus-4-6",
+            max_tokens=300,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        raw = response.content[0].text.strip()
+        if "```" in raw:
+            raw = raw.split("```", 1)[1]
+            if raw.startswith("json"): raw = raw[4:]
+            raw = raw.rsplit("```", 1)[0].strip()
+        s, e = raw.find("{"), raw.rfind("}")
+        if s != -1 and e != -1: raw = raw[s:e+1]
+        result = json.loads(raw)
+        order = result.get("order", [])
+        reordered_middle = [middle[i - 1] for i in order if 1 <= i <= len(middle)]
+        new_stops = [first] + reordered_middle + [last]
+        return jsonify({"stops": new_stops, "reason": result.get("reason", "")})
+    except Exception as ex:
+        return jsonify({"error": str(ex)}), 500
+
+
+@app.route("/api/alternative-routes", methods=["POST"])
+def alternative_routes():
+    data    = request.json
+    api_key = data.get("api_key", "").strip() or DEFAULT_API_KEY
+    route   = data.get("route")
+
+    if not api_key:
+        return jsonify({"error": "No API key"}), 400
+    if not route:
+        return jsonify({"error": "No route"}), 400
+
+    stops = route.get("stops", [])
+    start = stops[0]["address"] if stops else ""
+    end   = stops[-1]["address"] if len(stops) > 1 else ""
+
+    client = anthropic.Anthropic(api_key=api_key)
+    prompt = f"""The user has this road trip: {route.get('name')} from {start} to {end} with theme: {route.get('theme','')}.
+
+Generate 2 alternative route variations with different themes/stops. Return ONLY valid JSON (no markdown):
+[
+  {{
+    "name": "Alternative route name",
+    "theme": "Different theme",
+    "tagline": "One vivid sentence on what makes this different",
+    "stops": ["Stop 1 name — City, State", "Stop 2 name — City, State", "Stop 3 name — City, State"]
+  }}
+]
+
+Keep start ({start}) and end ({end}) the same. Make each alternative meaningfully different (e.g. coastal vs mountain, fast vs slow, cultural vs outdoor). Return exactly 2 alternatives."""
+
+    try:
+        response = client.messages.create(
+            model="claude-opus-4-6",
+            max_tokens=600,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        raw = response.content[0].text.strip()
+        if "```" in raw:
+            raw = raw.split("```", 1)[1]
+            if raw.startswith("json"): raw = raw[4:]
+            raw = raw.rsplit("```", 1)[0].strip()
+        s, e = raw.find("["), raw.rfind("]")
+        if s != -1 and e != -1: raw = raw[s:e+1]
+        return jsonify({"alternatives": json.loads(raw)})
+    except Exception as ex:
+        return jsonify({"error": str(ex)}), 500
+
+
+@app.route("/api/poi-suggestions", methods=["POST"])
+def poi_suggestions():
+    data    = request.json
+    api_key = data.get("api_key", "").strip() or DEFAULT_API_KEY
+    route   = data.get("route")
+
+    if not api_key:
+        return jsonify({"error": "No API key"}), 400
+    if not route:
+        return jsonify({"error": "No route"}), 400
+
+    stops = route.get("stops", [])
+    stop_names = [s.get("address", s.get("name", "")) for s in stops]
+
+    client = anthropic.Anthropic(api_key=api_key)
+    prompt = f"""Suggest interesting points of interest along this road trip route: {' → '.join(stop_names[:6])}.
+
+Return ONLY valid JSON (no markdown):
+{{
+  "pois": [
+    {{
+      "name": "POI name",
+      "location": "City, State",
+      "between": "Between Stop A and Stop B",
+      "type": "National Park / Museum / Restaurant / Viewpoint / etc.",
+      "why": "One vivid sentence on why it's worth stopping"
+    }}
+  ]
+}}
+
+Suggest 5-8 real, specific POIs that are actually along or near the route. Vary types (nature, food, history, quirky)."""
+
+    try:
+        response = client.messages.create(
+            model="claude-opus-4-6",
+            max_tokens=700,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        raw = response.content[0].text.strip()
+        if "```" in raw:
+            raw = raw.split("```", 1)[1]
+            if raw.startswith("json"): raw = raw[4:]
+            raw = raw.rsplit("```", 1)[0].strip()
+        s, e = raw.find("{"), raw.rfind("}")
+        if s != -1 and e != -1: raw = raw[s:e+1]
+        return jsonify(json.loads(raw))
+    except Exception as ex:
+        return jsonify({"error": str(ex)}), 500
+
+
+@app.route("/api/visa-check", methods=["POST"])
+def visa_check():
+    data       = request.json
+    api_key    = data.get("api_key", "").strip() or DEFAULT_API_KEY
+    route      = data.get("route")
+    nationality = data.get("nationality", "US").strip()
+
+    if not api_key:
+        return jsonify({"error": "No API key"}), 400
+    if not route:
+        return jsonify({"error": "No route"}), 400
+
+    stops = route.get("stops", [])
+    countries = list({s.get("address", "").split(",")[-1].strip() for s in stops if s.get("address")})
+
+    client = anthropic.Anthropic(api_key=api_key)
+    prompt = f"""Check entry/visa requirements for a {nationality} passport holder traveling to: {', '.join(countries)}.
+
+Return ONLY valid JSON (no markdown):
+{{
+  "checks": [
+    {{
+      "country": "Country name",
+      "requirement": "Visa-free / Visa on arrival / eVisa required / Visa required",
+      "duration": "e.g. Up to 90 days",
+      "notes": "Brief important note (e.g. passport validity, vaccination requirements)"
+    }}
+  ],
+  "disclaimer": "Always verify with official embassy websites before travel."
+}}"""
+
+    try:
+        response = client.messages.create(
+            model="claude-opus-4-6",
+            max_tokens=600,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        raw = response.content[0].text.strip()
+        if "```" in raw:
+            raw = raw.split("```", 1)[1]
+            if raw.startswith("json"): raw = raw[4:]
+            raw = raw.rsplit("```", 1)[0].strip()
+        s, e = raw.find("{"), raw.rfind("}")
+        if s != -1 and e != -1: raw = raw[s:e+1]
+        return jsonify(json.loads(raw))
+    except Exception as ex:
+        return jsonify({"error": str(ex)}), 500
+
+
+@app.route("/api/toll-warnings", methods=["POST"])
+def toll_warnings():
+    data    = request.json
+    api_key = data.get("api_key", "").strip() or DEFAULT_API_KEY
+    route   = data.get("route")
+
+    if not api_key:
+        return jsonify({"error": "No API key"}), 400
+    if not route:
+        return jsonify({"error": "No route"}), 400
+
+    stops = route.get("stops", [])
+    stop_addresses = [s.get("address", "") for s in stops if s.get("address")]
+
+    client = anthropic.Anthropic(api_key=api_key)
+    prompt = f"""For this road trip route: {' → '.join(stop_addresses[:6])}, identify known tolls, border crossings, and speed camera zones.
+
+Return ONLY valid JSON (no markdown):
+{{
+  "warnings": [
+    {{
+      "type": "Toll Road / Border Crossing / Speed Camera Zone / Ferry",
+      "location": "Specific road or area name",
+      "between": "Between Stop A and Stop B",
+      "detail": "Brief practical tip (e.g. 'Bring exact change' or 'E-ZPass accepted')",
+      "estimated_cost": "e.g. $5-15 or Free"
+    }}
+  ],
+  "tips": "One overall tip for this route regarding tolls/borders"
+}}
+
+Only include real, known toll roads and crossings for this specific route. If no tolls, return empty warnings array."""
+
+    try:
+        response = client.messages.create(
+            model="claude-opus-4-6",
+            max_tokens=600,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        raw = response.content[0].text.strip()
+        if "```" in raw:
+            raw = raw.split("```", 1)[1]
+            if raw.startswith("json"): raw = raw[4:]
+            raw = raw.rsplit("```", 1)[0].strip()
+        s, e = raw.find("{"), raw.rfind("}")
+        if s != -1 and e != -1: raw = raw[s:e+1]
+        return jsonify(json.loads(raw))
+    except Exception as ex:
+        return jsonify({"error": str(ex)}), 500
+
+
+@app.route("/routes/review/<int:route_id>", methods=["POST"])
+@login_required
+def add_review(route_id):
+    saved = SavedRoute.query.get_or_404(route_id)
+    data  = request.json
+    rating = int(data.get("rating", 0))
+    text   = data.get("text", "").strip()[:500]
+
+    if not (1 <= rating <= 5):
+        return jsonify({"error": "Rating must be 1-5"}), 400
+
+    # Update or create
+    existing = RouteReview.query.filter_by(route_id=route_id, user_id=current_user.id).first()
+    if existing:
+        existing.rating = rating
+        existing.review_text = text
+    else:
+        db.session.add(RouteReview(
+            route_id=route_id, user_id=current_user.id,
+            username=current_user.username, rating=rating, review_text=text
+        ))
+    db.session.commit()
+    avg = db.session.query(db.func.avg(RouteReview.rating)).filter_by(route_id=route_id).scalar() or 0
+    return jsonify({"success": True, "avg_rating": round(float(avg), 1)})
+
+
+@app.route("/routes/reviews/<int:route_id>")
+def get_reviews(route_id):
+    reviews = RouteReview.query.filter_by(route_id=route_id)\
+                               .order_by(RouteReview.created_at.desc()).limit(20).all()
+    avg = db.session.query(db.func.avg(RouteReview.rating)).filter_by(route_id=route_id).scalar() or 0
+    return jsonify({
+        "reviews": [{"username": r.username, "rating": r.rating,
+                     "text": r.review_text, "date": r.created_at.strftime("%b %d, %Y")} for r in reviews],
+        "avg_rating": round(float(avg), 1),
+        "count": len(reviews)
+    })
+
+
+@app.route("/routes/journal/<int:route_id>", methods=["GET", "POST"])
+@login_required
+def route_journal(route_id):
+    saved = SavedRoute.query.get_or_404(route_id)
+    if saved.user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    if request.method == "GET":
+        journal = TripJournal.query.filter_by(route_id=route_id, user_id=current_user.id).first()
+        if journal:
+            return jsonify({"content": journal.content or "", "stop_ratings": json.loads(journal.stop_ratings or "{}")})
+        return jsonify({"content": "", "stop_ratings": {}})
+
+    data = request.json
+    journal = TripJournal.query.filter_by(route_id=route_id, user_id=current_user.id).first()
+    if journal:
+        journal.content = data.get("content", "")[:5000]
+        journal.stop_ratings = json.dumps(data.get("stop_ratings", {}))
+        journal.updated_at = datetime.utcnow()
+    else:
+        journal = TripJournal(
+            route_id=route_id, user_id=current_user.id,
+            content=data.get("content", "")[:5000],
+            stop_ratings=json.dumps(data.get("stop_ratings", {}))
+        )
+        db.session.add(journal)
+    db.session.commit()
+    return jsonify({"success": True})
+
+
+@app.route("/stats")
+@login_required
+def stats():
+    routes = SavedRoute.query.filter_by(user_id=current_user.id).all()
+    total_routes = len(routes)
+
+    # Parse distances and extract state/country names
+    total_miles = 0
+    places = set()
+    for r in routes:
+        try:
+            data = json.loads(r.route_data)
+            dist_str = data.get("distance", "")
+            # Extract number from strings like "1,234 miles" or "2,000 km"
+            import re
+            nums = re.findall(r'[\d,]+', dist_str)
+            if nums:
+                val = int(nums[0].replace(",", ""))
+                if "km" in dist_str.lower():
+                    val = int(val * 0.621371)
+                total_miles += val
+            for stop in data.get("stops", []):
+                addr = stop.get("address", "")
+                parts = [p.strip() for p in addr.split(",")]
+                if len(parts) >= 2:
+                    places.add(parts[-1])  # last part = country or state
+        except Exception:
+            pass
+
+    return render_template("stats.html",
+        total_routes=total_routes,
+        total_miles=f"{total_miles:,}",
+        places_visited=sorted(places),
+        member_since=current_user.created_at.strftime("%B %Y") if current_user.created_at else "Unknown"
+    )
+
+
+@app.route("/routes/fork/<share_id>", methods=["POST"])
+@login_required
+def fork_route(share_id):
+    original = SavedRoute.query.filter_by(share_id=share_id, is_public=True).first_or_404()
+    forked = SavedRoute(
+        user_id   = current_user.id,
+        share_id  = str(uuid.uuid4())[:10],
+        name      = original.name + " (Fork)",
+        route_data= original.route_data
+    )
+    db.session.add(forked)
+    db.session.commit()
+    return jsonify({"success": True, "redirect": "/routes/saved"})
+
+
+@app.route("/trip-mode/<share_id>")
+def trip_mode(share_id):
+    saved = SavedRoute.query.filter_by(share_id=share_id).first_or_404()
+    return render_template("trip_mode.html", route_json=saved.route_data, route_name=saved.name)
 
 
 if __name__ == "__main__":

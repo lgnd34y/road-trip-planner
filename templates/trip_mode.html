@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trip Mode — Road Trip Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #09090b; color: #fafafa; min-height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+    .trip-bar { background: #18181b; border-bottom: 1px solid #27272a; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .trip-bar-title { font-size: 14px; font-weight: 600; }
+    .trip-bar-close { color: #71717a; text-decoration: none; font-size: 13px; }
+    .trip-bar-close:hover { color: #fafafa; }
+    .progress-bar { height: 3px; background: #27272a; }
+    .progress-fill { height: 3px; background: #16a34a; transition: width 0.4s; }
+    .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; text-align: center; gap: 28px; }
+    .stop-index { font-size: 12px; font-weight: 600; color: #52525b; text-transform: uppercase; letter-spacing: 0.08em; }
+    .stop-name { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.04em; line-height: 1.1; max-width: 600px; }
+    .stop-address { font-size: 15px; color: #71717a; margin-top: 6px; }
+    .stop-desc { font-size: 14px; color: #a1a1aa; max-width: 480px; line-height: 1.6; }
+    .navigate-btn { display: inline-block; background: #16a34a; color: #fff; text-decoration: none; padding: 14px 36px; border-radius: 10px; font-weight: 600; font-size: 16px; letter-spacing: -0.01em; transition: background 0.15s; }
+    .navigate-btn:hover { background: #15803d; }
+    .visit-check { display: flex; align-items: center; gap: 8px; color: #52525b; font-size: 13px; cursor: pointer; }
+    .visit-check input { width: 16px; height: 16px; accent-color: #16a34a; cursor: pointer; }
+    .visit-check.done { color: #16a34a; }
+    .bottom-nav { background: #18181b; border-top: 1px solid #27272a; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .nav-btn { flex: 1; background: #27272a; color: #fafafa; border: none; border-radius: 8px; padding: 12px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+    .nav-btn:hover { background: #3f3f46; }
+    .nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .stop-counter { font-size: 13px; color: #52525b; flex-shrink: 0; white-space: nowrap; }
+    .next-preview { font-size: 12px; color: #52525b; }
+  </style>
+</head>
+<body>
+  <div class="trip-bar">
+    <span class="trip-bar-title" id="trip-title">Loading…</span>
+    <a class="trip-bar-close" href="javascript:history.back()">✕ Exit</a>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
+  <div class="main">
+    <div class="stop-index" id="stop-index"></div>
+    <div>
+      <div class="stop-name" id="stop-name"></div>
+      <div class="stop-address" id="stop-address"></div>
+    </div>
+    <div class="stop-desc" id="stop-desc"></div>
+    <a class="navigate-btn" id="navigate-btn" href="#" target="_blank">Navigate →</a>
+    <label class="visit-check" id="visit-check-label">
+      <input type="checkbox" id="visit-check" onchange="markVisited(this.checked)"/> Mark as visited
+    </label>
+    <div class="next-preview" id="next-preview"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn" id="prev-btn" onclick="prevStop()">← Prev</button>
+    <span class="stop-counter" id="stop-counter"></span>
+    <button class="nav-btn" id="next-btn" onclick="nextStop()">Next →</button>
+  </div>
+
+  <script>
+    const routeData = {{ route_json | safe }};
+    const routeName = {{ route_name | tojson }};
+    let current = 0;
+    const stops = routeData ? routeData.stops || [] : [];
+    const visitKey = 'trip_visited_' + (routeData ? routeData.name : '');
+    const visited  = JSON.parse(localStorage.getItem(visitKey) || '{}');
+
+    function render() {
+      if (!stops.length) { document.getElementById('stop-name').textContent = 'No stops found'; return; }
+      const stop = stops[current];
+      const total = stops.length;
+
+      document.getElementById('trip-title').textContent = routeName || (routeData && routeData.name) || 'Road Trip';
+      document.getElementById('stop-index').textContent = 'Stop ' + (current + 1) + ' of ' + total;
+      document.getElementById('stop-name').textContent = stop.name || '';
+      document.getElementById('stop-address').textContent = stop.address || '';
+      document.getElementById('stop-desc').textContent = stop.description || '';
+      document.getElementById('stop-counter').textContent = (current + 1) + ' / ' + total;
+
+      const navBtn = document.getElementById('navigate-btn');
+      const addr = encodeURIComponent(stop.address || stop.name || '');
+      navBtn.href = 'https://www.google.com/maps/dir/?api=1&destination=' + addr;
+
+      document.getElementById('progress-fill').style.width = ((current + 1) / total * 100) + '%';
+
+      const check = document.getElementById('visit-check');
+      const label = document.getElementById('visit-check-label');
+      check.checked = !!visited[current];
+      label.className = 'visit-check' + (visited[current] ? ' done' : '');
+
+      const next = stops[current + 1];
+      document.getElementById('next-preview').textContent = next ? 'Next: ' + next.name : 'Last stop!';
+
+      document.getElementById('prev-btn').disabled = current === 0;
+      document.getElementById('next-btn').disabled = current === total - 1;
+    }
+
+    function nextStop() { if (current < stops.length - 1) { current++; render(); } }
+    function prevStop() { if (current > 0) { current--; render(); } }
+
+    function markVisited(checked) {
+      visited[current] = checked;
+      localStorage.setItem(visitKey, JSON.stringify(visited));
+      const label = document.getElementById('visit-check-label');
+      label.className = 'visit-check' + (checked ? ' done' : '');
+    }
+
+    render();
+  </script>
+</body>
+</html>

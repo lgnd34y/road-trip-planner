@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Explore Routes — Road Trip Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #fafafa; --surface: #ffffff; --border: #e4e4e7; --border-hover: #d4d4d8;
+      --text: #09090b; --muted: #71717a; --subtle: #a1a1aa;
+      --primary: #18181b; --primary-fg: #fafafa;
+      --brand: #16a34a; --brand-bg: #f0fdf4; --brand-border: #bbf7d0;
+      --radius: 8px; --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-brand { color: var(--text); font-weight: 700; font-size: 15px; text-decoration: none; letter-spacing: -0.02em; }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .nav-link { color: var(--muted); font-size: 13px; text-decoration: none; padding: 5px 10px; border-radius: var(--radius); transition: color 0.15s, background 0.15s; }
+    .nav-link:hover { color: var(--text); background: var(--bg); }
+    .page-header { padding: 36px 24px 24px; max-width: 960px; margin: 0 auto; }
+    .page-header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.03em; }
+    .page-header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .container { max-width: 960px; margin: 0 auto 80px; padding: 0 24px; }
+    .routes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+    .route-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; transition: border-color 0.15s, box-shadow 0.15s; }
+    .route-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow-sm); }
+    .route-name { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; margin-bottom: 4px; }
+    .route-theme { display: inline-block; background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 99px; margin-bottom: 10px; }
+    .route-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .badge { background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 99px; }
+    .route-highlight { font-size: 13px; color: var(--muted); line-height: 1.55; margin-bottom: 14px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .view-btn { display: block; background: var(--primary); color: var(--primary-fg); text-align: center; padding: 8px 16px; border-radius: var(--radius); text-decoration: none; font-weight: 500; font-size: 13px; transition: background 0.15s; }
+    .view-btn:hover { background: #27272a; }
+    .empty-state { text-align: center; padding: 64px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+    .empty-state h2 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+    .empty-state p { color: var(--muted); font-size: 13px; }
+    .fork-btn { background: var(--surface); color: var(--muted); border: 1px solid var(--border); border-radius: var(--radius); padding: 7px 14px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+    .fork-btn:hover { border-color: var(--brand); color: var(--brand); }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-brand" href="/">Road Trip Planner</a>
+    <div class="nav-right">
+      <a class="nav-link" href="/">Plan a Trip</a>
+      {% if current_user.is_authenticated %}
+      <a class="nav-link" href="/routes/saved">My Routes</a>
+      <a class="nav-link" href="/trips">Trips</a>
+      <a class="nav-link" href="/auth/logout">Logout</a>
+      {% else %}
+      <a class="nav-link" href="/">Log In</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h1>Explore Community Routes</h1>
+    <p>Routes shared by other travelers — clone any to use as your own starting point.</p>
+  </div>
+
+  <div class="container">
+    {% if routes %}
+    <div class="routes-grid">
+      {% for r in routes %}
+      <div class="route-card">
+        <div class="route-name">{{ r.name }}</div>
+        <div class="route-theme">{{ r.theme }}</div>
+        <div class="route-badges">
+          {% if r.distance %}<span class="badge">📏 {{ r.distance }}</span>{% endif %}
+          {% if r.drive_time %}<span class="badge">🕐 {{ r.drive_time }}</span>{% endif %}
+          {% if r.best_time %}<span class="badge">📅 {{ r.best_time }}</span>{% endif %}
+          <span class="badge">{{ r.stop_count }} stops</span>
+          {% if r.avg_rating %}
+          <span class="badge">⭐ {{ r.avg_rating }}</span>
+          {% endif %}
+        </div>
+        {% if r.highlight %}<div class="route-highlight">{{ r.highlight }}</div>{% endif %}
+        <a class="view-btn" href="/share/{{ r.share_id }}">View Route →</a>
+        {% if current_user.is_authenticated %}
+        <button class="fork-btn" onclick="forkRoute('{{ r.share_id }}', this)">+ Fork</button>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <h2>No public routes yet</h2>
+      <p>Be the first — save a route and make it public from My Routes.</p>
+    </div>
+    {% endif %}
+  </div>
+  <script>
+async function forkRoute(shareId, btn) {
+  btn.textContent = 'Forking…';
+  btn.disabled = true;
+  try {
+    const res  = await fetch('/routes/fork/' + shareId, { method: 'POST' });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Failed');
+    btn.textContent = '✓ Saved!';
+    btn.style.color = '#16a34a';
+    btn.style.borderColor = '#bbf7d0';
+    setTimeout(() => { btn.textContent = '+ Fork'; btn.disabled = false; btn.style.color = ''; btn.style.borderColor = ''; }, 2500);
+  } catch(e) {
+    btn.textContent = '✕ Error';
+    btn.disabled = false;
+  }
+}
+  </script>
+</body>
+</html>

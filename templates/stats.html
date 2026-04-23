@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Stats — Road Trip Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #fafafa; --surface: #ffffff; --border: #e4e4e7; --border-hover: #d4d4d8;
+      --text: #09090b; --muted: #71717a; --subtle: #a1a1aa;
+      --primary: #18181b; --primary-fg: #fafafa;
+      --brand: #16a34a; --brand-bg: #f0fdf4; --brand-border: #bbf7d0;
+      --radius: 8px; --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-brand { color: var(--text); font-weight: 700; font-size: 15px; text-decoration: none; letter-spacing: -0.02em; }
+    .nav-right  { display: flex; align-items: center; gap: 8px; }
+    .nav-link   { color: var(--muted); font-size: 13px; text-decoration: none; padding: 5px 10px; border-radius: var(--radius); transition: color 0.15s, background 0.15s; }
+    .nav-link:hover { color: var(--text); background: var(--bg); }
+    .page-header { padding: 36px 24px 24px; max-width: 720px; margin: 0 auto; }
+    .page-header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.03em; }
+    .page-header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .container { max-width: 720px; margin: 0 auto 80px; padding: 0 24px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 28px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; }
+    .stat-value { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; color: var(--text); }
+    .stat-label { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .section-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+    .places-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .place-chip { background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-size: 12px; padding: 3px 10px; border-radius: 99px; }
+    .empty-places { color: var(--subtle); font-size: 13px; }
+    .cta-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; text-align: center; margin-top: 20px; }
+    .cta-box h2 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .cta-box p  { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+    .btn-primary { display: inline-block; background: var(--primary); color: var(--primary-fg); text-decoration: none; padding: 9px 22px; border-radius: var(--radius); font-weight: 500; font-size: 14px; }
+    .btn-primary:hover { background: #27272a; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-brand" href="/">Road Trip Planner</a>
+    <div class="nav-right">
+      <a class="nav-link" href="/">Plan a Trip</a>
+      <a class="nav-link" href="/routes/saved">My Routes</a>
+      <a class="nav-link" href="/explore">Explore</a>
+      <a class="nav-link" href="/trips">Trips</a>
+      <a class="nav-link" href="/auth/logout">Logout</a>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h1>My Travel Stats</h1>
+    <p>Member since {{ member_since }}</p>
+  </div>
+
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">{{ total_routes }}</div>
+        <div class="stat-label">Routes saved</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ total_miles }}</div>
+        <div class="stat-label">Est. miles planned</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ places_visited | length }}</div>
+        <div class="stat-label">States / countries</div>
+      </div>
+    </div>
+
+    <div class="section-title">Places visited</div>
+    {% if places_visited %}
+      <div class="places-grid">
+        {% for place in places_visited %}
+          <span class="place-chip">{{ place }}</span>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-places">No routes saved yet — start planning!</p>
+    {% endif %}
+
+    <div class="cta-box" style="margin-top: 28px;">
+      <h2>Ready for your next adventure?</h2>
+      <p>Plan a new route and add it to your collection.</p>
+      <a class="btn-primary" href="/">Plan a Trip</a>
+    </div>
+  </div>
+</body>
+</html>

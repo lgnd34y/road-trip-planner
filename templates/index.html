@@ -4,6 +4,8 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Road Trip Planner</title>
+  <link rel="manifest" href="/static/manifest.json"/>
+  <meta name="theme-color" content="#18181b"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -67,21 +69,6 @@
       text-align: center;
       max-width: 600px;
       margin: 0 auto;
-    }
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--brand-bg);
-      border: 1px solid var(--brand-border);
-      color: var(--brand);
-      font-size: 12px;
-      font-weight: 600;
-      padding: 4px 12px;
-      border-radius: 99px;
-      margin-bottom: 22px;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
     }
     .hero h1 {
       font-size: 2.6rem;
@@ -156,7 +143,7 @@
 
     /* ── RESULTS ── */
     #results { max-width: 720px; margin: 0 auto 80px; padding: 0 24px; }
-    .results-heading { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 14px; color: var(--text); }
+    .results-heading { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 14px; color: var(--text); display: flex; align-items: center; justify-content: space-between; }
 
     /* ── ROUTE CARD ── */
     .route-card {
@@ -259,8 +246,6 @@
     .save-btn { flex: 1; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 16px; font-weight: 500; font-size: 13px; font-family: inherit; cursor: pointer; transition: all 0.15s; min-width: 0; }
     .save-btn:hover { border-color: var(--border-hover); background: var(--bg); }
     .save-btn.saved { background: var(--brand-bg); color: var(--brand); border-color: var(--brand-border); cursor: default; }
-    .maps-link { display: block; text-align: center; margin-top: 8px; font-size: 12px; color: var(--muted); text-decoration: none; }
-    .maps-link:hover { color: var(--text); text-decoration: underline; }
     .share-box { display: none; margin-top: 10px; background: var(--brand-bg); border: 1px solid var(--brand-border); border-radius: var(--radius); padding: 11px 13px; font-size: 13px; color: #15803d; }
     .share-box input { border: 1px solid var(--brand-border); border-radius: 6px; padding: 5px 9px; font-size: 13px; width: 100%; margin-top: 5px; color: var(--text); background: var(--surface); }
     .copy-btn { margin-top: 6px; background: var(--primary); color: var(--primary-fg); border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-family: inherit; cursor: pointer; }
@@ -404,6 +389,8 @@
     .gchat-send { background: var(--primary); color: var(--primary-fg); border: none; padding: 10px 14px; font-weight: 500; font-size: 13px; font-family: inherit; cursor: pointer; transition: background 0.15s; }
     .gchat-send:hover { background: #27272a; }
     .gchat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+    .gchat-clear { background: rgba(255,255,255,0.12); border: none; color: white; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+    .gchat-clear:hover { background: rgba(255,255,255,0.22); }
 
     /* ── MODE TABS ── */
     .mode-tabs {
@@ -496,9 +483,35 @@
     .guided-dot.active { background: var(--primary); box-shadow: 0 0 0 3px rgba(24,24,27,0.12); }
     .guided-dot-line { flex: 1; height: 1px; background: var(--border); }
 
+    /* ── WEATHER ── */
+    .weather-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: 99px; padding: 2px 8px; margin-left: 6px; white-space: nowrap; vertical-align: middle; }
+    .weather-badge.loading { opacity: 0.4; }
+
+    /* ── PACKING MODAL ── */
+    .packing-modal-inner { max-width: 540px; width: 100%; max-height: 80vh; overflow-y: auto; }
+    .packing-category { margin-bottom: 16px; }
+    .packing-category-name { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 7px; }
+    .packing-items { display: flex; flex-direction: column; gap: 5px; }
+    .packing-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); }
+    .packing-item input[type=checkbox] { accent-color: var(--brand); width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
+    .packing-item label { cursor: pointer; }
+    .packing-item.checked label { text-decoration: line-through; color: var(--muted); }
+
+    /* ── FUEL STOPS ── */
+    .fuel-stops-section { margin-top: 10px; padding: 10px 13px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); font-size: 12px; color: var(--muted); line-height: 1.7; display: none; }
+    .fuel-stops-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--subtle); margin-bottom: 5px; }
+
+    /* ── AVOID TIP ── */
+    .avoid-tip { margin-top: 10px; font-size: 0.83rem; color: var(--muted); background: var(--bg); border: 1px solid var(--border); padding: 9px 12px; border-radius: var(--radius); }
+
+    /* ── THEME BADGE ── */
+    .theme-badge { display: inline-block; background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 500; padding: 2px 9px; border-radius: 99px; }
+
     /* ── NEW SEARCH BAR ── */
     .new-search-bar {
-      display: none; max-width: 720px; margin: 0 auto 16px; padding: 0 24px;
+      display: none; max-width: 720px; margin: 0 auto; padding: 8px 24px;
+      position: sticky; top: 56px; z-index: 90; background: var(--bg);
+      border-bottom: 1px solid var(--border);
     }
     .new-search-btn {
       background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
@@ -506,6 +519,24 @@
       color: var(--muted); cursor: pointer; transition: all 0.15s;
     }
     .new-search-btn:hover { border-color: var(--border-hover); color: var(--text); }
+
+    /* ── COMPARE ── */
+    .compare-btn { background: var(--surface); color: var(--muted); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 16px; font-weight: 500; font-size: 13px; font-family: inherit; cursor: pointer; transition: all 0.15s; min-width: 0; }
+    .compare-btn:hover { border-color: var(--border-hover); color: var(--text); }
+    .compare-btn.selected { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+    .compare-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); color: var(--primary-fg); padding: 12px 24px; display: none; align-items: center; gap: 12px; z-index: 200; font-size: 13px; }
+    .compare-bar.visible { display: flex; }
+    .compare-bar-label { flex: 1; font-weight: 500; }
+    .compare-bar-btn { background: white; color: var(--primary); border: none; border-radius: var(--radius); padding: 7px 16px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: opacity 0.15s; }
+    .compare-bar-btn:hover { opacity: 0.9; }
+    .compare-bar-clear { background: rgba(255,255,255,0.15); color: white; border: none; border-radius: 99px; width: 26px; height: 26px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .compare-bar-clear:hover { background: rgba(255,255,255,0.25); }
+    .compare-modal-inner { max-width: 860px; width: 100%; overflow-x: auto; }
+    .compare-table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 500px; }
+    .compare-table th { background: var(--bg); border: 1px solid var(--border); padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    .compare-table td { border: 1px solid var(--border); padding: 9px 12px; color: var(--text); vertical-align: top; }
+    .compare-table tr:first-child td { font-weight: 600; }
+    .compare-table .highlight-cell { font-size: 12px; color: var(--muted); line-height: 1.5; }
 
     /* ── MOBILE ── */
     @media (max-width: 768px) {
@@ -533,6 +564,38 @@
       .modal { padding: 20px 16px; margin: 12px; }
       .suggestion-grid { grid-template-columns: 1fr; }
     }
+
+    /* ── ALTERNATIVES ── */
+    .alt-routes-section { margin-top: 10px; }
+    .alt-routes-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--subtle); margin-bottom: 6px; }
+    .alt-route-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 13px; margin-bottom: 6px; cursor: pointer; transition: border-color 0.15s; }
+    .alt-route-card:hover { border-color: var(--border-hover); }
+    .alt-route-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .alt-route-tagline { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .alt-route-stops { font-size: 11px; color: var(--subtle); margin-top: 4px; }
+
+    /* ── POI / VISA / TOLL MODALS ── */
+    .info-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 3000; align-items: center; justify-content: center; }
+    .info-modal-overlay.open { display: flex; }
+    .info-modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; max-width: 560px; width: 92%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.14); }
+    .info-modal-box h3 { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .info-modal-box .info-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+    .info-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .info-item:last-child { border-bottom: none; }
+    .info-item-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .info-item-meta { font-size: 11px; color: var(--subtle); margin-top: 2px; }
+    .info-item-why { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+    .info-modal-close { margin-top: 16px; width: 100%; background: var(--primary); color: var(--primary-fg); border: none; border-radius: var(--radius); padding: 9px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; }
+    .info-modal-close:hover { background: #27272a; }
+
+    /* ── DRIVING DAYS BADGE ── */
+    .driving-day-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 99px; margin-left: 6px; vertical-align: middle; }
+    .driving-day-badge.good { background: #f0fdf4; border: 1px solid var(--brand-border); color: var(--brand); }
+    .driving-day-badge.bad  { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
+
+    /* ── HOTEL LINK ── */
+    .hotel-link { font-size: 11px; color: var(--brand); text-decoration: none; margin-left: 6px; }
+    .hotel-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -542,7 +605,9 @@
     <a class="nav-logo" href="/">Road Trip Planner</a>
     <div class="nav-right">
       {% if current_user.is_authenticated %}
-        <span class="nav-user">Hi, {{ current_user.username }}</span>
+        <span class="nav-user">{{ current_user.username }}</span>
+        <a class="nav-link" href="/explore">Explore</a>
+        <a class="nav-link" href="/trips">Trips</a>
         <a class="nav-link" href="/routes/saved" style="position:relative">
           My Routes
           {% if inbox_count > 0 %}
@@ -564,7 +629,7 @@
   </div>
 
   <!-- MODE TABS -->
-  <div class="mode-tabs" style="max-width:580px;margin:0 auto 20px;padding:4px 4px;">
+  <div class="mode-tabs">
     <button class="mode-tab active" id="tab-quick" onclick="switchMode('quick')">⚡ Quick Plan</button>
     <button class="mode-tab" id="tab-guided" onclick="switchMode('guided')">🧭 Guided Planning</button>
   </div>
@@ -577,7 +642,7 @@
         <input type="hidden" id="api_key" value=""/>
 
         <div class="form-group full">
-          <label>Starting Location *</label>
+          <label>Starting Location</label>
           <input type="text" id="location" placeholder="e.g. Denver, Colorado" required/>
         </div>
 
@@ -596,12 +661,27 @@
           <input type="text" id="duration" placeholder="e.g. weekend, 1 week"/>
         </div>
 
+        <div class="form-group">
+          <label>Departure Date</label>
+          <input type="date" id="departure_date"/>
+        </div>
+
         <div class="form-group full">
           <label>Notes</label>
           <textarea id="extra_info" rows="2" placeholder="e.g. travelling with kids, avoid highways, budget trip"></textarea>
         </div>
 
+        <div class="form-group full" style="margin-bottom:0;">
+          <label>Import from Google Maps <span style="font-weight:400;color:var(--subtle)">(optional)</span></label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="gmaps-url" placeholder="Paste a Google Maps directions URL to prefill stops"/>
+            <button type="button" onclick="importGMaps()" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;white-space:nowrap;color:var(--muted);">Import</button>
+          </div>
+          <div id="gmaps-msg" style="font-size:12px;margin-top:4px;display:none;"></div>
+        </div>
+
         <button class="btn" type="submit">✨ Plan My Road Trip</button>
+        <button class="btn" type="button" onclick="surpriseMe()" style="background:var(--surface);color:var(--muted);border:1px solid var(--border);">🎲 Surprise Me</button>
       </div>
     </form>
     </div>
@@ -700,6 +780,33 @@
   </div>
   <div id="results"></div>
 
+  <!-- COMPARE BAR -->
+  <div class="compare-bar" id="compare-bar">
+    <span class="compare-bar-label" id="compare-bar-label">0 routes selected</span>
+    <button class="compare-bar-btn" onclick="openCompareModal()">Compare →</button>
+    <button class="compare-bar-clear" onclick="clearCompare()" title="Clear selection">×</button>
+  </div>
+
+  <!-- COMPARE MODAL -->
+  <div class="modal-backdrop" id="compare-modal">
+    <div class="modal compare-modal-inner">
+      <button class="modal-close" onclick="document.getElementById('compare-modal').classList.remove('open')">×</button>
+      <h2>Route Comparison</h2>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Side-by-side stats for your selected routes.</p>
+      <div id="compare-table-wrap"></div>
+    </div>
+  </div>
+
+  <!-- PACKING LIST MODAL -->
+  <div class="modal-backdrop" id="packing-modal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal packing-modal-inner">
+      <button class="modal-close" onclick="document.getElementById('packing-modal').classList.remove('open')">×</button>
+      <h2>Packing List</h2>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;" id="packing-subtitle">Tailored to your route.</p>
+      <div id="packing-content"><div style="text-align:center;padding:32px 0;color:var(--muted);">Generating your list…</div></div>
+    </div>
+  </div>
+
   <!-- SHARE TO USER MODAL -->
   <div class="modal-backdrop" id="share-to-modal">
     <div class="modal">
@@ -723,8 +830,14 @@
   </button>
   <div class="gchat-panel" id="gchat-panel">
     <div class="gchat-header">
-      <div class="gchat-header-text">AI Travel Assistant</div>
-      <button class="gchat-close" onclick="toggleGlobalChat()">×</button>
+      <div>
+        <div class="gchat-header-text">AI Travel Assistant</div>
+        <div class="gchat-header-sub">Ask anything about your trip</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="gchat-clear" onclick="clearGlobalChat()">Clear</button>
+        <button class="gchat-close" onclick="toggleGlobalChat()">×</button>
+      </div>
     </div>
     <div class="gchat-messages" id="gchat-messages">
       <div class="gchat-msg ai">Hi! I'm your travel assistant. Generate a trip first, then ask me anything — comparisons, tips, flight info, what to pack, and more!</div>
@@ -815,13 +928,16 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Planning…';
 
+      const api_key = document.getElementById('api_key').value.trim();
+      window._apiKey = api_key;
       const payload = {
-        api_key:     document.getElementById('api_key').value.trim(),
-        location:    document.getElementById('location').value.trim(),
-        destination: document.getElementById('destination').value.trim(),
-        nights:      document.getElementById('nights').value.trim(),
-        duration:    document.getElementById('duration').value.trim(),
-        extra_info:  document.getElementById('extra_info').value.trim(),
+        api_key:        api_key,
+        location:       document.getElementById('location').value.trim(),
+        destination:    document.getElementById('destination').value.trim(),
+        nights:         document.getElementById('nights').value.trim(),
+        duration:       document.getElementById('duration').value.trim(),
+        extra_info:     document.getElementById('extra_info').value.trim(),
+        departure_date: document.getElementById('departure_date').value || '',
       };
 
       try {
@@ -912,13 +1028,15 @@
           </div>`;
       }
 
+      const city = (stop.address || stop.name || '').split(',')[0].trim();
+      const cityForSearch = encodeURIComponent((stop.address || stop.name || '').split(',')[0]);
       return `
-        <div class="stop" onclick="toggleStop(this)">
+        <div class="stop" onclick="toggleStop(this)" data-city="${escHtml(city)}">
           <div class="stop-header">
             <div class="stop-icon">${isEnd ? '🏁' : '📌'}</div>
             <div class="stop-info">
               <div class="stop-name">${escHtml(stop.name)}</div>
-              <div class="stop-address">${escHtml(stop.address)}</div>
+              <div class="stop-address">${escHtml(stop.address)} <span class="weather-badge loading">…</span><a class="hotel-link" href="https://www.airbnb.com/s/${cityForSearch}/homes" target="_blank" rel="noopener" onclick="event.stopPropagation()">🏠 Find accommodation</a></div>
               <div class="stop-label">${j === 0 ? 'Start / End' : isEnd ? 'Return' : 'Stop ' + j}</div>
             </div>
             <div class="stop-chevron">▼</div>
@@ -948,9 +1066,10 @@
       const resultsDiv = document.getElementById('results');
       const loc = payload.location || '';
       const dest = payload.destination ? ` → ${payload.destination}` : '';
-      resultsDiv.innerHTML = `<div class="results-heading" style="display:flex;align-items:center;justify-content:space-between;">${routes.length} route${routes.length !== 1 ? 's' : ''} from ${loc}${dest}</div>`;
+      resultsDiv.innerHTML = `<div class="results-heading">${routes.length} route${routes.length !== 1 ? 's' : ''} from ${loc}${dest}</div>`;
 
       routes.forEach((route, i) => {
+        if (payload.departure_date) route.departure_date = payload.departure_date;
         const card = document.createElement('div');
         card.className = 'route-card';
         card.id = `route-card-${i}`;
@@ -996,18 +1115,20 @@
 
         const avoidWords = ['highway','highways','motorway','toll','tolls','freeway'];
         const avoidTip = avoidWords.some(w => (payload.extra_info||'').toLowerCase().includes(w))
-          ? `<p style="margin-top:10px;font-size:0.83rem;color:#744210;background:#fffbea;padding:9px 12px;border-radius:7px;">⚠️ To avoid highways/tolls: in Google Maps click ⋮ → Route options after it opens.</p>`
+          ? `<p class="avoid-tip">⚠️ To avoid highways/tolls: in Google Maps click ⋮ → Route options after it opens.</p>`
           : '';
 
         card.innerHTML = `
           <div class="route-header" onclick="toggleCard(this.parentElement)">
             <div class="route-header-left">
               <h3 id="route-title-${i}">Route ${i + 1}: ${escHtml(route.name)}</h3>
-              <p style="margin-top:4px;"><span style="display:inline-block;background:var(--bg);border:1px solid var(--border);color:var(--muted);font-size:11px;font-weight:500;padding:2px 9px;border-radius:99px;">${escHtml(route.theme)}</span></p>
+              <p style="margin-top:4px;"><span class="theme-badge">${escHtml(route.theme)}</span></p>
               <div class="route-badges">
-                <span class="badge">📏 ${escHtml(route.distance)}</span>
-                <span class="badge">🕐 ${escHtml(route.drive_time)}</span>
-                <span class="badge">📅 ${escHtml(route.best_time)}</span>
+                ${[['📏', route.distance], ['🕐', route.drive_time], ['📅', route.best_time]]
+                  .filter(([,v]) => v && !['unknown','n/a',''].includes((v+'').trim().toLowerCase()))
+                  .map(([icon,v]) => `<span class="badge">${icon} ${escHtml(v)}</span>`)
+                  .join('')}
+                ${drivingDayBadge(route.departure_date)}
               </div>
             </div>
             <div class="chevron">▼</div>
@@ -1038,14 +1159,24 @@
                 </div>
                 <div class="cost-breakdown" id="cost-bd-${i}">
                 </div>
+                <div class="fuel-stops-section" id="fuel-stops-${i}"></div>
               </div>
             </div>
+            <div class="alt-routes-section" id="alt-routes-${i}" style="display:none"></div>
             <div class="card-actions">
               <a class="maps-btn" href="#" target="_blank" id="map-btn-${i}" onclick="openMap(event,${i})">🗺️ View Route on Map</a>
               <button class="save-btn" id="save-btn-${i}" onclick="handleSave(${i})">💾 Save</button>
               <button class="edit-btn" id="share-to-btn-${i}" onclick="openIndexShareModal(${i})">↗ Send</button>
               <button class="edit-btn" id="edit-btn-${i}" onclick="toggleEdit(${i})">✏️ Edit</button>
               <button class="edit-btn" onclick="openPrint(${i})" title="Print itinerary">🖨️</button>
+              <button class="edit-btn" onclick="openPackingModal(${i})">🎒 Packing</button>
+              <button class="edit-btn" onclick="emailItinerary(${i})">📧 Email</button>
+              <button class="edit-btn" onclick="openOptimizeModal(${i})">⚡ Optimize</button>
+              <button class="edit-btn" onclick="openAltRoutes(${i})">🔀 Alternatives</button>
+              <button class="edit-btn" onclick="openPOIModal(${i})">📍 POIs</button>
+              <button class="edit-btn" onclick="openVisaModal(${i})">🛂 Visa</button>
+              <button class="edit-btn" onclick="openTollModal(${i})">🚧 Tolls</button>
+              <button class="compare-btn" id="cmp-btn-${i}" onclick="toggleCompare(${i})">Compare</button>
             </div>
             <div class="share-box" id="share-box-${i}">
               ✅ Route saved! Share this link:
@@ -1426,7 +1557,7 @@
       const t = document.getElementById(`route-title-${i}`);
       if (t) t.textContent = `Route ${i + 1}: ${currentRoutes[i].name}`;
 
-      wrapEl.innerHTML = '<div style="color:#553c9a;font-size:0.85rem;padding:4px 0;">✓ Changes applied to route!</div>';
+      wrapEl.innerHTML = '<div style="color:var(--brand);font-size:0.85rem;padding:4px 0;">✓ Changes applied to route!</div>';
       wrapEl._pending = null;
       setTimeout(() => { wrapEl.style.display = 'none'; }, 3000);
     }
@@ -1682,10 +1813,10 @@
         currentSessionId = data.session_id;
         renderRoutes(data.routes, data.session_id, payload);
       } catch(err) {
-        document.getElementById('error-inner').textContent = err.message;
+        document.getElementById('error-inner').innerHTML =
+          escHtml(err.message) +
+          ' <button onclick="backToWizard()" style="margin-left:8px;background:none;border:1px solid #fecaca;border-radius:5px;padding:2px 8px;font-size:12px;color:#dc2626;cursor:pointer;">← Back to wizard</button>';
         document.getElementById('error-box').style.display = 'block';
-        document.getElementById('mode-quick').style.display = '';
-        document.querySelector('.mode-tabs').style.display = '';
       } finally {
         stopLoader();
         btn.disabled = false;
@@ -1747,6 +1878,394 @@
         btn.textContent = 'Send Route';
       }
     }
+
+    // ── Global chat clear ──
+    function clearGlobalChat() {
+      document.getElementById('gchat-messages').innerHTML =
+        '<div class="gchat-msg ai">Chat cleared. Ask me anything about your trip!</div>';
+    }
+
+    // ── Wizard back-from-error ──
+    function backToWizard() {
+      document.getElementById('error-box').style.display = 'none';
+      switchMode('guided');
+      showStep(4);
+    }
+
+    // ── Route comparison ──
+    const selectedForCompare = new Set();
+
+    function toggleCompare(i) {
+      const btn = document.getElementById(`cmp-btn-${i}`);
+      if (selectedForCompare.has(i)) {
+        selectedForCompare.delete(i);
+        btn.classList.remove('selected');
+      } else {
+        selectedForCompare.add(i);
+        btn.classList.add('selected');
+      }
+      const bar = document.getElementById('compare-bar');
+      const label = document.getElementById('compare-bar-label');
+      if (selectedForCompare.size >= 2) {
+        bar.classList.add('visible');
+        label.textContent = `${selectedForCompare.size} route${selectedForCompare.size > 1 ? 's' : ''} selected`;
+      } else {
+        bar.classList.remove('visible');
+      }
+    }
+
+    function clearCompare() {
+      selectedForCompare.forEach(i => {
+        const btn = document.getElementById(`cmp-btn-${i}`);
+        if (btn) btn.classList.remove('selected');
+      });
+      selectedForCompare.clear();
+      document.getElementById('compare-bar').classList.remove('visible');
+    }
+
+    function openCompareModal() {
+      const indices = Array.from(selectedForCompare);
+      const routes  = indices.map(i => currentRoutes[i]).filter(Boolean);
+      if (routes.length < 2) return;
+
+      const rows = [
+        ['', ...routes.map(r => escHtml(r.name))],
+        ['Theme', ...routes.map(r => escHtml(r.theme || '—'))],
+        ['Distance', ...routes.map(r => escHtml(r.distance || '—'))],
+        ['Drive Time', ...routes.map(r => escHtml(r.drive_time || '—'))],
+        ['Best Time', ...routes.map(r => escHtml(r.best_time || '—'))],
+        ['Stops', ...routes.map(r => String((r.stops || []).length))],
+        ['Highlight', ...routes.map(r => `<span class="highlight-cell">${escHtml(r.highlight || '—')}</span>`)],
+      ];
+
+      const headerRow = `<tr><th></th>${routes.map((_,j) => `<th>Route ${indices[j]+1}</th>`).join('')}</tr>`;
+      const bodyRows  = rows.map((row, ri) =>
+        `<tr>${row.map((cell, ci) => ci === 0
+          ? `<th>${cell}</th>`
+          : `<td>${cell}</td>`
+        ).join('')}</tr>`
+      ).join('');
+
+      document.getElementById('compare-table-wrap').innerHTML =
+        `<table class="compare-table">${headerRow}${bodyRows}</table>`;
+
+      document.getElementById('compare-modal').classList.add('open');
+    }
+
+    // ── Surprise Me ──
+    const _surpriseTrips = [
+      ['Austin, TX', 'Santa Fe, NM'], ['Seattle, WA', 'Portland, OR'],
+      ['Chicago, IL', 'Nashville, TN'], ['Denver, CO', 'Moab, UT'],
+      ['Miami, FL', 'Key West, FL'], ['Boston, MA', 'Acadia National Park, ME'],
+      ['San Francisco, CA', 'Big Sur, CA'], ['New Orleans, LA', 'Memphis, TN'],
+      ['Phoenix, AZ', 'Sedona, AZ'], ['Atlanta, GA', 'Smoky Mountains, TN'],
+      ['Minneapolis, MN', 'Boundary Waters, MN'], ['Las Vegas, NV', 'Grand Canyon, AZ'],
+      ['Salt Lake City, UT', 'Yellowstone, WY'], ['Dallas, TX', 'Marfa, TX'],
+      ['Washington, DC', 'Shenandoah Valley, VA'], ['Portland, ME', 'White Mountains, NH'],
+    ];
+    function surpriseMe() {
+      const pair = _surpriseTrips[Math.floor(Math.random() * _surpriseTrips.length)];
+      document.getElementById('location').value    = pair[0];
+      document.getElementById('destination').value = pair[1];
+      document.getElementById('trip-form').requestSubmit();
+    }
+
+    // ── Google Maps import ──
+    function importGMaps() {
+      const url   = document.getElementById('gmaps-url').value.trim();
+      const msgEl = document.getElementById('gmaps-msg');
+      msgEl.style.display = 'none';
+      const match = url.match(/maps\/dir\/([^?#@]+)/);
+      if (!match) {
+        msgEl.textContent = "Couldn't parse that URL — make sure it's a Google Maps directions link (google.com/maps/dir/…).";
+        msgEl.style.color = '#dc2626'; msgEl.style.display = 'block'; return;
+      }
+      const stops = match[1].split('/').map(s => decodeURIComponent(s.replace(/\+/g,' ')).trim()).filter(s => s && !s.startsWith('@'));
+      if (stops.length < 2) {
+        msgEl.textContent = 'Need at least 2 stops in the URL.';
+        msgEl.style.color = '#dc2626'; msgEl.style.display = 'block'; return;
+      }
+      document.getElementById('location').value    = stops[0];
+      document.getElementById('destination').value = stops[stops.length - 1];
+      if (stops.length > 2) document.getElementById('extra_info').value = 'Via: ' + stops.slice(1,-1).join(', ');
+      msgEl.textContent = `Imported ${stops.length} stops. Fill in other details and click Plan.`;
+      msgEl.style.color = '#16a34a'; msgEl.style.display = 'block';
+      document.getElementById('gmaps-url').value = '';
+    }
+
+    // ── Weather ──
+    const _weatherCache = {};
+    async function loadWeatherForCard(cardEl) {
+      const stops = cardEl.querySelectorAll('.stop[data-city]');
+      let delay = 0;
+      stops.forEach(stopEl => {
+        const city  = stopEl.dataset.city;
+        const badge = stopEl.querySelector('.weather-badge');
+        if (!city || !badge) return;
+        if (_weatherCache[city]) {
+          badge.textContent = _weatherCache[city];
+          badge.classList.remove('loading');
+          return;
+        }
+        setTimeout(async () => {
+          try {
+            const res  = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=j1`);
+            const data = await res.json();
+            const cur  = data.current_condition[0];
+            const text = `${cur.temp_F}°F · ${cur.weatherDesc[0].value}`;
+            _weatherCache[city] = text;
+            badge.textContent = text;
+            badge.classList.remove('loading');
+          } catch(_) { badge.style.display = 'none'; }
+        }, delay);
+        delay += 80;
+      });
+    }
+
+    // Patch toggleCard to load weather on open
+    const _origToggleCard = toggleCard;
+    function toggleCard(card) {
+      _origToggleCard(card);
+      if (card.classList.contains('open')) loadWeatherForCard(card);
+    }
+
+    // ── Fuel stop suggestions ──
+    function renderFuelStops(i) {
+      const el = document.getElementById(`fuel-stops-${i}`);
+      if (!el) return;
+      const route = currentRoutes[i];
+      if (!route) return;
+      const mpg     = parseFloat(document.getElementById(`mpg-${i}`).value) || 30;
+      const rangeMi = mpg * 12;
+      const distStr = route.distance || '';
+      let totalMiles = 0;
+      const mMatch = distStr.match(/([\d,]+)\s*miles?/i);
+      const kMatch = distStr.match(/([\d,]+)\s*k?m/i);
+      if (mMatch) totalMiles = parseFloat(mMatch[1].replace(/,/g,''));
+      else if (kMatch) totalMiles = parseFloat(kMatch[1].replace(/,/g,'')) * 0.621;
+      if (totalMiles < rangeMi) { el.style.display = 'none'; return; }
+      const numStops = Math.floor(totalMiles / rangeMi);
+      const stops    = route.stops || [];
+      const legs     = Math.max(stops.length - 1, 1);
+      const miPerLeg = totalMiles / legs;
+      const suggestions = [];
+      for (let s = 1; s <= numStops; s++) {
+        const atMile = s * rangeMi;
+        const legIdx = Math.min(Math.floor(atMile / miPerLeg), legs - 1);
+        const from   = stops[legIdx]     ? stops[legIdx].name     : 'Start';
+        const to     = stops[legIdx + 1] ? stops[legIdx + 1].name : 'End';
+        suggestions.push(`~${Math.round(atMile)} mi — between ${escHtml(from)} and ${escHtml(to)}`);
+      }
+      el.innerHTML = `<div class="fuel-stops-title">⛽ Suggested Fuel Stops (${Math.round(rangeMi)} mi range)</div>${suggestions.map(s=>`<div>• ${s}</div>`).join('')}`;
+      el.style.display = 'block';
+    }
+
+    // Patch calcCost to also show fuel stops
+    const _origCalcCost = calcCost;
+    function calcCost(i, distStr, nights) {
+      _origCalcCost(i, distStr, nights);
+      renderFuelStops(i);
+    }
+
+    // ── Packing list ──
+    async function openPackingModal(i) {
+      const modal   = document.getElementById('packing-modal');
+      const content = document.getElementById('packing-content');
+      const sub     = document.getElementById('packing-subtitle');
+      const route   = currentRoutes[i];
+      if (!route) return;
+      sub.textContent = `For: ${route.name}`;
+      content.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--muted);">Generating your packing list…</div>';
+      modal.classList.add('open');
+      try {
+        const res  = await fetch('/api/packing-list', {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ api_key: document.getElementById('api_key').value.trim(), route })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        content.innerHTML = (data.categories||[]).map(cat => `
+          <div class="packing-category">
+            <div class="packing-category-name">${escHtml(cat.name)}</div>
+            <div class="packing-items">${(cat.items||[]).map(item => {
+              const id = 'pk-' + Math.random().toString(36).slice(2);
+              return `<div class="packing-item"><input type="checkbox" id="${id}" onchange="this.closest('.packing-item').classList.toggle('checked',this.checked)"/><label for="${id}">${escHtml(item)}</label></div>`;
+            }).join('')}</div>
+          </div>`).join('');
+      } catch(e) {
+        content.innerHTML = `<div style="color:#dc2626;font-size:13px;">${escHtml(e.message)}</div>`;
+      }
+    }
+
+    // ── Email itinerary ──
+    function emailItinerary(i) {
+      const route = currentRoutes[i];
+      if (!route) return;
+      const stops = (route.stops||[]).map(s=>s.name).join(' → ');
+      const days  = (route.itinerary||[]).map(d=>`Day ${d.day} — ${d.title}\n${(d.plan||'').slice(0,150)}`).join('\n\n');
+      const body  = `Route: ${route.name}\nTheme: ${route.theme||''}\nDistance: ${route.distance||''}\n\nStops: ${stops}\n\n${days}`;
+      window.open(`mailto:?subject=${encodeURIComponent('Road Trip: '+route.name)}&body=${encodeURIComponent(body)}`, '_blank');
+    }
+
+    // ── Optimize route ──
+    async function openOptimizeModal(i) {
+      const route = currentRoutes[i];
+      if (!route || (route.stops || []).length < 3) { alert('Need at least 3 stops to optimize.'); return; }
+      const mode = confirm('Optimize for shortest driving distance?\n\nOK = Shortest  |  Cancel = Most scenic') ? 'shortest' : 'scenic';
+      const btn = document.querySelector(`#card-${i} .edit-btn[onclick*="openOptimizeModal"]`);
+      if (btn) { btn.textContent = '⏳ Optimizing…'; btn.disabled = true; }
+      try {
+        const res  = await fetch('/api/optimize-route', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ route, mode, api_key: window._apiKey || '' })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        currentRoutes[i].stops = data.stops;
+        // Re-render stops list
+        const stopsEl = document.querySelector(`#stops-container-${i}`);
+        if (stopsEl) stopsEl.innerHTML = (data.stops || []).map((s, j) => buildStopItemHtml(s, j, data.stops.length)).join('');
+        alert('✓ ' + (data.reason || 'Route optimized!'));
+      } catch(e) { alert('Error: ' + e.message); }
+      finally { if (btn) { btn.textContent = '⚡ Optimize'; btn.disabled = false; } }
+    }
+
+    // ── Alternative routes ──
+    async function openAltRoutes(i) {
+      const route = currentRoutes[i];
+      if (!route) return;
+      const section = document.getElementById('alt-routes-' + i);
+      if (!section) return;
+      if (section.style.display !== 'none' && section.innerHTML) { section.style.display = 'none'; return; }
+      section.style.display = 'block';
+      section.innerHTML = '<div class="alt-routes-title">Loading alternatives…</div>';
+      try {
+        const res  = await fetch('/api/alternative-routes', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ route, api_key: window._apiKey || '' })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        const alts = data.alternatives || [];
+        section.innerHTML = '<div class="alt-routes-title">Alternative Routes</div>' +
+          alts.map(a => `<div class="alt-route-card">
+            <div class="alt-route-name">${escHtml(a.name)}</div>
+            <div class="alt-route-tagline">${escHtml(a.tagline || '')}</div>
+            <div class="alt-route-stops">${(a.stops || []).join(' → ')}</div>
+          </div>`).join('');
+      } catch(e) {
+        section.innerHTML = '<div style="color:#ef4444;font-size:12px;">Could not load alternatives.</div>';
+      }
+    }
+
+    // ── POI suggestions ──
+    async function openPOIModal(i) {
+      const route = currentRoutes[i];
+      if (!route) return;
+      showInfoModal('📍 Points of Interest', route.name || 'Your route', '<p style="color:var(--muted);font-size:13px;">Loading suggestions…</p>');
+      try {
+        const res  = await fetch('/api/poi-suggestions', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ route, api_key: window._apiKey || '' })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        const pois = data.pois || [];
+        document.getElementById('info-modal-body').innerHTML = pois.map(p => `
+          <div class="info-item">
+            <div class="info-item-title">${escHtml(p.name)} <span style="font-weight:400;color:var(--subtle);font-size:11px;">${escHtml(p.type || '')}</span></div>
+            <div class="info-item-meta">${escHtml(p.location)} · ${escHtml(p.between || '')}</div>
+            <div class="info-item-why">${escHtml(p.why)}</div>
+          </div>`).join('') || '<p style="color:var(--muted)">No specific POIs found.</p>';
+      } catch(e) {
+        document.getElementById('info-modal-body').innerHTML = '<p style="color:#ef4444;font-size:13px;">Error loading suggestions.</p>';
+      }
+    }
+
+    // ── Visa check ──
+    async function openVisaModal(i) {
+      const route = currentRoutes[i];
+      if (!route) return;
+      const nationality = prompt('Your passport nationality (e.g. US, UK, AU):', 'US') || 'US';
+      showInfoModal('🛂 Visa & Entry Requirements', 'For ' + nationality + ' passport holders', '<p style="color:var(--muted);font-size:13px;">Checking requirements…</p>');
+      try {
+        const res  = await fetch('/api/visa-check', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ route, nationality, api_key: window._apiKey || '' })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        const checks = data.checks || [];
+        document.getElementById('info-modal-body').innerHTML =
+          checks.map(c => `<div class="info-item">
+            <div class="info-item-title">${escHtml(c.country)} — <span style="color:${c.requirement.includes('Visa-free') ? '#16a34a' : '#dc2626'}">${escHtml(c.requirement)}</span></div>
+            <div class="info-item-meta">${escHtml(c.duration || '')}</div>
+            <div class="info-item-why">${escHtml(c.notes || '')}</div>
+          </div>`).join('') +
+          (data.disclaimer ? `<p style="font-size:11px;color:var(--subtle);margin-top:12px;">${escHtml(data.disclaimer)}</p>` : '');
+      } catch(e) {
+        document.getElementById('info-modal-body').innerHTML = '<p style="color:#ef4444;font-size:13px;">Error checking requirements.</p>';
+      }
+    }
+
+    // ── Toll warnings ──
+    async function openTollModal(i) {
+      const route = currentRoutes[i];
+      if (!route) return;
+      showInfoModal('🚧 Tolls & Road Warnings', route.name || 'Your route', '<p style="color:var(--muted);font-size:13px;">Checking tolls…</p>');
+      try {
+        const res  = await fetch('/api/toll-warnings', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ route, api_key: window._apiKey || '' })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        const warnings = data.warnings || [];
+        document.getElementById('info-modal-body').innerHTML =
+          (warnings.length ? warnings.map(w => `<div class="info-item">
+            <div class="info-item-title">${escHtml(w.type)} — ${escHtml(w.location || '')}</div>
+            <div class="info-item-meta">${escHtml(w.between || '')} · ${escHtml(w.estimated_cost || '')}</div>
+            <div class="info-item-why">${escHtml(w.detail || '')}</div>
+          </div>`).join('') : '<div class="info-item"><div class="info-item-why" style="color:var(--brand)">✓ No major tolls identified for this route.</div></div>') +
+          (data.tips ? `<p style="font-size:12px;color:var(--muted);margin-top:10px;">${escHtml(data.tips)}</p>` : '');
+      } catch(e) {
+        document.getElementById('info-modal-body').innerHTML = '<p style="color:#ef4444;font-size:13px;">Error checking tolls.</p>';
+      }
+    }
+
+    // ── Info modal helpers ──
+    function showInfoModal(title, sub, bodyHtml) {
+      document.getElementById('info-modal-title').textContent = title;
+      document.getElementById('info-modal-sub').textContent = sub;
+      document.getElementById('info-modal-body').innerHTML = bodyHtml;
+      document.getElementById('info-modal').classList.add('open');
+    }
+    function closeInfoModal(e) { if (e.target === document.getElementById('info-modal')) closeInfoModalDirect(); }
+    function closeInfoModalDirect() { document.getElementById('info-modal').classList.remove('open'); }
+
+    // ── Driving day badge ──
+    function drivingDayBadge(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr + 'T00:00:00');
+      const day = d.getDay();
+      const good = day >= 1 && day <= 4;
+      const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      return `<span class="driving-day-badge ${good ? 'good' : 'bad'}" title="${good ? 'Good driving day — lighter traffic' : 'Busier travel day — expect heavier traffic'}">${dayNames[day]} ${good ? '✓ Light traffic' : '⚠ Busy day'}</span>`;
+    }
+
+  </script>
+  <!-- POI / VISA / TOLL INFO MODAL -->
+  <div class="info-modal-overlay" id="info-modal" onclick="closeInfoModal(event)">
+    <div class="info-modal-box">
+      <h3 id="info-modal-title"></h3>
+      <p class="info-sub" id="info-modal-sub"></p>
+      <div id="info-modal-body"></div>
+      <button class="info-modal-close" onclick="closeInfoModalDirect()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
   </script>
 </body>
 </html>
