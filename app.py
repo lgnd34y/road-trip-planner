@@ -318,7 +318,7 @@ def recommend():
     except Exception:
         pass
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = anthropic.Anthropic(api_key=api_key, timeout=25.0)
 
     is_day_trip = nights == "0"
 
@@ -450,14 +450,16 @@ Rules:
     if extra_info:
         user_message += f"\nDetails: {extra_info}"
 
-    # Long trips: fewer stops, shorter text, grouped itinerary days to stay under token limit
+    # Keep responses short to avoid timeouts
     if nights_int >= 7:
-        user_message += f"\nIMPORTANT: This is a {nights_int}-night trip. Use max 5 stops total. Limit each description/note to 1 short sentence. Group every 2-3 nights into a single itinerary entry (so max 5 itinerary entries total). Be extremely concise — every extra word risks truncating the JSON."
+        user_message += f"\nIMPORTANT: This is a {nights_int}-night trip. Use max 5 stops total. Limit each description/note to 1 short sentence. Group every 2-3 nights into a single itinerary entry (so max 5 itinerary entries total). Be extremely concise."
+    else:
+        user_message += "\nIMPORTANT: Be very concise — 1 short sentence per description/note. Do not over-explain."
 
     try:
         response = client.messages.create(
             model="claude-opus-4-6",
-            max_tokens=6000,
+            max_tokens=3500,
             system=system_prompt,
             messages=[{"role": "user", "content": user_message}]
         )
