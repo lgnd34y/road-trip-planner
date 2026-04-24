@@ -590,7 +590,7 @@ def estimate_costs():
     stops = [s.get("address", "") for s in route.get("stops", []) if s.get("address")]
     region = stops[0] if stops else "USA"
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = anthropic.Anthropic(api_key=api_key, timeout=25.0)
     prompt = f"""A road trip is being planned through these locations: {', '.join(stops[:6])}.
 
 Provide realistic CURRENT price estimates for this region. Return ONLY this JSON (no markdown):
@@ -608,7 +608,7 @@ Base these on real current prices for the specific region, not generic defaults.
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-haiku-4-5-20251001",
             max_tokens=400,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -639,7 +639,7 @@ def packing_list():
     theme  = route.get("theme", "")
     nights = len(route.get("itinerary", [])) or 1
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = anthropic.Anthropic(api_key=api_key, timeout=25.0)
     prompt = f"""Create a practical packing list for this road trip:
 Route theme: {theme}
 Stops: {', '.join(stops[:8])}
@@ -656,7 +656,7 @@ Include 5-7 categories (e.g. Clothing, Toiletries, Documents, Tech, Snacks & Dri
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-haiku-4-5-20251001",
             max_tokens=800,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -836,7 +836,7 @@ def guided_suggestions():
     if not location:
         return jsonify({"error": "Location required"}), 400
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = anthropic.Anthropic(api_key=api_key, timeout=25.0)
     prompt = f"""Suggest 6 diverse road trip destinations reachable from {location}. Return ONLY valid JSON (no markdown):
 {{
   "suggestions": [
@@ -852,7 +852,7 @@ Vary distance, terrain, and vibe (coastal, mountain, city, rural, historical, ad
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-haiku-4-5-20251001",
             max_tokens=700,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -881,7 +881,7 @@ def chat_route():
     if not message:
         return jsonify({"reply": "No message provided."}), 400
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = anthropic.Anthropic(api_key=api_key, timeout=25.0)
 
     if route:
         # Single-route editing context
@@ -917,7 +917,7 @@ No markdown. Be concise and friendly."""
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-haiku-4-5-20251001",
             max_tokens=3000,
             system=system,
             messages=[{"role": "user", "content": user_content}]
@@ -957,7 +957,7 @@ def optimize_route():
     first, last = stops[0], stops[-1]
     middle = stops[1:-1]
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = anthropic.Anthropic(api_key=api_key, timeout=25.0)
     stop_list = "\n".join(f"{i+1}. {s['name']} ({s['address']})" for i, s in enumerate(middle))
     prompt = f"""Reorder these middle stops for the {'shortest total driving distance' if mode == 'shortest' else 'most scenic and logical flow'}. Keep the same start ({first['name']}) and end ({last['name']}).
 
@@ -971,7 +971,7 @@ Example: if 3 stops reordered as 2,1,3 → {{"order": [2,1,3], "reason": "..."}}
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-haiku-4-5-20251001",
             max_tokens=300,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -1006,7 +1006,7 @@ def alternative_routes():
     start = stops[0]["address"] if stops else ""
     end   = stops[-1]["address"] if len(stops) > 1 else ""
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = anthropic.Anthropic(api_key=api_key, timeout=25.0)
     prompt = f"""The user has this road trip: {route.get('name')} from {start} to {end} with theme: {route.get('theme','')}.
 
 Generate 2 alternative route variations with different themes/stops. Return ONLY valid JSON (no markdown):
@@ -1023,7 +1023,7 @@ Keep start ({start}) and end ({end}) the same. Make each alternative meaningfull
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-haiku-4-5-20251001",
             max_tokens=600,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -1053,7 +1053,7 @@ def poi_suggestions():
     stops = route.get("stops", [])
     stop_names = [s.get("address", s.get("name", "")) for s in stops]
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = anthropic.Anthropic(api_key=api_key, timeout=25.0)
     prompt = f"""Suggest interesting points of interest along this road trip route: {' → '.join(stop_names[:6])}.
 
 Return ONLY valid JSON (no markdown):
@@ -1073,7 +1073,7 @@ Suggest 5-8 real, specific POIs that are actually along or near the route. Vary 
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-haiku-4-5-20251001",
             max_tokens=700,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -1104,7 +1104,7 @@ def visa_check():
     stops = route.get("stops", [])
     countries = list({s.get("address", "").split(",")[-1].strip() for s in stops if s.get("address")})
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = anthropic.Anthropic(api_key=api_key, timeout=25.0)
     prompt = f"""Check entry/visa requirements for a {nationality} passport holder traveling to: {', '.join(countries)}.
 
 Return ONLY valid JSON (no markdown):
@@ -1122,7 +1122,7 @@ Return ONLY valid JSON (no markdown):
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-haiku-4-5-20251001",
             max_tokens=600,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -1152,7 +1152,7 @@ def toll_warnings():
     stops = route.get("stops", [])
     stop_addresses = [s.get("address", "") for s in stops if s.get("address")]
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = anthropic.Anthropic(api_key=api_key, timeout=25.0)
     prompt = f"""For this road trip route: {' → '.join(stop_addresses[:6])}, identify known tolls, border crossings, and speed camera zones.
 
 Return ONLY valid JSON (no markdown):
@@ -1173,7 +1173,7 @@ Only include real, known toll roads and crossings for this specific route. If no
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-haiku-4-5-20251001",
             max_tokens=600,
             messages=[{"role": "user", "content": prompt}]
         )
