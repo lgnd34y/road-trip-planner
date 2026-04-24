@@ -1908,19 +1908,20 @@
     const selectedForCompare = new Set();
 
     function toggleCompare(i) {
-      const btn = document.getElementById(`cmp-btn-${i}`);
       if (selectedForCompare.has(i)) {
         selectedForCompare.delete(i);
-        btn.classList.remove('selected');
       } else {
         selectedForCompare.add(i);
-        btn.classList.add('selected');
       }
-      const bar = document.getElementById('compare-bar');
+      const bar   = document.getElementById('compare-bar');
       const label = document.getElementById('compare-bar-label');
-      if (selectedForCompare.size >= 2) {
+      const count = selectedForCompare.size;
+      if (count >= 2) {
         bar.classList.add('visible');
-        label.textContent = `${selectedForCompare.size} route${selectedForCompare.size > 1 ? 's' : ''} selected`;
+        label.textContent = `${count} route${count > 1 ? 's' : ''} selected — click Compare →`;
+      } else if (count === 1) {
+        bar.classList.add('visible');
+        label.textContent = 'Select one more route to compare';
       } else {
         bar.classList.remove('visible');
       }
