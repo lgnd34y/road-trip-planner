@@ -459,7 +459,7 @@ Rules:
     try:
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=3000,
+            max_tokens=5000,
             system=system_prompt,
             messages=[{"role": "user", "content": user_message}]
         )
@@ -476,7 +476,19 @@ Rules:
         if start != -1 and end != -1:
             raw = raw[start:end + 1]
 
-        routes = json.loads(raw)
+        try:
+            routes = json.loads(raw)
+        except json.JSONDecodeError:
+            # Truncated — recover complete route objects that were fully written
+            import re
+            routes = []
+            for m in re.finditer(r'\{[^{}]*"stops"\s*:\s*\[[\s\S]*?\]\s*[^{}]*\}', raw):
+                try:
+                    routes.append(json.loads(m.group()))
+                except Exception:
+                    pass
+            if not routes:
+                raise
 
         for route in routes:
             route["maps_url"] = build_maps_url([s["address"] for s in route["stops"]])
