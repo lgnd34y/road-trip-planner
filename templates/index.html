@@ -565,6 +565,10 @@
       .suggestion-grid { grid-template-columns: 1fr; }
     }
 
+    /* ── MORE MENU ── */
+    .more-menu-item { display: block; width: 100%; text-align: left; background: none; border: none; padding: 8px 14px; font-size: 13px; font-family: inherit; color: var(--text); cursor: pointer; white-space: nowrap; }
+    .more-menu-item:hover { background: var(--bg); }
+
     /* ── ALTERNATIVES ── */
     .alt-routes-section { margin-top: 10px; }
     .alt-routes-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--subtle); margin-bottom: 6px; }
@@ -1164,19 +1168,24 @@
             </div>
             <div class="alt-routes-section" id="alt-routes-${i}" style="display:none"></div>
             <div class="card-actions">
-              <a class="maps-btn" href="#" target="_blank" id="map-btn-${i}" onclick="openMap(event,${i})">🗺️ View Route on Map</a>
+              <a class="maps-btn" href="#" target="_blank" id="map-btn-${i}" onclick="openMap(event,${i})">🗺️ View on Map</a>
               <button class="save-btn" id="save-btn-${i}" onclick="handleSave(${i})">💾 Save</button>
-              <button class="edit-btn" id="share-to-btn-${i}" onclick="openIndexShareModal(${i})">↗ Send</button>
               <button class="edit-btn" id="edit-btn-${i}" onclick="toggleEdit(${i})">✏️ Edit</button>
-              <button class="edit-btn" onclick="openPrint(${i})" title="Print itinerary">🖨️</button>
               <button class="edit-btn" onclick="openPackingModal(${i})">🎒 Packing</button>
               <button class="edit-btn" onclick="emailItinerary(${i})">📧 Email</button>
-              <button class="edit-btn" onclick="openOptimizeModal(${i})">⚡ Optimize</button>
-              <button class="edit-btn" onclick="openAltRoutes(${i})">🔀 Alternatives</button>
-              <button class="edit-btn" onclick="openPOIModal(${i})">📍 POIs</button>
-              <button class="edit-btn" onclick="openVisaModal(${i})">🛂 Visa</button>
-              <button class="edit-btn" onclick="openTollModal(${i})">🚧 Tolls</button>
-              <button class="compare-btn" id="cmp-btn-${i}" onclick="toggleCompare(${i})">Compare</button>
+              <div class="more-actions-wrap" style="position:relative;display:inline-block;">
+                <button class="edit-btn" onclick="toggleMoreMenu(${i})">More ▾</button>
+                <div class="more-menu" id="more-menu-${i}" style="display:none;position:absolute;top:100%;left:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,0.1);z-index:200;min-width:160px;padding:4px 0;margin-top:4px;">
+                  <button class="more-menu-item" onclick="closeMoreMenu(${i});openIndexShareModal(${i})">↗ Send to user</button>
+                  <button class="more-menu-item" onclick="closeMoreMenu(${i});openPrint(${i})">🖨️ Print</button>
+                  <button class="more-menu-item" onclick="closeMoreMenu(${i});openOptimizeModal(${i})">⚡ Optimize stops</button>
+                  <button class="more-menu-item" onclick="closeMoreMenu(${i});openAltRoutes(${i})">🔀 Alternatives</button>
+                  <button class="more-menu-item" onclick="closeMoreMenu(${i});openPOIModal(${i})">📍 Points of interest</button>
+                  <button class="more-menu-item" onclick="closeMoreMenu(${i});openVisaModal(${i})">🛂 Visa check</button>
+                  <button class="more-menu-item" onclick="closeMoreMenu(${i});openTollModal(${i})">🚧 Toll warnings</button>
+                  <button class="more-menu-item" onclick="closeMoreMenu(${i});toggleCompare(${i})">⚖️ Compare</button>
+                </div>
+              </div>
             </div>
             <div class="share-box" id="share-box-${i}">
               ✅ Route saved! Share this link:
@@ -1239,7 +1248,10 @@
       window.open('/print#' + hash, '_blank');
     }
 
-    function toggleCard(card) { card.classList.toggle('open'); }
+    function toggleCard(card) {
+      card.classList.toggle('open');
+      if (card.classList.contains('open')) loadWeatherForCard(card);
+    }
     function toggleStop(stop) { stop.classList.toggle('open'); }
     function toggleDay(day)   { day.classList.toggle('open'); }
 
@@ -2022,12 +2034,7 @@
       });
     }
 
-    // Patch toggleCard to load weather on open
-    const _origToggleCard = toggleCard;
-    function toggleCard(card) {
-      _origToggleCard(card);
-      if (card.classList.contains('open')) loadWeatherForCard(card);
-    }
+    // toggleCard already includes weather loading above
 
     // ── Fuel stop suggestions ──
     function renderFuelStops(i) {
@@ -2242,6 +2249,24 @@
     }
     function closeInfoModal(e) { if (e.target === document.getElementById('info-modal')) closeInfoModalDirect(); }
     function closeInfoModalDirect() { document.getElementById('info-modal').classList.remove('open'); }
+
+    // ── More menu ──
+    function toggleMoreMenu(i) {
+      const menu = document.getElementById('more-menu-' + i);
+      if (!menu) return;
+      const isOpen = menu.style.display !== 'none';
+      document.querySelectorAll('.more-menu').forEach(m => m.style.display = 'none');
+      menu.style.display = isOpen ? 'none' : 'block';
+    }
+    function closeMoreMenu(i) {
+      const menu = document.getElementById('more-menu-' + i);
+      if (menu) menu.style.display = 'none';
+    }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.more-actions-wrap')) {
+        document.querySelectorAll('.more-menu').forEach(m => m.style.display = 'none');
+      }
+    });
 
     // ── Driving day badge ──
     function drivingDayBadge(dateStr) {
