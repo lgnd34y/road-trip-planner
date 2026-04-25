@@ -1175,7 +1175,7 @@
               <button class="edit-btn" onclick="emailItinerary(${i})">📧 Email</button>
               <div class="more-actions-wrap" style="position:relative;display:inline-block;">
                 <button class="edit-btn" onclick="toggleMoreMenu(${i})">More ▾</button>
-                <div class="more-menu" id="more-menu-${i}" style="display:none;position:absolute;top:100%;left:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,0.1);z-index:200;min-width:160px;padding:4px 0;margin-top:4px;">
+                <div class="more-menu" id="more-menu-${i}" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:9999;min-width:180px;padding:4px 0;">
                   <button class="more-menu-item" onclick="closeMoreMenu(${i});openIndexShareModal(${i})">↗ Send to user</button>
                   <button class="more-menu-item" onclick="closeMoreMenu(${i});openPrint(${i})">🖨️ Print</button>
                   <button class="more-menu-item" onclick="closeMoreMenu(${i});openOptimizeModal(${i})">⚡ Optimize stops</button>
@@ -1433,7 +1433,7 @@
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
-            api_key: document.getElementById('api_key').value.trim(),
+            api_key: window._apiKey || '',
             route: currentRoutes[i]
           })
         });
@@ -2251,21 +2251,30 @@
     function closeInfoModal(e) { if (e.target === document.getElementById('info-modal')) closeInfoModalDirect(); }
     function closeInfoModalDirect() { document.getElementById('info-modal').classList.remove('open'); }
 
-    // ── More menu ──
+    // ── More menu (fixed-position to escape overflow:hidden on cards) ──
+    let _openMoreIdx = null;
     function toggleMoreMenu(i) {
-      const menu = document.getElementById('more-menu-' + i);
-      if (!menu) return;
-      const isOpen = menu.style.display !== 'none';
+      if (_openMoreIdx === i) { closeMoreMenu(i); return; }
       document.querySelectorAll('.more-menu').forEach(m => m.style.display = 'none');
-      menu.style.display = isOpen ? 'none' : 'block';
+      _openMoreIdx = i;
+      const menu = document.getElementById('more-menu-' + i);
+      const btn  = menu && menu.previousElementSibling;
+      if (!menu || !btn) return;
+      const rect = btn.getBoundingClientRect();
+      menu.style.position = 'fixed';
+      menu.style.top  = (rect.bottom + 4) + 'px';
+      menu.style.left = rect.left + 'px';
+      menu.style.display = 'block';
     }
     function closeMoreMenu(i) {
       const menu = document.getElementById('more-menu-' + i);
       if (menu) menu.style.display = 'none';
+      _openMoreIdx = null;
     }
     document.addEventListener('click', e => {
-      if (!e.target.closest('.more-actions-wrap')) {
+      if (!e.target.closest('.more-actions-wrap') && !e.target.closest('.more-menu')) {
         document.querySelectorAll('.more-menu').forEach(m => m.style.display = 'none');
+        _openMoreIdx = null;
       }
     });
 
